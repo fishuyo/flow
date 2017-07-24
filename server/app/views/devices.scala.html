@@ -1,0 +1,25 @@
+@import com.fishuyo.seer.hid._
+@import collection.mutable.ListBuffer
+@import collection.mutable.HashMap
+
+@(devices:HashMap[String,ListBuffer[Device]])
+
+
+  @for(list <- devices.values){
+    @if(list.length == 1){
+      <li>
+        <a class="collapsible-header"><i class="material-icons">arrow_drop_down</i><span class="truncate">@{list.head.device.getProduct()}</span></a>
+        <div class="collapsible-body">
+          @device(list.head)
+        </div>
+      </li>
+    } else if(list.length > 1){
+      <li>
+        <a class="collapsible-header"><i class="material-icons">arrow_drop_down</i><span class="badge">@{list.length}</span><span class="truncate">@{list.head.device.getProduct()}</span></a>
+        <div class="collapsible-body">
+        @device(list.head)
+        </div>
+      </li>
+    }
+  }
+

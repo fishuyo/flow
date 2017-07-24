@@ -1,0 +1,23 @@
+@import com.fishuyo.seer.hid._
+
+@(device:Device)
+
+  <ul>
+  @for(e <- device.elements){
+    @e match {
+      case Button(name, pin, value) => { 
+        <li><a href="#!"><i class="material-icons blue-text tiny">gamepad</i>@name<div class="secondary-content"><i class="material-icons red-text text-lighten-2 tiny">remove_red_eye</i></div></a></li>
+      }
+      case ButtonEx(name, pin, value) => { 
+        <li><a href="#!"><i class="material-icons blue-text tiny">gamepad</i>@name</a></li>
+      }
+      case Analog(name, pin) => { 
+        <li><a href="#!"><i class="material-icons blue-text tiny">radio_button_checked</i>@name</a></li>
+      }
+      case AnalogSigned(name, pin) => { 
+        <li><a href="#!"><i class="material-icons blue-text tiny">radio_button_checked</i>@name</a></li>
+      }
+    }
+  }
+  </ul>
+
