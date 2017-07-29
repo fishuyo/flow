@@ -34,6 +34,7 @@ lazy val server = (project in file("server")).settings(
     guice,
     specs2 % Test,
     "interface_server" %% "interface_server" % "0.1-SNAPSHOT",
+    "script" %% "script" % "0.1-SNAPSHOT",
     "org.webjars" %% "webjars-play" % "2.6.0",
     "org.webjars" % "jquery" % "3.2.1",
     "org.webjars" % "materializecss" % "0.99.0",

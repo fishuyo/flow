@@ -23,9 +23,9 @@ document.addEventListener('DOMContentLoaded', function(){
         // "highlightSelectionMatches": {
         //   "showToken" -> js.Dynamic.global.RegExp("\\w")),
         // }
-        // "extraKeys" : {
+        "extraKeys" : {
         //   "Tab" : "defaultTab",
-          "cmd-Enter" : "run",
+          "cmd-Enter" : function(cm){ console.log("run")}, //???
         //   ctrl + "-S" : "save",
         //   ctrl + "-M" : "newSnippet",
         //   "Ctrl" + "-Space" : "autocomplete",
@@ -37,10 +37,14 @@ document.addEventListener('DOMContentLoaded', function(){
         //   "F6" : "formatCode",
         //   "F7" : "toggleLineNumbers",
         //   "F8" : "togglePresentationMode"
-        // }
+        }
       
   })
   cm.setSize("100%", "100%")
+
+  cm.on("keyHandled", function(cm,name,event){ if(name == "Cmd-Enter") com.fishuyo.Main().send(cm.getValue()) })
+
+  setInterval(function(){ com.fishuyo.Main().send("keepalive"); }, 1000);
 
     // Initialize collapse button
   $('.button-collapse').sideNav({

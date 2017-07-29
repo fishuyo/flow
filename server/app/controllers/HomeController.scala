@@ -19,9 +19,9 @@ class HomeController @Inject()(cc: ControllerComponents)(implicit system: ActorS
 
   def index() = Action { implicit request: Request[AnyContent] =>
     val devices = DeviceManager.getRegisteredDevices //HashMap[String,ListBuffer[Device]]()
-    DeviceManager.shutdown
-    // Ok(views.html.index(DeviceManager.devices))
-    Ok(views.html.test())
+    // DeviceManager.shutdown
+    Ok(views.html.index(DeviceManager.devices))
+    // Ok(views.html.test())
   }
 
 

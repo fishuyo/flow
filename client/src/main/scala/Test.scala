@@ -1,6 +1,7 @@
 package com.fishuyo
 
 import scala.scalajs.js
+import scala.scalajs.js.annotation._
 import org.scalajs.dom.document
 import org.scalajs.dom.raw._
 
@@ -8,16 +9,18 @@ import com.thoughtworks.binding.Binding
 import com.thoughtworks.binding.Binding.{Var, Vars}
 import com.thoughtworks.binding.dom
 
-object ScalaJSExample extends js.JSApp {
+object Main extends js.JSApp {
   
   case class Contact(name: Var[String], email: Var[String])
+
+  var ws:WebSocket = _
 
   val data = Vars.empty[Contact]
 
   def main(): Unit = {
     println("from scalajs Main hi!")
     connectWS()
-    dom.render(document.body, renderHeader)
+    // dom.render(document.body, renderHeader)
 
     // val nameField = dom.document.getElementById("name").asInstanceOf[HTMLInputElement]
     // joinButton.onclick = { (event: MouseEvent) =>
@@ -113,8 +116,11 @@ object ScalaJSExample extends js.JSApp {
 
   }
 
+  @JSExport
+  def send(data:String){ ws.send(data) }
+  
   def connectWS(): Unit = {
-    val ws = new WebSocket(getWebsocketUri())
+    ws = new WebSocket(getWebsocketUri())
     
     ws.onopen = { (event: Event) =>
       // playground.insertBefore(p("ws connection was successful!"), playground.firstChild)
@@ -135,7 +141,7 @@ object ScalaJSExample extends js.JSApp {
       //   event.preventDefault()
       // }
 
-      ws.send("init")
+      // ws.send("init")
       event
     }
 
@@ -156,6 +162,7 @@ object ScalaJSExample extends js.JSApp {
       // }
     }
     ws.onclose = { (event: Event) =>
+      println("ws close")
       // playground.insertBefore(p("Connection to ws lost. You can try to rejoin manually."), playground.firstChild)
       // joinButton.disabled = false
       // sendButton.disabled = true
