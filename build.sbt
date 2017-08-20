@@ -1,4 +1,4 @@
-name := """flow-control"""
+name := """flow"""
 organization := "com.fishuyo"
 
 version := "0.1-SNAPSHOT"
@@ -29,12 +29,15 @@ lazy val server = (project in file("server")).settings(
   pipelineStages := Seq(digest, gzip),
   // triggers scalaJSPipeline when using compile or continuous compilation
   compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
+  resolvers += Resolver.sonatypeRepo("snapshots"),
+  //updateOptions := updateOptions.value.withLatestSnapshots(false),
   libraryDependencies ++= Seq(
     "com.vmunier" %% "scalajs-scripts" % "1.1.1",
     guice,
     specs2 % Test,
-    "interface_server" %% "interface_server" % "0.1-SNAPSHOT",
-    "script" %% "script" % "0.1-SNAPSHOT",
+    "de.sciss" %% "scalaaudiofile" % "1.4.3+",
+    "com.fishuyo.seer" %% "interface_server" % "0.1-SNAPSHOT",
+    //"script" %% "script" % "0.1-SNAPSHOT",
     "org.webjars" %% "webjars-play" % "2.6.0",
     "org.webjars" % "jquery" % "3.2.1",
     "org.webjars" % "materializecss" % "0.99.0",
@@ -45,14 +48,18 @@ lazy val server = (project in file("server")).settings(
 ).enablePlugins(PlayScala).
   dependsOn(sharedJvm)
 
-
 lazy val client = (project in file("client")).settings(
   scalaVersion := scalaV,
   scalaJSUseMainModuleInitializer := true,
   resolvers += Resolver.jcenterRepo,
+  resolvers += Resolver.bintrayRepo("denigma", "denigma-releases"),
+
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
     "com.thoughtworks.binding" %%% "dom" % "latest.release",
+    "org.querki" %%% "jquery-facade" % "1.0",
+    "com.definitelyscala" %%% "scala-js-materializecss" % "1.0.0",
+    "org.denigma" %%% "codemirror-facade" % "5.13.2-0.8",
     compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
   ),
   jsDependencies ++= Seq(
@@ -66,9 +73,13 @@ lazy val client = (project in file("client")).settings(
   dependsOn(sharedJs)
 
 
-lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared")).
-  settings(scalaVersion := scalaV).
-  jsConfigure(_ enablePlugins ScalaJSWeb)
+lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared")).settings(
+    scalaVersion := scalaV,
+    libraryDependencies ++= Seq(
+      // "com.typesafe.play" %% "play-json" % "2.6.1",
+      "org.julienrf" %%% "play-json-derived-codecs" % "4.0.0"
+    )
+  ).jsConfigure(_ enablePlugins ScalaJSWeb)
 
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js

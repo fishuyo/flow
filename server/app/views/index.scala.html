@@ -63,7 +63,64 @@
       </li>
     </ul>
 
-    <a href="#" data-activates="slide-out" class="button-collapse hide-on-large-only"><i class="material-icons">menu</i></a>
+    <ul id="slide-out2" class="side-nav fixed blue-grey lighten-5">
+      <li class="no-padding">
+        <ul class="collapsible collapsible-accordion">
+          <li>
+            <a class="collapsible-header">Devices<i class="material-icons">arrow_drop_down</i><span class="badge right">@{deviceMap.values.map(_.length).sum}</span></a>
+            <div class="collapsible-body">
+              <ul class="collapsible collapsible-accordion" data-collapsible="accordion">
+                @devices(deviceMap)
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </li>
+
+      <li class="no-padding">
+        <ul class="collapsible collapsible-accordion">
+          <li>
+            <a class="collapsible-header">Apps<i class="material-icons">arrow_drop_down</i><span class="badge right">1</span></a>
+            <div class="collapsible-body">
+              <ul>
+                <li><a href="#!">First<i class="material-icons right">add</i></a></li>
+                <li><a href="#!">Second</a></li>
+                <li><a href="#!">Third</a></li>
+                <li>
+                  <ul class="collapsible collapsible-accordion" data-collapsible="accordion">
+                    <li>
+                      <a class="collapsible-header">App 4<i class="material-icons">arrow_drop_down</i></a>
+                      <div class="collapsible-body">
+                        <ul>
+                          <li><a href="#!">First</a></li>
+                          <li><a href="#!">Second</a></li>
+                          <li><a href="#!">Third</a></li>
+                          <li><a href="#!">Fourth</a></li>
+                        </ul>
+                      </div>
+                    </li>
+                    <li>
+                      <a class="collapsible-header">App 5<i class="material-icons">arrow_drop_down</i></a>
+                      <div class="collapsible-body">
+                        <ul>
+                          <li><a href="#!">First</a></li>
+                          <li><a href="#!">Second</a></li>
+                          <li><a href="#!">Third</a></li>
+                          <li><a href="#!">Fourth</a></li>
+                        </ul>
+                      </div>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+      <a id="menu-button-left" href="#" data-activates="slide-out" class="button-collapse hide-on-large-only"><i class="material-icons">menu</i> Devices </a>
+      <a id="menu-button-right" href="#" data-activates="slide-out2" class="button-collapse hide-on-large-only right green-text small"> Apps / Mappings <i class="material-icons">menu</i></a>
   </header>
 
   <main class="blue-grey darken-4">
