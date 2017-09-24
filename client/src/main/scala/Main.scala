@@ -2,6 +2,7 @@ package flow
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation._
+import scala.scalajs.js.timers.setInterval
 import org.scalajs.dom.document
 import org.scalajs.dom.console
 import org.scalajs.dom.raw._
@@ -24,6 +25,8 @@ object Main extends js.JSApp {
 
     CodeEditor.init("code")
     Socket.init()
+    setInterval(1000){ Socket.send("keepalive") }
+
 
   }
 

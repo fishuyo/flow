@@ -20,7 +20,7 @@ object WebsocketActor {
 
 class WebsocketActor(out: ActorRef) extends Actor {
 
-  val script = ScriptManager()
+  val script = ScriptManager()  // TODO: need multiple script actors for each mapping script running
 
   def receive = {
     case msg:String if msg == "keepalive" => ()
@@ -31,7 +31,7 @@ class WebsocketActor(out: ActorRef) extends Actor {
         case ClientHandshake() => 
           sendDeviceList()
           sendMappingList()
-        case Run(Mapping(name,code)) =>
+        case Run(Mapping(name, code, modified, running)) =>
           script ! Code(FlowScriptWrapper(code)); script ! Reload
 
       }

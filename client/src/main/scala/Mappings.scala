@@ -17,6 +17,8 @@ object Mappings {
 
   val mappings = Vars.empty[Mapping]
 
+  def apply() = mappings
+
   def mappingCount = Binding {
     mappings.bind.length
   }
@@ -44,10 +46,11 @@ object Mappings {
     @dom
     def mappingList = {
       for(m <- mappings) yield m match {
-          case Mapping(name, code) =>
+          case Mapping(name, code, modified, running) =>
             <li> 
               <a href="#" onclick={ event:Event => event.preventDefault(); CodeEditor.load(m) }>
-                {name}
+                { name }  
+                { if(modified) <i class="material-icons">edit</i> else <i></i> }
               </a>
  <!--              <a class="collapsible-header">
                 <i class="material-icons">arrow_drop_down</i>

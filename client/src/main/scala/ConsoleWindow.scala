@@ -21,11 +21,17 @@ object ConsoleWindow {
 
     @dom
     def main = {
-      <div class="row">
-        <div class="col s12"> 
-          Console Area         
-        </div>
-      </div>
+      <ul class="collapsible" data:data-collapsible="accordion">
+        <li>
+          <div class="collapsible-header"><i class="material-icons">filter_drama</i>Console</div>
+          <div class="collapsible-body">
+            <span>Lorem ipsum dolor sit amet.</span>
+            <span>Lorem ipsum dolor sit amet.</span>
+            <span>Lorem ipsum dolor sit amet.</span>
+          </div>
+        </li>
+      </ul>
+           
     }
 
   }

@@ -42,11 +42,20 @@ object CodeEditor {
     load(Mapping("untitled",demoSource))
   }
 
+  def getCode() = {
+    val m = mapping.copy(code = editor.getDoc().getValue(), modified = true)
+    mapping = m    
+  }
+
   def run() = {
     println("Run Code!")
-    val m = mapping.copy(code = editor.getDoc().getValue())
-    mapping = m
+    getCode()
     Socket.send(Run(mapping))
+  }
+
+  def stop() = {
+    println("Stop!")
+    Socket.send(Stop(mapping))
   }
 
   def load(m:Mapping) = {
@@ -57,6 +66,15 @@ object CodeEditor {
 
   def save() = {
     println("Save!")
+    getCode()
+    Socket.send(Save(mapping))
+    mapping = mapping.copy(modified = false)
+  }
+
+  def newMapping() = {
+    val m = Mapping("unamed","",true)
+    Mappings().get.prepend(m)
+    load(m)
   }
 
 
@@ -78,9 +96,21 @@ object CodeEditor {
               </a>
             </li>
             <li>
+              <a href="#" onclick={ event:Event => event.preventDefault(); stop() }>
+                <i class="material-icons left">stop</i>
+                Save
+              </a>
+            </li>
+            <li>
               <a href="#" onclick={ event:Event => event.preventDefault(); save() }>
                 <i class="material-icons left">save</i>
                 Save
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick={ event:Event => event.preventDefault(); newMapping() }>
+                <i class="material-icons left">add_circle_outline</i>
+                New
               </a>
             </li>
           </ul>
