@@ -11,6 +11,8 @@ case class ClientHandshake() extends Message
 case class Device(name:String, count:Int, elements:Seq[String]) extends Message
 case class DeviceList(devices:Seq[Device]) extends Message
 
+case class OSCConfig(address:String, sinkPort:Int) extends Message
+case class AppConfig(name:String, sources:Seq[String], sinks:Seq[String], defaultMappings:Seq[String]) extends Message
 case class AppList(apps:Seq[String]) extends Message
 
 case class Mapping(name:String, code:String, modified:Boolean=false, running:Boolean=false) extends Message
@@ -33,5 +35,7 @@ object Message {
   implicit val deviceFormat = derived.oformat[Device]()
   implicit val mappingFormat = derived.oformat[Mapping]()
   // implicit val mappingTreeFormat = derived.oformat[MappingTree]()
+  implicit val oscConfigFormat = derived.oformat[OSCConfig]()
+  implicit val appConfigFormat = derived.oformat[AppConfig]()
   implicit val format = derived.oformat[Message]()
 }

@@ -1,7 +1,15 @@
 package controllers
 
+import flow._
 import flow.protocol._
 import flow.protocol.Message.format
+
+// import com.fishuyo.seer.interface._
+// import com.fishuyo.seer.dynamic._
+import flow.script._
+import ScriptLoaderActor._
+
+import flow.hid.DeviceManager
 
 import julienrf.json.derived._
 import play.api.libs.json._
@@ -9,10 +17,6 @@ import play.api.libs.functional.syntax._
 
 import akka.actor._
 
-import com.fishuyo.seer.interface._
-import com.fishuyo.seer.dynamic._
-import com.fishuyo.seer.dynamic.ScriptLoaderActor._
-import com.fishuyo.seer.hid.DeviceManager
 
 object WebsocketActor {
   def props(out: ActorRef) = Props(new WebsocketActor(out))

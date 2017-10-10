@@ -20,8 +20,6 @@ val scalaV = "2.11.11"
 // Adds additional packages into conf/routes
 // play.sbt.routes.RoutesKeys.routesImport += "com.fishuyo.binders._"
 
-
-
 lazy val server = (project in file("server")).settings(
   scalaVersion := scalaV,
   scalaJSProjects := Seq(client),
@@ -35,8 +33,21 @@ lazy val server = (project in file("server")).settings(
     "com.vmunier" %% "scalajs-scripts" % "1.1.1",
     guice,
     specs2 % Test,
+    
+    "org.hid4java" % "hid4java" % "0.5.0",
+
+    "de.sciss" %% "scalaosc" % "1.1.+",
+    "org.spire-math" %% "spire" % "0.13.0",
+
+    "com.twitter" % "util-eval_2.11" % "6.29.0",
+    "org.scala-lang" % "scala-reflect" % "2.11.8",
+    "org.scala-lang" % "scala-compiler" % "2.11.8",
+    "org.scala-lang" % "scala-library" % "2.11.8",
+
+
     "de.sciss" %% "scalaaudiofile" % "1.4.3+",
-    "com.fishuyo.seer" %% "interface_server" % "0.1-SNAPSHOT",
+    // "com.fishuyo.seer" %% "interface_server" % "0.1-SNAPSHOT",
+    "com.fishuyo.seer" %% "core" % "0.1-SNAPSHOT",
     //"script" %% "script" % "0.1-SNAPSHOT",
     "org.webjars" %% "webjars-play" % "2.6.0",
     "org.webjars" % "jquery" % "3.2.1",

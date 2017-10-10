@@ -98,7 +98,7 @@ object CodeEditor {
             <li>
               <a href="#" onclick={ event:Event => event.preventDefault(); stop() }>
                 <i class="material-icons left">stop</i>
-                Save
+                Stop
               </a>
             </li>
             <li>
