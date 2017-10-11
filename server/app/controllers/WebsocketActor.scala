@@ -35,7 +35,8 @@ class WebsocketActor(out: ActorRef) extends Actor {
         case ClientHandshake() => 
           sendDeviceList()
           sendMappingList()
-        case Run(Mapping(name, code, modified, running)) =>
+
+        case Run(Mapping(name, code, modified, running, errors)) =>
           script ! Code(FlowScriptWrapper(code)); script ! Reload
 
       }

@@ -4,16 +4,11 @@ import flow.protocol.Device
 
 import com.thoughtworks.binding.Binding
 import com.thoughtworks.binding.Binding._
-// import com.thoughtworks.binding.Binding.{Var, Vars}
 import com.thoughtworks.binding.dom
-
-
-// case class Device(name:String, elements:Seq[String]=Seq("button"))
 
 object Devices {
 
   val devices = Vars.empty[Device]
-  // devices.get += Device("Test 1")
 
   def apply() = devices
 

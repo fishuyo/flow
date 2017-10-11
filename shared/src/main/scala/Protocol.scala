@@ -15,10 +15,9 @@ case class OSCConfig(address:String, sinkPort:Int) extends Message
 case class AppConfig(name:String, sources:Seq[String], sinks:Seq[String], defaultMappings:Seq[String]) extends Message
 case class AppList(apps:Seq[String]) extends Message
 
-case class Mapping(name:String, code:String, modified:Boolean=false, running:Boolean=false) extends Message
+case class Mapping(name:String, code:String, modified:Boolean=false, running:Boolean=false, errors:Boolean=false) extends Message
 case class MappingList(mappings:Seq[Mapping]) extends Message
 // case class MappingTree(name:String, mappings:Seq[Mapping], trees:Seq[MappingTree]) extends Message
-
 
 case class Run(mapping:Mapping) extends Message
 case class Stop(mapping:Mapping) extends Message

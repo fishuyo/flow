@@ -46,11 +46,14 @@ object Mappings {
     @dom
     def mappingList = {
       for(m <- mappings) yield m match {
-          case Mapping(name, code, modified, running) =>
+          case Mapping(name, code, modified, running, errors) =>
             <li> 
               <a href="#" onclick={ event:Event => event.preventDefault(); CodeEditor.load(m) }>
                 { name }  
-                { if(modified) <i class="material-icons">edit</i> else <i></i> }
+                { if(errors) <i class="material-icons">error</i>
+                  else if(modified) <i class="material-icons">edit</i>
+                  else if(running) <i class="material-icons">directions_run</i>
+                  else <i></i> }
               </a>
  <!--              <a class="collapsible-header">
                 <i class="material-icons">arrow_drop_down</i>
