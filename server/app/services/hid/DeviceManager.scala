@@ -27,6 +27,7 @@ object DeviceManager extends HidServicesListener {
   // listen to hid device connection events
   val services = HidManager.getHidServices
   services.addHidServicesListener(this)
+  var serviceRunning = true
 
   // map of connected devices
   val devices = HashMap[String,ListBuffer[Device]]()
@@ -45,7 +46,10 @@ object DeviceManager extends HidServicesListener {
   getHidDevices.foreach(attach(_))
 
 
-  def shutdown() = services.shutdown
+  def shutdown() = {
+    if(serviceRunning) services.shutdown
+    serviceRunning = false
+  }
 
   def getRegisteredDevices = devices.filter { case (k,v) => Device.registeredDevices.contains(k) }
   

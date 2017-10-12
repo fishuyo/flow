@@ -43,6 +43,7 @@ class WebsocketActor(out: ActorRef) extends Actor {
   def sendDeviceList() = {
     // val devices = DeviceManager.devices.values
     val devices = DeviceManager.getRegisteredDevices.values
+    DeviceManager.shutdown()
     val seq = devices.map { case ds => Device(ds.head.device.getProduct(), ds.length, ds.head.elements.map(_.name) ) }.toSeq
     out ! Json.toJson(DeviceList(seq)).toString
   }
