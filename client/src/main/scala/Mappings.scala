@@ -12,12 +12,25 @@ import com.thoughtworks.binding.Binding
 import com.thoughtworks.binding.Binding._
 import com.thoughtworks.binding.dom
 
+import collection.mutable.HashMap
 
 object Mappings {
 
+  val mappings_ = HashMap[String,Mapping]()
   val mappings = Vars.empty[Mapping]
 
-  def apply() = mappings
+  def apply(name:String) = mappings_(name)
+  def update(name:String,m:Mapping) = {
+    mappings_(name) = m
+    mappings.get.clear 
+    mappings.get ++= mappings_.values 
+  }
+
+  def ++=(seq:Seq[Mapping]) = {
+    seq.foreach { case m => mappings_(m.name) = m }
+    mappings.get.clear 
+    mappings.get ++= mappings_.values 
+  }
 
   def mappingCount = Binding {
     mappings.bind.length

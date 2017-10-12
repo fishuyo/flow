@@ -45,7 +45,8 @@ object Socket {
 
       wsMsg match {
         case DeviceList(ds) => Devices.devices.get ++= ds
-        case MappingList(ms) => Mappings.mappings.get ++= ms
+        case AppList(as) => Apps.apps.get ++= as
+        case MappingList(ms) => Mappings ++= ms
         
       }
     }

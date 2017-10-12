@@ -32,7 +32,7 @@ object AppIO{
 	}
 }
 
-class AppIO(config:AppConfig) extends IO {
+class AppIO(val config:AppConfig) extends IO {
 
   // var oscConfig = OSCConfig()
 
@@ -75,6 +75,8 @@ class AppIO(config:AppConfig) extends IO {
     OSCManager() ! OSCManagerActor.Unbind(port, handler)
     OSCManager() ! OSCManagerActor.Bind(port, handler)
   }
+
+  def runDefaultMappings() = config.defaultMappings.foreach(MappingManager.run(_))
 
 
 }

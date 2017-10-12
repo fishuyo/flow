@@ -19,6 +19,7 @@ import collection.mutable.ListBuffer
 class HomeController @Inject()(cc: ControllerComponents)(implicit system: ActorSystem, materializer: Materializer) extends AbstractController(cc) {
 
   // Initialize services here, because I don't want to change everything to use play's DI
+  // works since HomeController a Singleton
   System() = system
   OSCApi.listen(12000) 
 

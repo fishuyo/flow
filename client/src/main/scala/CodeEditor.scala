@@ -34,27 +34,37 @@ object CodeEditor {
       case elem:HTMLTextAreaElement =>
         editor = CodeMirror.fromTextArea(elem, config)
         editor.setSize("100%","80vh")
-        //editor.getDoc().setValue(demoSource)
 
       case _ => console.error("cannot find text area for the code!")
     }
 
-    load(Mapping("untitled",demoSource))
+    load(Mapping("untitled",""))
   }
 
   def getCode() = {
-    val m = mapping.copy(code = editor.getDoc().getValue(), modified = true)
-    mapping = m    
+    val code_ = editor.getDoc().getValue()
+    if(mapping.code != code_){
+      mapping = mapping.copy(code = code_, modified = true)
+      Mappings(mapping.name) = mapping          
+    }
   }
 
   def run() = {
     println("Run Code!")
     getCode()
+    if(!mapping.running){
+      mapping = mapping.copy(running = true)
+      Mappings(mapping.name) = mapping
+    }
     Socket.send(Run(mapping))
   }
 
   def stop() = {
     println("Stop!")
+    if(mapping.running){
+      mapping = mapping.copy(running = false)
+      Mappings(mapping.name) = mapping
+    }
     Socket.send(Stop(mapping))
   }
 
@@ -67,13 +77,17 @@ object CodeEditor {
   def save() = {
     println("Save!")
     getCode()
-    Socket.send(Save(mapping))
-    mapping = mapping.copy(modified = false)
+    if(mapping.modified){
+      Socket.send(Save(mapping))
+      mapping = mapping.copy(modified = false)
+      Mappings(mapping.name) = mapping          
+    }
   }
 
   def newMapping() = {
+    getCode()
     val m = Mapping("unamed","",true)
-    Mappings().get.prepend(m)
+    Mappings("unamed") = m
     load(m)
   }
 

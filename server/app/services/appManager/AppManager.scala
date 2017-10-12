@@ -28,6 +28,10 @@ object AppManager {
 
 		app = apps.getOrElseUpdate(name, app)
 		app.listen(12000) // XXX 
+		
+		app.runDefaultMappings()
+		
+		System().actorSelection("akka://application/user/*/flowActor") ! "sendAppList"
 	}
 
 

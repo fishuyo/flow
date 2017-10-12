@@ -4,11 +4,6 @@ import flow._
 import flow.protocol._
 import flow.protocol.Message.format
 
-// import com.fishuyo.seer.interface._
-// import com.fishuyo.seer.dynamic._
-import flow.script._
-import ScriptLoaderActor._
-
 import flow.hid.DeviceManager
 
 import julienrf.json.derived._
@@ -24,35 +19,43 @@ object WebsocketActor {
 
 class WebsocketActor(out: ActorRef) extends Actor {
 
-  val script = ScriptManager()  // TODO: need multiple script actors for each mapping script running
-
   def receive = {
     case msg:String if msg == "keepalive" => ()
+    case msg:String if msg == "sendDeviceList" => sendDeviceList()
+    case msg:String if msg == "sendAppList" => sendAppList()
     case msg:String => 
       println(msg)
       val message = Json.parse(msg).as[Message]
       message match {
         case ClientHandshake() => 
           sendDeviceList()
+          sendAppList()
           sendMappingList()
 
-        case Run(Mapping(name, code, modified, running, errors)) =>
-          script ! Code(FlowScriptWrapper(code)); script ! Reload
-
+        case Run(mapping) => MappingManager.run(mapping)
+        case Stop(mapping) => MappingManager.stop(mapping)
+        case Save(mapping) => MappingManager.save(mapping)
       }
 
     case msg => println(msg)
   }
 
   def sendDeviceList() = {
-    val devices = DeviceManager.devices.values
-    val seq = devices.map { case ds => Device(ds.head.device.getProduct(), ds.length, Seq("button1","button2")) }.toSeq
+    // val devices = DeviceManager.devices.values
+    val devices = DeviceManager.getRegisteredDevices.values
+    val seq = devices.map { case ds => Device(ds.head.device.getProduct(), ds.length, ds.head.elements.map(_.name) ) }.toSeq
     out ! Json.toJson(DeviceList(seq)).toString
   }
 
+  def sendAppList() = {
+    val apps = AppManager.apps.values.map(_.config).toSeq
+    out ! Json.toJson(AppList(apps)).toString
+  }
+
   def sendMappingList() = {
-    val ms = MappingList(Seq(Mapping("mapping1", """println("mapping1")"""), Mapping("mapping2", """println("mapping2")""")))
-    out ! Json.toJson(ms).toString
+    MappingManager.readMappingsDir() // XXX modifying state, probs not safe
+    val ms = MappingManager.mappings.values.toSeq 
+    out ! Json.toJson(MappingList(ms)).toString
   }
 
 }

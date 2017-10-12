@@ -46,6 +46,9 @@ object Main extends js.JSApp {
       <ul id="slide-out" class="side-nav fixed blue-grey lighten-5">
         <li class="no-padding">
           { Devices.views.collapsibleList.bind }
+        </li>
+        <li class="no-padding">
+          { Apps.views.collapsibleList.bind }
         </li> 
         <li class="no-padding">
           { Mappings.views.collapsibleList.bind }
