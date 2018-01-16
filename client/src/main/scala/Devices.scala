@@ -12,6 +12,11 @@ object Devices {
 
   def apply() = devices
 
+  def set(ds:Seq[Device]) = {
+    devices.value.clear
+    devices.value ++= ds
+  }
+
   def deviceCount = Binding {
     devices.bind.map(_.count).sum
   }

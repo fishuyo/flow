@@ -22,14 +22,14 @@ object Mappings {
   def apply(name:String) = mappings_(name)
   def update(name:String,m:Mapping) = {
     mappings_(name) = m
-    mappings.get.clear 
-    mappings.get ++= mappings_.values 
+    mappings.value.clear 
+    mappings.value ++= mappings_.values 
   }
 
   def ++=(seq:Seq[Mapping]) = {
     seq.foreach { case m => mappings_(m.name) = m }
-    mappings.get.clear 
-    mappings.get ++= mappings_.values 
+    mappings.value.clear 
+    mappings.value ++= mappings_.values 
   }
 
   def mappingCount = Binding {

@@ -44,8 +44,8 @@ object Socket {
       val wsMsg = Json.parse(event.data.toString).as[Message]
 
       wsMsg match {
-        case DeviceList(ds) => Devices.devices.get ++= ds
-        case AppList(as) => Apps.apps.get ++= as
+        case DeviceList(ds) => Devices.set(ds)
+        case AppList(as) => Apps.set(as)
         case MappingList(ms) => Mappings ++= ms
         
       }

@@ -1,12 +1,11 @@
 package flow
 package hid
 
-import org.hid4java._
-
-class JoyconR(device:HidDevice) extends Device(device) {
+class JoyconR(index:Int) extends Device(index) {
+  lazy val productString = "Joy-Con (R)"
   override val deviceType = AnalogJoystick
   
-  val elements = List(
+  val sourceElements = List(
     Button("A", 1, 1),
     Button("B", 1, 4),
     Button("Y", 1, 8),
@@ -30,10 +29,11 @@ class JoyconR(device:HidDevice) extends Device(device) {
   )
 }
 
-class JoyconL(device:HidDevice) extends Device(device) {
+class JoyconL(index:Int) extends Device(index) {
+  lazy val productString = "Joy-Con (L)"
   override val deviceType = AnalogJoystick
   
-  val elements = List(
+  val sourceElements = List(
     Button("left", 1, 1),
     Button("up", 1, 4),
     Button("right", 1, 8),

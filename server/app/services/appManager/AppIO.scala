@@ -58,7 +58,10 @@ class AppIO(val config:AppConfig) extends IO {
   }.toMap
 
   override def sinks:Map[String,Sink[Float,akka.NotUsed]] = sinkNames.map { case name =>
-    val sink = Sink.foreach(oscSend.send(s"/$name", _:Float)).mapMaterializedValue{ case _ => akka.NotUsed}
+    val sink = Sink.foreach( (f:Float) => {
+      try{ oscSend.send(s"/$name", f) }
+      catch{ case e:Exception => AppManager.close(config.name) }
+    }).mapMaterializedValue{ case _ => akka.NotUsed}
     name -> sink
   }.toMap
 
@@ -71,12 +74,21 @@ class AppIO(val config:AppConfig) extends IO {
 
   def connect() = oscSend.connect(hostname, sinkPort)
 
-  def listen(port:Int) = {
-    OSCManager() ! OSCManagerActor.Unbind(port, handler)
-    OSCManager() ! OSCManagerActor.Bind(port, handler)
+  def listen() = {
+    // XXX may get message intended to be from another app, if same osc namespace! No good
+    // either use different ports, or different osc namespace..
+    OSCManager() ! OSCManagerActor.Unbind(12000, handler) //XXX find better way to make this work
+    OSCManager() ! OSCManagerActor.Bind(12000, handler)
+  }
+
+  def close() = {
+    stopDefaultMappings()
+    OSCManager() ! OSCManagerActor.Unbind(12000, handler)
+    oscSend.disconnect
   }
 
   def runDefaultMappings() = config.defaultMappings.foreach(MappingManager.run(_))
+  def stopDefaultMappings() = config.defaultMappings.foreach(MappingManager.stop(_))
 
 
 }

@@ -15,6 +15,9 @@ import akka.actor._
 
 object WebsocketActor {
   def props(out: ActorRef) = Props(new WebsocketActor(out))
+
+  def sendAppList() = System().actorSelection("akka://application/user/*/flowActor") ! "sendAppList"
+  def sendDeviceList() = System().actorSelection("akka://application/user/*/flowActor") ! "sendDeviceList"
 }
 
 class WebsocketActor(out: ActorRef) extends Actor {
@@ -41,10 +44,13 @@ class WebsocketActor(out: ActorRef) extends Actor {
   }
 
   def sendDeviceList() = {
-    // val devices = DeviceManager.devices.values
-    val devices = DeviceManager.getRegisteredDevices.values
-    DeviceManager.shutdown()
-    val seq = devices.map { case ds => Device(ds.head.device.getProduct(), ds.length, ds.head.elements.map(_.name) ) }.toSeq
+    val devices = DeviceManager.getRegisteredDevices()
+    val seq = devices.collect { case ds if ds.length > 0 => 
+      val di = ds.head.info
+      // TODO: assure broadcastHub in Device cleaned up..
+      val d = hid.Device(di, 99999) // temporary device, absurd index to prevent actually opening a device..
+      Device(di.getProductString, ds.length, d.sourceElements.map(_.name)) 
+    }.toSeq
     out ! Json.toJson(DeviceList(seq)).toString
   }
 

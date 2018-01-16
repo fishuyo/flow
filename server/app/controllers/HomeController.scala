@@ -22,6 +22,7 @@ class HomeController @Inject()(cc: ControllerComponents)(implicit system: ActorS
   // works since HomeController a Singleton
   System() = system
   OSCApi.listen(12000) 
+  DeviceManager.startPolling()
 
 
 

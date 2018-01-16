@@ -2,10 +2,7 @@
 package flow
 package hid
 
-import org.hid4java._
-
-class UnknownDevice(device:HidDevice) extends Device(device) {
-  val elements = List()
-
-  override def toString() = s"UnknownDevice: ${device.getProduct}"
+class UnknownDevice(name:String, index:Int) extends Device(index) {
+  lazy val productString = name
+  val sourceElements = List()
 }

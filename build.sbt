@@ -34,6 +34,8 @@ lazy val server = (project in file("server")).settings(
     guice,
     specs2 % Test,
     
+    "net.java.dev.jna" % "jna" % "4.0.0",
+
     "org.hid4java" % "hid4java" % "0.5.0",
 
     "de.sciss" %% "scalaosc" % "1.1.+",
@@ -49,6 +51,7 @@ lazy val server = (project in file("server")).settings(
     // "com.fishuyo.seer" %% "interface_server" % "0.1-SNAPSHOT",
     "com.fishuyo.seer" %% "core" % "0.1-SNAPSHOT",
     //"script" %% "script" % "0.1-SNAPSHOT",
+
     "org.webjars" %% "webjars-play" % "2.6.0",
     "org.webjars" % "jquery" % "3.2.1",
     "org.webjars" % "materializecss" % "0.99.0",

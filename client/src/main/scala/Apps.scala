@@ -12,6 +12,12 @@ object Apps {
 
   def apply() = apps
 
+  def set(ds:Seq[AppConfig]) = {
+    apps.value.clear
+    apps.value ++= ds
+  }
+
+
   def appCount = Binding {
     apps.bind.length
   }

@@ -2,14 +2,13 @@
 package flow
 package hid
 
-import org.hid4java._
+import spire.math.UByte
 
-class PS3Controller(device:HidDevice) extends Device(device) {
-
-  override val name = "PLAYSTATION(R)3 Controller"
+class PS3Controller(index:Int) extends Device(index) {
+  lazy val productString = "PLAYSTATION(R)3 Controller"
   override val deviceType = DualAnalogJoystick
 
-  val elements = List(
+  val sourceElements = List(
     Analog("leftX", 6),
     Analog("leftY", 7),
     Analog("rightX", 8),
@@ -46,8 +45,25 @@ class PS3Controller(device:HidDevice) extends Device(device) {
     AnalogSigned("accX", 42),
     AnalogSigned("accY", 44),
     AnalogSigned("accZ", 46)
-
   )
 
+  override val sinkElements = List(
+    Bitmask("led1", 10, 2),
+    Bitmask("led2", 10, 4),
+    Bitmask("led3", 10, 8),
+    Bitmask("led4", 10, 16),
+    BByte("leds", 10),
+    FFloat("rightRumble", 3),  //on/off highfreq
+    FFloat("leftRumble", 5)   //analog lowfreq
+  )
+
+  override val outputBuffer:Array[Byte] = Array(
+    1, 0, 254, 0, 254, 0, 0, 0, 0, 0, 0,
+    255, 39, 16, 0, 50, 255, 39, 16, 0, 50, 255,
+    39, 16, 0, 50, 255, 39, 16, 0, 50, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0
+  ).map(_.toByte)
 
 }
+

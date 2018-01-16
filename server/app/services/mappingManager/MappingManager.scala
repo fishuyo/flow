@@ -48,7 +48,8 @@ object MappingManager {
       script ! Code(FlowScriptWrapper(code)); script ! Reload
   }
   
-  def stop(m:Mapping) = { script ! Unload }
+  def stop(name:String):Unit = stop(mappings(name))
+  def stop(m:Mapping):Unit = { script ! Unload }
   
   def save(m:Mapping) = {
     val pw = new PrintWriter(new FileOutputStream(mappingPath + m.name + ".scala", false));
