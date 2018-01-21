@@ -1,38 +1,40 @@
-// package flow
+package flow
+package ijs
 
-// import play.api.Logger
-// import play.api.libs.json._
-// import akka.actor._
+import play.api.Logger
+import play.api.libs.json._
+import akka.actor._
 
-// import de.sciss.osc.Message
+import de.sciss.osc.Message
 
-// import collection.mutable.HashMap
+import collection.mutable.HashMap
 
 
-// object OSCActor {
+object InterfaceOSCActor {
 //   // case class used to represent OSC messages over json
 //   case class Msg(`type`:String, address:String, parameters:Seq[Float])
 //   case class StrMsg(`type`:String, address:String, parameters:Seq[String])
 //   implicit val statFormat = Json.format[Msg]
 //   implicit val statStrFormat = Json.format[StrMsg]
 
-//   case class Bind(port:Int, handler:PartialFunction[Message,Unit])
-//   case class Unbind(port:Int, handler:PartialFunction[Message,Unit])
+  // def props(out:ActorRef, manager:ActorRef, config:OSCConfig, request:String) = Props(new InterfaceOSCActor(out,manager,config, request))
+  def props(out:ActorRef, request:String) = Props(new InterfaceOSCActor(out,request))
+}
 
-//   //
-//   // Map to hold and reuse open OSC receivers 
-//   // val receivers = HashMap[Int,OSCRecv]()
+class InterfaceOSCActor(out:ActorRef, request:String) extends Actor with ActorLogging {
 
-//   def props(out:ActorRef, manager:ActorRef, config:OSCConfig, request:String) = Props(new OSCActor(out,manager,config, request))
-// }
+  def receive = {
+    case msg => println(msg)
+  }
+}
+// class InterfaceOSCActor(out:ActorRef, config:OSCConfig, request:String) extends Actor with ActorLogging {
+//   import InterfaceOSCActor._
 
-// class OSCActor(out:ActorRef, manager:ActorRef, config:OSCConfig, request:String) extends Actor with ActorLogging {
-//   import OSCActor._
-
-//   // XXX race condition on first update.. which is unlikely and mostly harmless..
+//   val manager = OSCManager()
 
 //   val oscSend = new OSCSend
 //   oscSend.connect(config.address, config.inPort)
+  
 //   println(s"Sending to ${config.address} on ${config.inPort}")
 //   val logger = Logger(this.getClass())
 

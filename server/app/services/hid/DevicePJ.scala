@@ -117,7 +117,7 @@ abstract class Device(val index:Int) extends IO {
     openDevice = None
   }
 
-  def debugPrint() = byteStream.runForeach(msg => println(msg.mkString(" ")))
+  // def debugPrint(count:Int=1024) = byteStream.runForeach(msg => println(msg.take(count).mkString(" ")))
 
   override def sources:Map[String,Source[Float,akka.NotUsed]] = {
     sourceElements.map { 

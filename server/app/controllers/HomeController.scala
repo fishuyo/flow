@@ -39,4 +39,17 @@ class HomeController @Inject()(cc: ControllerComponents)(implicit system: ActorS
     }
   }
 
+  def ijsSocket = WebSocket.accept[String, String] { request =>
+    ActorFlow.actorRef { out =>
+      ijs.InterfaceOSCActor.props(out, request.remoteAddress)
+    }
+  }
+  // def ijsSocket(name:String) = WebSocket.acceptOrResult[String, String] { request =>
+  //   println(request)
+  //   Future.successful( AppConfig.apps.find( _.name == name ) match {
+  //     case None => Left(NotFound)
+  //     case Some(app) => Right(ActorFlow.actorRef(out => OSCActor.props(out, oscManager, app.oscConfig,request.remoteAddress )))
+  //   })
+  // }
+
 }

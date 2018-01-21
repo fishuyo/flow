@@ -8,10 +8,13 @@ sealed trait Message
 
 case class ClientHandshake() extends Message
 
+case class IOPort(name:String, `type`:String) extends Message
+case class IOConfig(name:String, sources:Seq[IOPort], sinks:Seq[IOPort]) extends Message
+
 case class Device(name:String, count:Int, elements:Seq[String]) extends Message
 case class DeviceList(devices:Seq[Device]) extends Message
 
-case class OSCConfig(address:String, sinkPort:Int) extends Message
+// case class OSCConfig(address:String, sinkPort:Int) extends Message
 case class AppConfig(name:String, sources:Seq[String], sinks:Seq[String], defaultMappings:Seq[String]) extends Message
 case class AppList(apps:Seq[AppConfig]) extends Message
 
@@ -31,10 +34,13 @@ case class WatchParameter(name:String, device:String) extends Message
 case class Parameter(name:String, device:String, value:Float) extends Message
 
 object Message {
+  implicit val ioportFormat = derived.oformat[IOPort]()
+  implicit val ioconfigFormat = derived.oformat[IOConfig]()
+
   implicit val deviceFormat = derived.oformat[Device]()
   implicit val mappingFormat = derived.oformat[Mapping]()
   // implicit val mappingTreeFormat = derived.oformat[MappingTree]()
-  implicit val oscConfigFormat = derived.oformat[OSCConfig]()
+  // implicit val oscConfigFormat = derived.oformat[OSCConfig]()
   implicit val appConfigFormat = derived.oformat[AppConfig]()
   implicit val format = derived.oformat[Message]()
 }

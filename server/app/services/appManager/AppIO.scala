@@ -19,12 +19,10 @@ import collection.mutable.HashMap
 
 object AppIO{
 	def apply(name:String) = {
-    // println("AppIO: apply")
     new AppIO(AppConfig(name,Seq(),Seq(),Seq()))
 	}
 
 	def fromConfigFile(file:java.io.File):AppIO = {
-    // println("AppIO: fromConfigFile")
     val stream = new java.io.FileInputStream(file)
     val config = try {  Json.parse(stream).as[AppConfig] } finally { stream.close() }
     println(config)
@@ -53,7 +51,7 @@ class AppIO(val config:AppConfig) extends IO {
 	
   override def sources:Map[String,Source[Float,akka.NotUsed]] = sourceNames.map { case name =>
     val src = Source.actorRef[Float](bufferSize = 0, OverflowStrategy.fail)
-                                    .mapMaterializedValue( (a:ActorRef) => { sourceActors(name) = a; akka.NotUsed } )
+      .mapMaterializedValue( (a:ActorRef) => { sourceActors(name) = a; akka.NotUsed } )
     name -> src
   }.toMap
 
