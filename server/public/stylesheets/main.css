@@ -1,4 +1,13 @@
 
+.errors {
+  width: 0.8em;
+}
+
+.material-tooltip { 
+  white-space: pre;
+  text-align: left;
+} 
+
 body {
   display: flex;
   min-height: 100vh;

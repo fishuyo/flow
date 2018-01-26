@@ -2,6 +2,8 @@
 package flow
 
 import protocol.AppConfig
+import protocol.IOConfig
+import protocol.IOPort
 import protocol.Message.appConfigFormat
 
 import julienrf.json.derived._
@@ -19,7 +21,7 @@ import collection.mutable.HashMap
 
 object AppIO{
 	def apply(name:String) = {
-    new AppIO(AppConfig(name,Seq(),Seq(),Seq()))
+    new AppIO(AppConfig(IOConfig(name,Seq(),Seq()),Seq()))
 	}
 
 	def fromConfigFile(file:java.io.File):AppIO = {
@@ -37,35 +39,35 @@ class AppIO(val config:AppConfig) extends IO {
 	// sources as actor refs sent messages from OSCRecv handler
 	// sinks as OSCSend to app port and address
 
-  val sourceNames = Set[String]()
-  val sinkNames = Set[String]()
+  // val sourceNames = Set[String]()
+  // val sinkNames = Set[String]()
   val sourceActors = HashMap[String,ActorRef]()
 
   val oscSend = new OSCSend() 
   var hostname = "localhost"
   var sinkPort = 9010
 
-  sourceNames ++= config.sources
-  sinkNames ++= config.sinks
+  // sourcePorts ++= config.io.sources
+  // sinkPorts ++= config.io.sinks
 
 	
-  override def sources:Map[String,Source[Float,akka.NotUsed]] = sourceNames.map { case name =>
+  override def sources:Map[String,Source[Float,akka.NotUsed]] = config.io.sources.map { case IOPort(name,types) =>
     val src = Source.actorRef[Float](bufferSize = 0, OverflowStrategy.fail)
       .mapMaterializedValue( (a:ActorRef) => { sourceActors(name) = a; akka.NotUsed } )
     name -> src
   }.toMap
 
-  override def sinks:Map[String,Sink[Float,akka.NotUsed]] = sinkNames.map { case name =>
+  override def sinks:Map[String,Sink[Float,akka.NotUsed]] = config.io.sinks.map { case IOPort(name,types) =>
     val sink = Sink.foreach( (f:Float) => {
       try{ oscSend.send(s"/$name", f) }
-      catch{ case e:Exception => AppManager.close(config.name) }
+      catch{ case e:Exception => AppManager.close(config.io.name) }
     }).mapMaterializedValue{ case _ => akka.NotUsed}
     name -> sink
   }.toMap
 
   val handler:OSC.OSCHandler = {
     case (Message(name:String, value:Float), addr) => 
-      sourceNames += name
+      // sourceNames += name
       sourceActors.get(name).foreach(_ ! value)
     case msg => println(s"Unhandled msg in AppIO: $msg")  
   }
@@ -88,7 +90,7 @@ class AppIO(val config:AppConfig) extends IO {
   def runDefaultMappings() = config.defaultMappings.foreach(MappingManager.run(_))
   def stopDefaultMappings() = config.defaultMappings.foreach(MappingManager.stop(_))
 
-
+  def toJson() = Json.toJson(config).toString
 }
 
 // case class AppConfig(name:String, sources:IOInfo, sinks:IOInfo, osc:OSCConfig)

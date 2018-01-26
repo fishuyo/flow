@@ -6,6 +6,7 @@ import protocol._
 import scala.scalajs.js
 import scala.scalajs.js.annotation._
 import org.scalajs.dom.document
+import org.scalajs.dom.window
 import org.scalajs.dom.console
 import org.scalajs.dom.raw._
 
@@ -15,6 +16,9 @@ import com.thoughtworks.binding.dom
 
 import org.denigma.codemirror.extensions.EditorConfig
 import org.denigma.codemirror._
+
+import org.querki.jquery._
+import com.definitelyscala.materializecss.{JQuery => JQ}
 
 object CodeEditor {
 
@@ -28,7 +32,13 @@ object CodeEditor {
       theme("material").
       keyMap("sublime").
       tabSize(2).
-      indentWithTabs(false)
+      indentWithTabs(false).
+      gutters(js.Array("errors")).
+      extraKeys(js.Dictionary[js.Function1[Editor,Unit]](
+        "Tab" -> ((cm:Editor) => println("tab tab")),
+        "Cmd-S" -> ((cm:Editor) => save()),
+        "Cmd-Enter" -> ((cm:Editor) => run())
+      ))
 
     document.getElementById(id) match {
       case elem:HTMLTextAreaElement =>
@@ -38,7 +48,20 @@ object CodeEditor {
       case _ => console.error("cannot find text area for the code!")
     }
 
+    // editor.on("gutterClick", (cm:Editor, n:Int) => {
+    //   var info = cm.lineInfo(n);
+    //   cm.setGutterMarker(n, "errors", if(info.gutterMarkers == null) makeMarker() else null);
+    //   ()
+    // });
+
     load(Mapping("untitled",""))
+  }
+
+  def makeMarker(msg:String) = {
+    val text = HtmlEscape(msg) //msg.split('\n').mkString("<br/>"))
+    var marker = document.createElement("div").asInstanceOf[HTMLDivElement];
+    marker.innerHTML = s"""<a class="tooltipped" style="color:#822;" data-position="right" data-delay="50" data-html="true" data-tooltip="$text">●</a>"""
+    marker
   }
 
   def getCode() = {
@@ -49,7 +72,7 @@ object CodeEditor {
     }
   }
 
-  def run() = {
+  def run(){
     println("Run Code!")
     getCode()
     if(!mapping.running){
@@ -59,7 +82,7 @@ object CodeEditor {
     Socket.send(Run(mapping))
   }
 
-  def stop() = {
+  def stop(){
     println("Stop!")
     if(mapping.running){
       mapping = mapping.copy(running = false)
@@ -68,13 +91,14 @@ object CodeEditor {
     Socket.send(Stop(mapping))
   }
 
-  def load(m:Mapping) = {
+  def load(m:Mapping){
     println("Load!")
     mapping = m
     editor.getDoc().setValue(m.code)
+    setErrorMarkers(m)
   }
 
-  def save() = {
+  def save(){
     println("Save!")
     getCode()
     if(mapping.modified){
@@ -84,11 +108,20 @@ object CodeEditor {
     }
   }
 
-  def newMapping() = {
+  def newMapping(name:String){
     getCode()
-    val m = Mapping("unamed","",true)
-    Mappings("unamed") = m
+    val m = Mapping(name,"",true)
+    Mappings(name) = m
     load(m)
+  }
+
+  def setErrorMarkers(m:Mapping){
+    editor.clearGutter("errors")
+    m.errors.foreach { case MappingError(line,msg) =>
+      var info = editor.lineInfo(line)
+      editor.setGutterMarker(line, "errors", makeMarker(msg));
+    }
+    $(".tooltipped").asInstanceOf[JQ].tooltip()
   }
 
 
@@ -122,7 +155,11 @@ object CodeEditor {
               </a>
             </li>
             <li>
-              <a href="#" onclick={ event:Event => event.preventDefault(); newMapping() }>
+              <a class="waves-effect waves-light modal-trigger" href="#newModal" onclick={ event:Event => 
+                event.preventDefault() 
+                val input = document.getElementById("mappingName").asInstanceOf[HTMLInputElement]
+                input.value = ""
+              }>
                 <i class="material-icons left">add_circle_outline</i>
                 New
               </a>
@@ -130,6 +167,28 @@ object CodeEditor {
           </ul>
         </div>
       </nav>
+
+      <!-- Modal Structure -->
+      <div id="newModal" class="modal">
+        <div class="modal-content">
+          <h4>New Mapping</h4>
+          <div class="row">
+            <div class="input-field col s6">
+              <input value="" id="mappingName" type="text" class="validate" />
+              <label class="active" for="mappingName">Mapping Name</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Cancel</a>
+          <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat" onclick={ event:Event => 
+                event.preventDefault() 
+                val input = document.getElementById("mappingName").asInstanceOf[HTMLInputElement]
+                if(input.value != "") newMapping(input.value)
+                else window.alert("Could not create mapping: Invalid name.")
+          }>Create</a>
+        </div>
+      </div>
 
       <div class="row">
         <div class="col s12"> 
@@ -169,7 +228,26 @@ object CodeEditor {
 
 
   """
+}
 
+object HtmlEscape {
+  def apply(html: String): String = {
+    val builder = new StringBuilder
+  
+    for (c <- html) {
+      c match {
+        case '&'  => builder.append("&amp;")
+        case '"'  => builder.append("&quot;")
+        case '<'  => builder.append("&lt;")
+        case '>'  => builder.append("&gt;")
+        case '\'' => builder.append("&#39;")
+        case '`'  => builder.append("&#96;")
+        case '{'  => builder.append("&#123;")
+        case '}'  => builder.append("&#125;")
+        case _    => builder.append(c)
+      }
+    }
 
-
+    builder.toString
+  }
 }

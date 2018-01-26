@@ -18,6 +18,7 @@ object WebsocketActor {
 
   def sendAppList() = System().actorSelection("akka://application/user/*/flowActor") ! "sendAppList"
   def sendDeviceList() = System().actorSelection("akka://application/user/*/flowActor") ! "sendDeviceList"
+  def sendMapping(m:Mapping) = System().actorSelection("akka://application/user/*/flowActor") ! m
 }
 
 class WebsocketActor(out: ActorRef) extends Actor {
@@ -40,6 +41,8 @@ class WebsocketActor(out: ActorRef) extends Actor {
         case Save(mapping) => MappingManager.save(mapping)
       }
 
+    case m:Mapping => sendMapping(m)
+
     case msg => println(msg)
   }
 
@@ -49,7 +52,7 @@ class WebsocketActor(out: ActorRef) extends Actor {
       val di = ds.head.info
       // TODO: assure broadcastHub in Device cleaned up..
       val d = hid.Device(di, 99999) // temporary device, absurd index to prevent actually opening a device..
-      Device(di.getProductString, ds.length, d.sourceElements.map(_.name)) 
+      Device(IOConfig(di.getProductString, d.sourceElements.map((e) => IOPort(e.name,"")), Seq()), ds.length) 
     }.toSeq
     out ! Json.toJson(DeviceList(seq)).toString
   }
@@ -63,6 +66,10 @@ class WebsocketActor(out: ActorRef) extends Actor {
     MappingManager.readMappingsDir() // XXX modifying state, probs not safe
     val ms = MappingManager.mappings.values.toSeq 
     out ! Json.toJson(MappingList(ms)).toString
+  }
+
+  def sendMapping(m:Mapping) = {
+    out ! Json.toJson(m).toString
   }
 
 }

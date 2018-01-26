@@ -1,6 +1,7 @@
 package flow
 
 import flow.protocol.Device
+import flow.protocol.IOPort
 
 import com.thoughtworks.binding.Binding
 import com.thoughtworks.binding.Binding._
@@ -46,23 +47,23 @@ object Devices {
       for(ds <- devices) yield ds match {
           // case Nil => <!-- empty -->
           // case d :: Nil =>
-          case Device(name, 1, elems) =>
+          case Device(io, 1) =>
             <li>
               <a class="collapsible-header">
                 <i class="material-icons">arrow_drop_down</i>
-                <span class="truncate">{name}</span>
+                <span class="truncate">{io.name}</span>
               </a>
               <div class="collapsible-body">
                 <ul>{ device(ds).bind }</ul>
               </div>
             </li>
-          case Device(name, count, elems) =>
+          case Device(io, count) =>
           // case d :: xs =>
             <li>
               <a class="collapsible-header">
                 <i class="material-icons">arrow_drop_down</i>
                 <span class="badge">{count.toString}</span>
-                <span class="truncate">{name}</span>
+                <span class="truncate">{io.name}</span>
               </a>
               <div class="collapsible-body">
                 <ul>{ device(ds).bind }</ul>
@@ -73,8 +74,8 @@ object Devices {
 
     @dom
     def device(d:Device) = {
-      for(element <- Constants(d.elements: _*)) yield element match {
-        case name =>
+      for(src <- Constants(d.io.sources: _*)) yield src match {
+        case IOPort(name,types) =>
           <li>
             <a href="#!">
               <i class="material-icons blue-text tiny">gamepad</i>

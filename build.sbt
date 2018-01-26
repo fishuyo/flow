@@ -81,7 +81,9 @@ lazy val client = (project in file("client")).settings(
     "org.webjars" % "materializecss" % "0.99.0" / "materialize.js" minified "materialize.min.js" dependsOn "jquery.js",
     "org.webjars.npm" % "codemirror" % "5.27.4" / "lib/codemirror.js",
     "org.webjars.npm" % "codemirror" % "5.27.4" / "mode/clike/clike.js" dependsOn "lib/codemirror.js",
-    "org.webjars.npm" % "codemirror" % "5.27.4" / "keymap/sublime.js" dependsOn "lib/codemirror.js"
+    "org.webjars.npm" % "codemirror" % "5.27.4" / "keymap/sublime.js" dependsOn "lib/codemirror.js",
+    "org.webjars.npm" % "codemirror" % "5.27.4" / "addon/comment/comment.js" dependsOn "lib/codemirror.js",
+    "org.webjars.npm" % "codemirror" % "5.27.4" / "addon/search/searchcursor.js" dependsOn "lib/codemirror.js"
   )
 ).enablePlugins(ScalaJSPlugin, ScalaJSWeb).
   dependsOn(sharedJs)

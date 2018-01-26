@@ -1,6 +1,7 @@
 package flow
 
 import flow.protocol.AppConfig
+import flow.protocol.IOPort
 
 import com.thoughtworks.binding.Binding
 import com.thoughtworks.binding.Binding._
@@ -49,7 +50,7 @@ object Apps {
             <li>
               <a class="collapsible-header">
                 <i class="material-icons">arrow_drop_down</i>
-                <span class="truncate">{a.name}</span>
+                <span class="truncate">{a.io.name}</span>
               </a>
               <div class="collapsible-body">
                 <ul>{ app(a).bind }</ul>
@@ -60,8 +61,8 @@ object Apps {
 
     @dom
     def app(app:AppConfig) = {
-      for(src <- Constants(app.sources: _*)) yield src match {
-        case name =>
+      for(src <- Constants(app.io.sources: _*)) yield src match {
+        case IOPort(name,types) =>
           <li>
             <a href="#!">
               <i class="material-icons blue-text tiny">arrow_back</i>
@@ -69,8 +70,8 @@ object Apps {
             </a>
           </li>
       }
-      for(sink <- Constants(app.sinks: _*)) yield sink match {
-        case name =>
+      for(sink <- Constants(app.io.sinks: _*)) yield sink match {
+        case IOPort(name,types) =>
           <li>
             <a href="#!">
               <i class="material-icons blue-text tiny">arrow_forward</i>

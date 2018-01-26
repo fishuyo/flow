@@ -31,24 +31,9 @@ object ScriptManager {
 
   case class Create(name:String="")
 
-  val toolbox = currentMirror.mkToolBox() 
   val manager = System().actorOf( Props[ScriptManagerActor], name="ScriptManager" )
   
   implicit val timeout = Timeout(4 seconds)
-
-  val imports = ListBuffer[String]()
-  imports += "com.fishuyo.seer._"
-  // imports += "com.fishuyo.seer.dynamic._"
-  // imports += "com.fishuyo.seer.actor._"
-  imports += "com.fishuyo.seer.spatial._"
-  // imports += "com.fishuyo.seer.graphics._"
-  // imports += "com.fishuyo.seer.audio._"
-  // imports += "com.fishuyo.seer.io._"
-  imports += "com.fishuyo.seer.util._"
-  imports += "scala.concurrent.duration._"
-  imports += "collection.mutable.ListBuffer"
-  imports += "collection.mutable.ArrayBuffer"
-  imports += "collection.mutable.HashMap"
 
   def apply() = Await.result(manager ? Create(), 3 seconds).asInstanceOf[ActorRef]
 
@@ -119,7 +104,7 @@ class ScriptManagerActor extends Actor with ActorLogging {
 
   override val supervisorStrategy =
     OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute, loggingEnabled=false) {
-      case _:scala.tools.reflect.ToolBoxError => logToolboxErrorLocation(); Resume
+      case _:scala.tools.reflect.ToolBoxError => Resume
       case t => super.supervisorStrategy.decider.applyOrElse(t, (_: Any) => Escalate)
     }
 
@@ -160,20 +145,6 @@ class ScriptManagerActor extends Actor with ActorLogging {
     case x => () //log.warning("Received unknown message: {}", x)
   }
 
-  def logToolboxErrorLocation(){
-    if(toolbox.frontEnd.hasErrors){
-      toolbox.frontEnd.infos.foreach{ case info =>
-        val line = info.pos.line - imports.length //+ 1
-        val msg = s"""
-          ${info.msg}
-          at line ${line}:${info.pos.column}
-          ${info.pos.lineContent}
-          ${info.pos.lineCaret} 
-        """
-        log.error(msg)
-      }
-    }
-  }
 }
 
 

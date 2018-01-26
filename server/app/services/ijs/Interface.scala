@@ -2,32 +2,48 @@
 package flow
 package ijs
 
+import protocol.IOPort
+
 import java.io.File
 import java.io.PrintWriter
 import java.io.FileOutputStream
 
 import collection.mutable.ListBuffer
 
-sealed trait Component{ 
+sealed trait Widget{ 
   def name:String
   def x:Float
   def y:Float
   def w:Float
   def h:Float
 }
-case class Slider(name:String,x:Float,y:Float,w:Float,h:Float) extends Component
-// case class Button(val name:String, x:Float,y:Float,w:Float,h:Float) extends Component
+case class Slider(name:String,x:Float,y:Float,w:Float,h:Float) extends Widget
+case class Button(name:String, x:Float,y:Float,w:Float,h:Float) extends Widget
 
 object Interface {
   def create(name:String) = new Interface(name)
+  
+  def fromApp(app:AppIO) = {
+    val io = app.config.io
+    val ijs = new Interface(io.name)
+    var sx = 0f
+    var bx = 0f
+    io.sinks.foreach {
+      case IOPort(name,"float") => ijs += Slider(name,sx,0f,0.1f,0.5f); sx += 0.1f
+      case IOPort(name,"bool") => ijs += Button(name,bx,0.55f,0.1f,0.1f); bx += 0.1f
+      case IOPort(name,"") => ijs += Button(name,bx,0.55f,0.1f,0.1f); bx += 0.1f
+      case _ => ()
+    }
+    ijs.save()
+  }
 }
 
 
 class Interface(val name:String) extends IO {
 
-  val components = ListBuffer[Component]()
+  val widgets = ListBuffer[Widget]()
 
-  def +=(component:Component) = components += component
+  def +=(w:Widget) = widgets += w
 
   def save() = {
     val path = "server/public/interfaces/"
@@ -39,11 +55,13 @@ class Interface(val name:String) extends IO {
   def toHtml() = {
     Html.header +
     "panel = new Interface.Panel({ useRelativeSizesAndPositions:true })\n" +
-    components.map{ 
-      case Slider(name,x,y,w,h) => s"""$name = new Interface.Slider({ name:"$name", bounds: [$x,$y,$w,$h] })"""
+    "panel.background = 'black'\n" +
+    widgets.map{ 
+      case Slider(name,x,y,w,h) => s"""$name = new Interface.Slider({ name:"$name", label:"$name", bounds: [$x,$y,$w,$h] ${if(w>h) ",isVertical:false" else ""} })"""
+      case Button(name,x,y,w,h) => s"""$name = new Interface.Button({ name:"$name", label:"$name", mode:"momentary", bounds: [$x,$y,$w,$h] })"""
 
     }.mkString("\n") + "\n" +
-    s"panel.add( ${components.map(_.name).mkString(",")} )" +
+    s"panel.add( ${widgets.map(_.name).mkString(",")} )" +
     Html.footer
   }
 

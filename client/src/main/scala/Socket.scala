@@ -47,7 +47,7 @@ object Socket {
         case DeviceList(ds) => Devices.set(ds)
         case AppList(as) => Apps.set(as)
         case MappingList(ms) => Mappings ++= ms
-        
+        case m:Mapping => Mappings(m.name) = m
       }
     }
 

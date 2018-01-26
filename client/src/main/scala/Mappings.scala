@@ -23,18 +23,20 @@ object Mappings {
   def update(name:String,m:Mapping) = {
     mappings_(name) = m
     mappings.value.clear 
-    mappings.value ++= mappings_.values 
+    mappings.value ++= mappings_.values.toSeq.sortBy(_.name)
+    if(m.name == CodeEditor.mapping.name) CodeEditor.setErrorMarkers(m)
   }
 
   def ++=(seq:Seq[Mapping]) = {
     seq.foreach { case m => mappings_(m.name) = m }
     mappings.value.clear 
-    mappings.value ++= mappings_.values 
+    mappings.value ++= mappings_.values.toSeq.sortBy(_.name)
   }
 
   def mappingCount = Binding {
     mappings.bind.length
   }
+
 
   object views {
 
@@ -63,7 +65,7 @@ object Mappings {
             <li> 
               <a href="#" onclick={ event:Event => event.preventDefault(); CodeEditor.load(m) }>
                 { name }  
-                { if(errors) <i class="material-icons">error</i>
+                { if(errors.length > 0) <i class="material-icons">error</i>
                   else if(modified) <i class="material-icons">edit</i>
                   else if(running) <i class="material-icons">directions_run</i>
                   else <i></i> }

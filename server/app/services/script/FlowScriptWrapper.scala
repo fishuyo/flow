@@ -2,40 +2,46 @@
 package flow
 package script
 
-
 object FlowScriptWrapper {
 
-  def apply(code:String) = {
+  val header = """
+import akka.actor._
+import akka.stream._
+import akka.stream.scaladsl._
 
-    s"""
-      import akka.actor._
-      import akka.stream._
-      import akka.stream.scaladsl._
+import scala.concurrent.duration._
 
-      import flow._
-      import flow.hid._
-      import flow.ijs._
-      import flow.script._
+import com.fishuyo.seer._
+import com.fishuyo.seer.spatial._
+import com.fishuyo.seer.util._
 
-      class FlowScript extends Script {
+import flow._
+import flow.hid._
+import flow.ijs._
+import flow.script._
 
-        implicit val system = System()
-        implicit val materializer = ActorMaterializer()
+class FlowScript extends Script {
 
-        implicit def source2io[T,M](src:Source[T,M]) = IOSource(src)
-        implicit val kill = KillSwitches.shared("hi")
+  implicit val system = System()
+  implicit val materializer = ActorMaterializer()
 
-        val Print = Sink.foreach(println(_:Any))
+  implicit def source2io[T,M](src:Source[T,M]) = IOSource(src)
+  implicit val kill = KillSwitches.shared("hi")
 
-        $code
+  val Print = Sink.foreach(println(_:Any))
+"""
 
-        override def unload(){
-          kill.shutdown
-        }
-      }
-      new FlowScript
-    """
-
+  val footer = """
+  override def unload(){
+    kill.shutdown
   }
+}
+new FlowScript
+"""
+  
+  def apply(code:String) = header + code + footer
+
+  def headerLength = header.count(_ == '\n')
+  def transformLineNumber(line:Int) = line - headerLength - 1
 
 }

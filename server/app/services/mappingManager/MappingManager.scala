@@ -13,14 +13,17 @@ import java.net.InetSocketAddress
 
 import collection.mutable.HashMap
 
+import akka.actor.ActorRef
+import akka.pattern.ask
+import akka.util.Timeout
+import scala.concurrent.duration._
+import concurrent.ExecutionContext.Implicits.global
+
 object MappingManager {
-
-  val script = ScriptManager()  // TODO: need multiple script actors for each mapping script running
-
 
   val mappingPath = "data/mappings/"
   val mappings = HashMap[String, Mapping]()
-  // readMappingsDir()
+  val scripts = HashMap[String, ActorRef]()
 
   def readMappingsDir(){
     val d = new File(mappingPath)
@@ -45,11 +48,28 @@ object MappingManager {
   def run(name:String):Unit = run(mappings(name))
   def run(m:Mapping):Unit = m match {
     case Mapping(name, code, modified, running, errors) =>
-      script ! Code(FlowScriptWrapper(code)); script ! Reload
+      implicit val duration: Timeout = 10 seconds
+      val script = scripts.getOrElseUpdate(name, ScriptManager())
+      script ! Code(FlowScriptWrapper(code))
+      script ! Reload
+      val future = script ? Status
+      future.onSuccess {
+        case status:Seq[(Int,String)] => 
+          if(status.length > 0 || m.errors.length > 0){
+            val off = FlowScriptWrapper.headerLength 
+            val errs = status.map { case (i,s) => MappingError(i-off-1,s) }
+            val mapping = m.copy(errors = errs)
+            mappings(m.name) = mapping
+            controllers.WebsocketActor.sendMapping(mapping)
+          }
+      }
   }
   
   def stop(name:String):Unit = stop(mappings(name))
-  def stop(m:Mapping):Unit = { script ! Unload }
+  def stop(m:Mapping):Unit = { 
+    val scriptOption = scripts.get(m.name)
+    scriptOption.foreach(_ ! Unload)
+  }
   
   def save(m:Mapping) = {
     val pw = new PrintWriter(new FileOutputStream(mappingPath + m.name + ".scala", false));
