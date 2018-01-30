@@ -16,9 +16,9 @@ import akka.actor._
 object WebsocketActor {
   def props(out: ActorRef) = Props(new WebsocketActor(out))
 
-  def sendAppList() = System().actorSelection("akka://application/user/*/flowActor") ! "sendAppList"
-  def sendDeviceList() = System().actorSelection("akka://application/user/*/flowActor") ! "sendDeviceList"
-  def sendMapping(m:Mapping) = System().actorSelection("akka://application/user/*/flowActor") ! m
+  def sendAppList() = System().actorSelection("akka://application/user/client.*/flowActor") ! "sendAppList"
+  def sendDeviceList() = System().actorSelection("akka://application/user/client.*/flowActor") ! "sendDeviceList"
+  def sendMapping(m:Mapping) = System().actorSelection("akka://application/user/client.*/flowActor") ! m
 }
 
 class WebsocketActor(out: ActorRef) extends Actor {

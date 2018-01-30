@@ -54,9 +54,9 @@ object Device {
 }
 
 abstract class Device(val index:Int) extends IO {
-
-  implicit val system = System()
-  implicit val materializer = ActorMaterializer()
+  // in IO now..
+  // implicit val system = System()
+  // implicit val materializer = ActorMaterializer()
 
   import concurrent.ExecutionContext.Implicits.global
 

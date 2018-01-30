@@ -68,6 +68,7 @@ class AppIO(val config:AppConfig) extends IO {
   val handler:OSC.OSCHandler = {
     case (Message(name:String, value:Float), addr) => 
       // sourceNames += name
+      // XXX need to strip /s?
       sourceActors.get(name).foreach(_ ! value)
     case msg => println(s"Unhandled msg in AppIO: $msg")  
   }

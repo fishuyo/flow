@@ -4,7 +4,6 @@ package flow
 import scala.language.dynamics
 
 import com.typesafe.config._
-// import net.ceedubs.ficus.Ficus._
 
 import akka.actor._
 import akka.stream._
@@ -17,27 +16,9 @@ import collection.mutable.HashMap
   * The IO object holds available io nodes, connected devices.. etc.
   */
 object IO {
-
   val ios = HashMap[String,IO]()
   def apply(name:String) = ios(name)
   def update(name:String, io:IO) = ios(name) = io
-
-  // def autoConnect(){
-  //   implicit val system = System()
-  //   implicit val materializer = ActorMaterializer()
-
-  //   val onConnectionEvent = DeviceManager.broadcastConnectionEvent
-  //                            .runWith(Sink.foreach{
-  //                               case DeviceAttached(d) => 
-  //                               case DeviceDetached(d) =>
-  //                               case _ => ()
-  //                             })
-  // }
-
-  // def connect(d:Device){
-
-  // }
-
 }
 
 /**
@@ -48,13 +29,15 @@ object IO {
 trait IO extends Dynamic {
   // available - ready for use - on instantiation from connection callback or something
   // open/active/streaming
-
-  // val sources = HashMap[String,Source[Float,Future[akka.Done]]]()
-  // val sinks = HashMap[String,Sink[Float,Future[akka.Done]]]()
+  implicit val system = System()
+  implicit val materializer = ActorMaterializer()
 
   def sources:Map[String,Source[Float,akka.NotUsed]] = Map[String,Source[Float,akka.NotUsed]]()
   def sinks:Map[String,Sink[Float,akka.NotUsed]] = Map[String,Sink[Float,akka.NotUsed]]()
   
+  def source(name:String) = sources.get(name)
+  def sink(name:String) = sinks.get(name)
+
   def selectDynamic(name:String) = sources(name)
 
   def destutter = Flow[Float].statefulMapConcat(() => {
@@ -63,20 +46,30 @@ trait IO extends Dynamic {
       if (elem != last) { last = elem; List(elem) }
       else Nil
   })
-    
-  // def close(){}
+
+  def >>(io:IO)(implicit kill:SharedKillSwitch) = {
+    if(sources.size > 0){
+      sources.foreach { case (name,src) =>
+        io.sink(name).foreach { case sink => 
+          src.via(kill.flow).runWith(sink)
+        }
+      }
+    } else { // else build from sink, allowing for dynamic source population.. hmm..
+      io.sinks.foreach { case (name,sink) =>
+        source(name).foreach { case src => 
+          src.via(kill.flow).runWith(sink)
+        }
+      }
+    }
+  }
+
 }
 
-case class IOSource[T,M](value:Source[T,M]){
+case class IOSource[T,M](src:Source[T,M]){
   implicit val system = System()
   implicit val materializer = ActorMaterializer()
 
-  def >>[U >: T,N](sink:Sink[U,N])(implicit kill:SharedKillSwitch) = value.via(kill.flow).runWith(sink)
+  def >>[U >: T,N](sink:Sink[U,N])(implicit kill:SharedKillSwitch) = src.via(kill.flow).runWith(sink)
 }
 
-// case class IOSink[T](value:Sink[T,akka.NotUsed]){
-//   implicit val system = System()
-//   implicit val materializer = ActorMaterializer()
-
-// }
 

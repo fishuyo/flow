@@ -34,15 +34,17 @@ class HomeController @Inject()(cc: ControllerComponents)(implicit system: ActorS
   }
 
   def socket = WebSocket.accept[String, String] { request =>
-    ActorFlow.actorRef { out =>
-      WebsocketActor.props(out)
-    }
+    NamedActorFlow.actorRef(out =>
+      WebsocketActor.props(out),
+      maybeName = Some(s"client.${com.fishuyo.seer.util.Random.int()}")
+    )
   }
 
-  def ijsSocket = WebSocket.accept[String, String] { request =>
-    ActorFlow.actorRef { out =>
-      ijs.InterfaceOSCActor.props(out, request.remoteAddress)
-    }
+  def ijsSocket(name:String) = WebSocket.accept[String, String] { request =>
+    NamedActorFlow.actorRef(out =>
+      ijs.InterfaceWSActor.props(out, name, request.remoteAddress),
+      maybeName = Some(s"ijs.${com.fishuyo.seer.util.Random.int()}")
+    )
   }
   // def ijsSocket(name:String) = WebSocket.acceptOrResult[String, String] { request =>
   //   println(request)

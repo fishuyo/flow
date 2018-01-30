@@ -1,30 +1,45 @@
 package flow
 package ijs
 
-import play.api.Logger
+import julienrf.json.derived._
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
+
+import play.api.Logger
+
 import akka.actor._
+import akka.stream._
+import akka.stream.scaladsl._
 
-import de.sciss.osc.Message
+object InterfaceWSActor {
 
-import collection.mutable.HashMap
+  case class Msg(`type`:String, address:String, typetags:String, parameters:Seq[Float])
+  implicit val msgFormat = oformat[Msg]()
 
-
-object InterfaceOSCActor {
-//   // case class used to represent OSC messages over json
-//   case class Msg(`type`:String, address:String, parameters:Seq[Float])
-//   case class StrMsg(`type`:String, address:String, parameters:Seq[String])
-//   implicit val statFormat = Json.format[Msg]
-//   implicit val statStrFormat = Json.format[StrMsg]
-
-  // def props(out:ActorRef, manager:ActorRef, config:OSCConfig, request:String) = Props(new InterfaceOSCActor(out,manager,config, request))
-  def props(out:ActorRef, request:String) = Props(new InterfaceOSCActor(out,request))
+  def props(out:ActorRef, name:String, request:String) = Props(new InterfaceWSActor(out,name,request))
 }
 
-class InterfaceOSCActor(out:ActorRef, request:String) extends Actor with ActorLogging {
+class InterfaceWSActor(out:ActorRef, name:String, request:String) extends Actor with ActorLogging {
+
+  import InterfaceWSActor._
+
+  val io = Interface(name)
+  io.sinkActors += self
 
   def receive = {
-    case msg => println(msg)
+    case msg:String => 
+      val message = Json.parse(msg).as[Msg]
+      message match {
+        case Msg("osc", addr, tt, params) => 
+          // println(s"OSC $addr $tt $params")
+          // io.sourceActors.get(addr.tail).foreach( _ ! params.head )
+          io.sourceActor.foreach(_ ! (addr.tail, params.head))
+        case m => println(m)
+      }
+
+    case (name:String, value:Float) => 
+      out ! Json.toJson(Msg("osc", "/"+name, "f", Seq(value))).toString
+
   }
 }
 // class InterfaceOSCActor(out:ActorRef, config:OSCConfig, request:String) extends Actor with ActorLogging {

@@ -6,7 +6,7 @@ var socketAndIPPort, socketString;
 // socketIPAndPort = socketIPAndPort.split(":");
 
 // socketString = 'ws://' + socketIPAndPort[0] + ':' + (parseInt(socketIPAndPort[1])) + '/socket';
-socketString = 'ws://' + window.location.host + '/' + window.location.pathname.split("/")[1] + '/ws';
+socketString = 'ws://' + window.location.host + '/' + window.location.pathname.split("/")[1] + '/' + window.location.pathname.split("/")[2].split(".")[0] + '/ws';
 
 Interface.Socket = new WebSocket( socketString );
 

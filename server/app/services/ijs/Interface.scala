@@ -8,7 +8,13 @@ import java.io.File
 import java.io.PrintWriter
 import java.io.FileOutputStream
 
+import akka.actor._
+import akka.stream._
+import akka.stream.scaladsl._
+
 import collection.mutable.ListBuffer
+import collection.mutable.HashMap
+import collection.mutable.Set
 
 sealed trait Widget{ 
   def name:String
@@ -21,11 +27,16 @@ case class Slider(name:String,x:Float,y:Float,w:Float,h:Float) extends Widget
 case class Button(name:String, x:Float,y:Float,w:Float,h:Float) extends Widget
 
 object Interface {
-  def create(name:String) = new Interface(name)
+
+  val interfaces = HashMap[String,InterfaceBuilder]()
+
+  def apply(name:String) = interfaces.getOrElseUpdate(name, new InterfaceBuilder(name))
+
+  def create(name:String) = interfaces.getOrElseUpdate(name, new InterfaceBuilder(name))
   
   def fromApp(app:AppIO) = {
     val io = app.config.io
-    val ijs = new Interface(io.name)
+    val ijs = interfaces.getOrElseUpdate(io.name, new InterfaceBuilder(io.name))
     var sx = 0f
     var bx = 0f
     io.sinks.foreach {
@@ -35,17 +46,42 @@ object Interface {
       case _ => ()
     }
     ijs.save()
+    ijs
   }
 }
 
 
-class Interface(val name:String) extends IO {
+
+class InterfaceBuilder(val name:String) extends IO {
 
   val widgets = ListBuffer[Widget]()
-
   def +=(w:Widget) = widgets += w
 
-  def save() = {
+  var sourceActor:Option[ActorRef] = None
+  val _src = Source.actorRef[(String,Float)](bufferSize = 0, OverflowStrategy.fail)
+                                    .mapMaterializedValue( (a:ActorRef) => sourceActor = Some(a) )
+  val broadcastSource: Source[(String,Float),akka.NotUsed] = _src.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
+
+  // val sourceActors = HashMap[String,ActorRef]()
+  var sinkActors = ListBuffer[ActorRef]()
+  
+  override def sources:Map[String,Source[Float,akka.NotUsed]] = widgets.map { case w =>
+    val src = broadcastSource.collect{ case (name,value) if name == w.name => value }
+      // Source.actorRef[Float](bufferSize = 0, OverflowStrategy.fail)
+      // .mapMaterializedValue( (a:ActorRef) => { sourceActors(w.name) = a; akka.NotUsed } )
+    w.name -> src
+  }.toMap
+
+  override def sinks:Map[String,Sink[Float,akka.NotUsed]] = widgets.map { case w =>
+    val sink = Sink.foreach( (f:Float) => {
+      sinkActors.foreach( _ ! (w.name,f))
+      // try{ oscSend.send(s"/$name", f) }
+      // catch{ case e:Exception => AppManager.close(config.io.name) }
+    }).mapMaterializedValue{ case _ => akka.NotUsed}
+    w.name -> sink
+  }.toMap
+
+  def save(){
     val path = "server/public/interfaces/"
     val pw = new PrintWriter(new FileOutputStream(path + name + ".html", false));
     pw.write(toHtml)
@@ -53,7 +89,7 @@ class Interface(val name:String) extends IO {
   }
 
   def toHtml() = {
-    Html.header +
+    htmlHeader +
     "panel = new Interface.Panel({ useRelativeSizesAndPositions:true })\n" +
     "panel.background = 'black'\n" +
     widgets.map{ 
@@ -62,14 +98,10 @@ class Interface(val name:String) extends IO {
 
     }.mkString("\n") + "\n" +
     s"panel.add( ${widgets.map(_.name).mkString(",")} )" +
-    Html.footer
+    htmlFooter
   }
 
-}
-
-
-object Html {
-  def header() = """
+    def htmlHeader() = """
 <html>
 <head>
   <script src="/assets/js/interface.js"></script>
@@ -79,10 +111,12 @@ object Html {
   <script>
   """
 
-  def footer() = """
+  def htmlFooter() = """
   </script>
 </body>
 </html>
   """
+
 }
+
 

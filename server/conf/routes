@@ -6,7 +6,7 @@
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
 GET     /ws                         controllers.HomeController.socket
-GET     /ijs/ws                     controllers.HomeController.ijsSocket
+GET     /ijs/:name/ws               controllers.HomeController.ijsSocket(name:String)
 
 # Serve interface.js files from /public folder to /ijs URL path
 GET     /ijs/*file                   controllers.Assets.at(path="/public/interfaces", file)
