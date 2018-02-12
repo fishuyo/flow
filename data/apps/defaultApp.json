@@ -1,0 +1,16 @@
+{
+	"io":{
+		"name":"defaultApp",
+		"sources":[],
+		"sinks":[
+			{"name":"mx", "type":"f"},
+			{"name":"my", "type":"f"},
+			{"name":"mz", "type":"f"},
+			{"name":"tx", "type":"f"},
+			{"name":"ty", "type":"f"},
+			{"name":"tz", "type":"f"},
+			{"name":"halt", "type":""}
+		]
+	},
+	"defaultMappings":["joystickNav"]
+}
