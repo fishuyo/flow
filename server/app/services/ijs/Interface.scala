@@ -32,7 +32,11 @@ object Interface {
 
   def apply(name:String) = interfaces.getOrElseUpdate(name, new InterfaceBuilder(name))
 
-  def create(name:String) = interfaces.getOrElseUpdate(name, new InterfaceBuilder(name))
+  def create(name:String) = {
+    val io = interfaces.getOrElseUpdate(name, new InterfaceBuilder(name))
+    io.widgets.clear
+    io
+  }
   
   def fromApp(app:AppIO) = {
     val io = app.config.io
@@ -40,7 +44,7 @@ object Interface {
     var sx = 0f
     var bx = 0f
     io.sinks.foreach {
-      case IOPort(name,"float") => ijs += Slider(name,sx,0f,0.1f,0.5f); sx += 0.1f
+      case IOPort(name,"f") => ijs += Slider(name,sx,0f,0.1f,0.5f); sx += 0.1f
       case IOPort(name,"bool") => ijs += Button(name,bx,0.55f,0.1f,0.1f); bx += 0.1f
       case IOPort(name,"") => ijs += Button(name,bx,0.55f,0.1f,0.1f); bx += 0.1f
       case _ => ()

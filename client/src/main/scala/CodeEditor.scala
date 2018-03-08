@@ -35,7 +35,7 @@ object CodeEditor {
       indentWithTabs(false).
       gutters(js.Array("errors")).
       extraKeys(js.Dictionary[js.Function1[Editor,Unit]](
-        "Tab" -> ((cm:Editor) => println("tab tab")),
+        //"Tab" -> ((cm:Editor) => println("tab tab")),
         "Cmd-S" -> ((cm:Editor) => save()),
         "Cmd-Enter" -> ((cm:Editor) => run())
       ))

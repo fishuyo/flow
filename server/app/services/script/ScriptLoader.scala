@@ -103,14 +103,18 @@ trait ScriptLoader {
         case obj => println(s"Unrecognized return value from script: $obj")
       }
     } catch { case e:Exception => 
-      loaded = false;
-      val cause = e.getCause
-      if(cause != null){
-        e.printStackTrace
-        val frame = cause.getStackTrace.find{ e => e.getMethodName.contains("init") }.get
+      e.printStackTrace 
+      val frame = e.getStackTrace.find{ e => e.getMethodName.contains("load") }.get
+      errors = Seq((frame.getLineNumber, "RuntimeError: " + e.toString))
+
+      // val cause = e.getCause
+      // if(cause != null){
+        // e.printStackTrace
+        // val frame = cause.getStackTrace.find{ e => e.getMethodName.contains(".load") }.get
         // println(s"$cause at line ${frame.getLineNumber}")
-        errors = Seq((frame.getLineNumber, "RuntimeError: " + cause.toString))
-      } else println("Exception in script: " + e); 
+        // errors = Seq((frame.getLineNumber, "RuntimeError: " + cause.toString))
+      // } else println("Exception in script: " + e); 
+      unload
     }
   }
 

@@ -26,12 +26,15 @@ class FlowScript extends Script {
   implicit val materializer = ActorMaterializer()
 
   implicit def source2io[T,M](src:Source[T,M]) = IOSource(src)
-  implicit val kill = KillSwitches.shared("hi")
+  implicit val kill = KillSwitches.shared("script")
 
   val Print = Sink.foreach(println(_:Any))
+
+  override def load(){
 """
 
   val footer = """
+  }
   override def unload(){
     kill.shutdown
   }
