@@ -75,7 +75,7 @@ object Main extends js.JSApp {
       </div> -->
 
       { CodeEditor.views.main.bind }
-      { ConsoleWindow.views.main.bind }
+      <!--{ ConsoleWindow.views.main.bind }-->
     </div>
   }
 

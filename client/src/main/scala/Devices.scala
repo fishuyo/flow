@@ -7,6 +7,13 @@ import com.thoughtworks.binding.Binding
 import com.thoughtworks.binding.Binding._
 import com.thoughtworks.binding.dom
 
+/* Devices Views */
+// TODO add different categories?
+// i.e.
+// 1. Connected Devices (ready to use)
+// 2. Implemented Devices
+// 2. Unknown Devices (unimplemented)
+
 object Devices {
 
   val devices = Vars.empty[Device]

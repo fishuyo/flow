@@ -19,6 +19,12 @@ case class Button(name:String, index:Int, mask:Int) extends SourceElement //rena
 case class ButtonEx(name:String, index:Int, value:Int) extends SourceElement //rename Value
 case class Analog(name:String, index:Int) extends SourceElement
 case class AnalogSigned(name:String, index:Int) extends SourceElement
+// ButtonBitMask(index = 0, mask = 0xFF)
+// ButtonEquals(index = 1, value = 0x128)
+// RawByteValue(index = 1)
+// Analog
+// case class MapFunction[T](index:Int, func: Byte=>T )
+
 
 sealed trait SinkElement { def name:String }
 case class Bitmask(name:String, index:Int, mask:Int ) extends SinkElement
@@ -54,12 +60,8 @@ object Device {
 }
 
 abstract class Device(val index:Int) extends IO {
-  // in IO now..
-  // implicit val system = System()
-  // implicit val materializer = ActorMaterializer()
 
   import concurrent.ExecutionContext.Implicits.global
-
   
   def productString:String
   val sourceElements:List[SourceElement]

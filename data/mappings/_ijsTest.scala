@@ -10,7 +10,7 @@ for(i <- 0 until ns)
   io += Slider(s"s$i", i*(1f/ns), 0, 1f/ns, 0.5)
 
 // Add 2 more sliders
-io += Slider("h1",0,0.5,0.5,0.25)
+io += Slider("h1", x=0, y=0.5, w=0.5, h=0.25)
 io += Slider("h2",0,0.75,0.5,0.25)
 
 // Add a 3 by 3 grid of buttons
@@ -33,8 +33,8 @@ io >> osc
 
 
 // Create an interface.js from an AppIO
-val app = AppManager("defaultApp")
-val io2 = Interface.fromApp(app)
-io2 >> app
-io2 >> io2
+// val app = AppManager("defaultApp")
+// val io2 = Interface.fromApp(app)
+// io2 >> app
+// io2 >> io2
 

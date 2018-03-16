@@ -59,7 +59,7 @@ sbt run
 - [Scala school](https://twitter.github.io/scala_school/)
 
 ## todos
-- implement IOs for: apple trackpad, leap, kinect, phasespace, vrpn, MIDI
+- implement IOs for: apple trackpad, leap, kinect, phasespace, vrpn, MIDI, tty
 - IO types Float, Int, String, Vec3f, etc.
 - Guiding implementation of additional hid devices
 - better Interface.js support
@@ -70,3 +70,5 @@ sbt run
 	- mapping folders?
 	- Stream Watch in browser
 	- Console view in browser
+
+- Zipping device streams examples (handling dropping elements in imbalanced stream rates)
