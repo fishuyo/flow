@@ -1,8 +1,17 @@
 
 
-# Flow (the new Device Server) Workshop
+# Flow (the new Device Server)
 
-Flow lets one create mappings between data streams of various [devices / interfaces] and [applications] over OpenSoundControl. Flow provides a web browser based interface for seeing available devices and implementing mapping scripts via a simplified [scala](https://www.scala-lang.org/) based [reactive stream](http://www.reactive-streams.org/) DSL built using [akka-stream](https://doc.akka.io/docs/akka/2.5.5/scala/stream/index.html).
+Flow lets one [create / live code] mappings between data streams of various [devices / interfaces] and [applications] over OpenSoundControl. Flow provides a web browser based interface for seeing available devices and implementing mapping scripts via a simplified [scala](https://www.scala-lang.org/) based [reactive stream](http://www.reactive-streams.org/) DSL built using [akka-stream](https://doc.akka.io/docs/akka/2.5.5/scala/stream/index.html).
+
+Flow is currently a work in progress and supports a limited set of [interfaces /devices], but will [eventually / soon] support: a wide range of HID devices, various motion tracking systems, VRPN data, MIDI, LeapMotion, Kinect.. etc. 
+
+Initially supported devices include: 
+- [Interface.js](https://github.com/charlieroberts/interface.js/) web guis
+- HID devices
+	- PS3 controllers
+	- Nintendo Joycon (partial support)
+	- (There will be an easy mechanism to add support for your own devices soon. For now see device implementations at: "flow/server/services/hid/devices/\*" )
 
 ## Getting started / Installation
 ### Requirements
@@ -38,25 +47,33 @@ sbt run
 
 ## Device IOs
 - if an implemented device is connected it will show up in the "Connected Devices" dropdown click on it to reveal its available Sources and Sinks.
-- See the "\_DeviceMapping" example.
+- See the "\_DeviceMapping" example mapping on how to map device data streams.
 
 ## OSC Sink
-- the OSC Sink is an easy way to send stream data over OSC
-- See the "\_OSCSink" example
+- the OSC Sink is an easy way to send data to you application over OSC
+- See the "\_OSCSink" example mapping on how to send device data over OSC
 
 ## Interface.js IOs
-- See "\_ijsTest" example
+- [Interface.js](https://github.com/charlieroberts/interface.js/) is a gui library for the browser. 
+- Flow currently has a simple DSL for generating simple interface.js guis of sliders and buttons, and wraps it as a Flow IO
+- See the "\_ijsTest" example mapping to see how to create and use interface.js in flow.
 
-## App IOs and allolib
-- App IOs require a config file to specify available Sources and Sinks for an "app"
-- This config file can be sent through an OSC handshake from the app
-- allolib's App class utilizes a default configuration to handshake and enable default joystick navigation mappings see "joystickNav" mapping.
+## App IOs
+- App IOs represent external applications that can receive and send data over OSC.
+- App IOs use json configuration files to communicate available [Sources / Sinks] (inputs and outputs)
+- Flow listens for application handshake messages through an API exposed over OSC.
+	- Currently the api is just for App hanshake messages, but future functionality will be added, such as remote configuration and creation of mapping scripts.
+	- Flow by default listens on port 12000 (to change this.. see application.conf..TODO)
+	- (See "flow/server/services/osc/OSCApi.scala")
+
+### Allolib
+- [allolib](https://github.com/AlloSphere-Research-Group/allolib) is a C++ framework for audio/visual applications
+- allolib's App class utilizes a default configuration to handshake and enable a default joystick navigation mapping. See "joystickNav" mapping script.
 - To customize your App's Sources and Sinks you can override the default config parameter and implement your own OSC handler.
 - Check out allolib's example in "allolib/examples/util/customDeviceServerApp.cpp"
 
-
 ## other resources
-- [Scala school](https://twitter.github.io/scala_school/)
+- [Scala school](https://twitter.github.io/scala_school/) - a useful introduction to the scala programming language
 
 ## todos
 - implement IOs for: apple trackpad, leap, kinect, phasespace, vrpn, MIDI, tty
