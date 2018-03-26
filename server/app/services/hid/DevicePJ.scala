@@ -69,6 +69,8 @@ abstract class Device(val index:Int) extends IO {
   val outputBuffer:Array[Byte] = Array[Byte]()
   val deviceType:DeviceType = Unknown
 
+  val kill = KillSwitches.shared("device")
+
   // Create a actor Source for device byte stream
   // using a broadcast hub to allow sending bytes to multiple consumers
   var byteStreamActor:Option[ActorRef] = None
@@ -76,7 +78,7 @@ abstract class Device(val index:Int) extends IO {
                                     .mapMaterializedValue( (a:ActorRef) => byteStreamActor = Some(a) )
   
   // materialize byteStream BroadcastHub which drops old messages  
-  val byteStream: Source[Array[Byte],akka.NotUsed] = byteStreamSource.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
+  val byteStream: Source[Array[Byte],akka.NotUsed] = byteStreamSource.via(kill.flow).toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
   //.watchTermination()((_, f) => {f.onComplete {  // for debugging
     // case t => println(t)
   // }; akka.NotUsed })
@@ -85,7 +87,7 @@ abstract class Device(val index:Int) extends IO {
   var openDevice:Option[HidDevice] = None
 
   // Materialize stream to handle connection events for device with matching productString and index
-  DeviceManager.connectionEvents.filter { case e =>
+  DeviceManager.connectionEvents.via(kill.flow).filter { case e =>
       e.index == index && 
       e.device.info.getProductString == productString
     }.runForeach {
@@ -116,6 +118,7 @@ abstract class Device(val index:Int) extends IO {
   def close() = {
     // println(s"Device closed: $productString")
     // openDevice.foreach(_.close) // never returns.. :(
+    kill.shutdown
     openDevice = None
   }
 
@@ -156,7 +159,7 @@ abstract class Device(val index:Int) extends IO {
     openDevice.foreach(_.setOutputReport(0, outputBuffer, outputBuffer.length))
   }).mapMaterializedValue{ case _ => akka.NotUsed}
 
-  val outputStream:Sink[(SinkElement,Float), akka.NotUsed] = MergeHub.source[(SinkElement,Float)].to(outputStreamSink).run()
+  val outputStream:Sink[(SinkElement,Float), akka.NotUsed] = MergeHub.source[(SinkElement,Float)].via(kill.flow).to(outputStreamSink).run()
 
   override def sinks:Map[String,Sink[Float,akka.NotUsed]] = {
     sinkElements.map { case e =>
