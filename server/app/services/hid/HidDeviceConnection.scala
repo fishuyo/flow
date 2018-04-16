@@ -20,6 +20,9 @@ import collection.mutable.HashMap
   */
 class HidDeviceConnection(val name:String, val index:Int) {
   
+  implicit val system = System()
+  implicit val materializer = ActorMaterializer()
+
   var openDevice:Option[HidDevice] = None
   var deviceType:DeviceType = Unknown // ???
   val kill = KillSwitches.shared("HidDeviceConnection") // ???
@@ -53,6 +56,8 @@ class HidDeviceConnection(val name:String, val index:Int) {
     case DeviceAttached(dev,idx) => open() //open and materialize mapping streams? only if mappings not empty???
     case DeviceDetached(dev,idx) => close() //close and close streams
   }
+
+  open()
 
   def open(){
     // open hid device and set input report listener to forward bytes to byteStreamActor

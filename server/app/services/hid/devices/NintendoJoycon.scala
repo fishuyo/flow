@@ -1,7 +1,7 @@
 package flow
 package hid
 
-abstract class Joycon(index:Int) extends Device(index){
+abstract class Joycon(name:String, index:Int) extends DeviceIO(name, index){
   override val deviceType = AnalogJoystick
 
 
@@ -40,8 +40,8 @@ abstract class Joycon(index:Int) extends Device(index){
 
 }
 
-class JoyconR(index:Int) extends Joycon(index) {
-  lazy val productString = "Joy-Con (R)"
+class JoyconR(index:Int) extends Joycon("Joy-Con (R)", index) {
+  // lazy val productString = "Joy-Con (R)"
   
   val sourceElements = List(
     Button("A", 1, 1),
@@ -67,8 +67,8 @@ class JoyconR(index:Int) extends Joycon(index) {
   )
 }
 
-class JoyconL(index:Int) extends Joycon(index) {
-  lazy val productString = "Joy-Con (L)"
+class JoyconL(index:Int) extends Joycon("Joy-Con (L)", index) {
+  // lazy val productString = "Joy-Con (L)"
   
   val sourceElements = List(
     Button("down", 1, 1),

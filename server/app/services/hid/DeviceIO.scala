@@ -40,11 +40,12 @@ sealed trait Joystick extends DeviceType
 case object AnalogJoystick extends Joystick
 case object DualAnalogJoystick extends Joystick 
 
-abstract class DeviceIO(val device:HidDeviceConnection) extends IO {
+abstract class DeviceIO(val name:String, val index:Int) extends IO {
 
   import concurrent.ExecutionContext.Implicits.global
   
-  def productString:String
+  val device:HidDeviceConnection = DeviceManager.getDeviceConnection(name,index)
+  // def productString:String
   val sourceElements:List[SourceElement]
   val sinkElements:List[SinkElement] = List()
   val outputBuffer:Array[Byte] = Array[Byte]()
