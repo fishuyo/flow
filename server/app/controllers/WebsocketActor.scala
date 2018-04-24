@@ -47,14 +47,21 @@ class WebsocketActor(out: ActorRef) extends Actor {
   }
 
   def sendDeviceList() = {
+    val devices = DeviceManager.getDevices()
     // val devices = DeviceManager.getRegisteredDevices()
-    // val seq = devices.collect { case ds if ds.length > 0 => 
-    //   val di = ds.head.info
-    //   // TODO: assure broadcastHub in Device cleaned up..
-    //   val d = hid.Device(di, 99999) // temporary device, absurd index to prevent actually opening a device..
-    //   Device(IOConfig(di.getProductString, d.sourceElements.map((e) => IOPort(e.name,"")), Seq()), ds.length) 
-    // }.toSeq
-    // out ! Json.toJson(DeviceList(seq)).toString
+    val seq = devices.collect { case ds if ds.length > 0 => 
+      val di = ds.head.info
+      val d = flow.Device(di.getProductString, -1) // temporary device, negative index
+      protocol.Device(
+        IOConfig(
+          di.getProductString,
+          d.sources.map{ case (n,s) => IOPort(n,"")}.toSeq,
+          d.sinks.map{ case (n,s) => IOPort(n,"")}.toSeq
+        ),
+        ds.length
+      ) 
+    }.toSeq
+    out ! Json.toJson(DeviceList(seq)).toString
   }
 
   def sendAppList() = {

@@ -39,6 +39,7 @@ object DeviceManager {
   implicit val materializer = ActorMaterializer()
 
   // map of connected devices keyed on product string
+  private val infoLock = new Object
   private val availableDevices = HashMap[String,ListBuffer[HidDeviceInfoW]]()
   private val deviceConnections = HashMap[String,ListBuffer[HidDeviceConnection]]()
   
@@ -50,19 +51,15 @@ object DeviceManager {
   val connectionEvents = connectionEventSource.toMat(BroadcastHub.sink)(Keep.right).run() 
   connectionEvents.runWith(Sink.ignore)  // default consumer keeps stream running
 
-  def getDevices() = {
-    this.synchronized {
-      availableDevices.values
-    }
+  def getDevices() = infoLock.synchronized {
+    availableDevices.values
   }
 
-  def getRegisteredDevices() = {
-    this.synchronized {
-      availableDevices.filter { case (k,v) => Device.registeredDevices.contains(k) }.values
-    }
+  def getRegisteredDevices() = infoLock.synchronized {
+    availableDevices.filter { case (k,v) => Device.registeredDevices.contains(k) }.values
   }
 
-  def getDeviceInfo(name:String, index:Int=0) = this.synchronized {
+  def getDeviceInfo(name:String, index:Int=0) = infoLock.synchronized {
     getInfo(name,index)
   }
   
@@ -74,21 +71,29 @@ object DeviceManager {
     } else None
   }
 
-  def getDeviceConnection(name:String, index:Int) = {
+  def getDeviceConnection(name:String, index:Int) = this.synchronized {
     val dcs = deviceConnections.getOrElseUpdate(name, ListBuffer[HidDeviceConnection]())
     dcs.find(_.index == index) match {
-      case Some(dc) => dc
+      case Some(dc) =>
+        println(s"Using existing device connection: $name $index")
+        dc
       case None =>        
+        // println(s"New device connection: $name $index")
         val dc = new HidDeviceConnection(name, index)
-        dcs += dc 
+        if(index >= 0){
+          dcs += dc 
+          openDeviceConnection(dc)
+        } else {
+          dc.close
+        }
         dc
     }
   }
   
-  def openDeviceConnection(dc:HidDeviceConnection) = this.synchronized {
+  def openDeviceConnection(dc:HidDeviceConnection) = infoLock.synchronized {
     val option = getInfo(dc.name, dc.index)
-    println(option)
     option.foreach { case di =>
+      println(s"Opening device connection: ${dc.name} ${dc.index}")
       val dev = PureJavaHidApi.openDevice(di)
       dev.setInputReportListener( new InputReportListener(){
         override def onInputReport(source:HidDevice, id:Byte, data:Array[Byte], len:Int){
@@ -100,7 +105,7 @@ object DeviceManager {
   }
 
   def closeDeviceConnection(dc:HidDeviceConnection) = {
-
+    // println(s"TODO close device connection: ${dc.name} ${dc.index}")
   }
 
   private def getAttachedDevices():List[HidDeviceInfo] = PureJavaHidApi.enumerateDevices.asScala.toList
@@ -125,7 +130,7 @@ object DeviceManager {
   }
 
   private def poll(){
-    this.synchronized {
+    infoLock.synchronized {
       val deviceList = getAttachedDevices().map(new HidDeviceInfoW(_))
       val removed = lastDeviceList.diff(deviceList)
       val added = deviceList.diff(lastDeviceList)

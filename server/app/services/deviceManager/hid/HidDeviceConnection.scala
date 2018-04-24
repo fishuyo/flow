@@ -58,7 +58,7 @@ class HidDeviceConnection(val name:String, val index:Int) {
     case DeviceDetached(dev,idx) => close() //close and close streams
   }
 
-  open()
+  //open()
 
   def open(){
     // open hid device and set input report listener to forward bytes to byteStreamActor
@@ -78,7 +78,7 @@ class HidDeviceConnection(val name:String, val index:Int) {
     DeviceManager.closeDeviceConnection(this)
     // println(s"Device closed: $name")
     // openDevice.foreach(_.close) // never returns.. :(
-    // kill.shutdown
+    kill.shutdown
     // openDevice = None
   }
 
