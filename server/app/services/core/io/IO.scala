@@ -15,11 +15,11 @@ import collection.mutable.HashMap
 /**
   * The IO object holds available io nodes, connected devices.. etc.
   */
-object IO {
-  val ios = HashMap[String,IO]()
-  def apply(name:String) = ios(name)
-  def update(name:String, io:IO) = ios(name) = io
-}
+// object IO {
+//   val ios = HashMap[String,IO]()
+//   def apply(name:String) = ios(name)
+//   def update(name:String, io:IO) = ios(name) = io
+// }
 
 /**
   * An IO represents a device or abstract node, that can generate data streams, and/or receive data streams.
@@ -27,18 +27,26 @@ object IO {
   * The wrapper also provides a custom DSL for mapping IOs to other IOs
   */
 trait IO extends Dynamic {
-  // available - ready for use - on instantiation from connection callback or something
-  // open/active/streaming
+
+  // For default type inference on selectDynamic
+  trait DefaultsTo[Type, Default]
+  object DefaultsTo {
+    implicit def defaultDefaultsTo[T]: DefaultsTo[T, T] = null
+    implicit def fallback[T, D]: DefaultsTo[T, D] = null  
+  }
+
   implicit val system = System()
   implicit val materializer = ActorMaterializer()
 
-  def sources:Map[String,Source[Float,akka.NotUsed]] = Map[String,Source[Float,akka.NotUsed]]()
-  def sinks:Map[String,Sink[Float,akka.NotUsed]] = Map[String,Sink[Float,akka.NotUsed]]()
+  def sources:Map[String,Source[Any,akka.NotUsed]] = Map[String,Source[Any,akka.NotUsed]]()
+  def sinks:Map[String,Sink[Any,akka.NotUsed]] = Map[String,Sink[Any,akka.NotUsed]]()
+
+  // def typedSources = Map[String, Map[String, Source[Any,akka.NotUsed]]]()
   
   def source(name:String) = sources.get(name)
   def sink(name:String) = sinks.get(name)
 
-  def selectDynamic(name:String) = sources(name)
+  def selectDynamic[T](name:String)(implicit default:DefaultsTo[T,Float]) = sources(name).asInstanceOf[Source[T,akka.NotUsed]]
 
   def destutter = Flow[Float].statefulMapConcat(() => {
     var last:Float = 0f

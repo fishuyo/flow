@@ -1,7 +1,7 @@
 package flow
 package hid
 
-abstract class Joycon(name:String, index:Int) extends DeviceIO(name, index){
+abstract class Joycon(name:String, index:Int) extends HidDeviceIO(name, index){
   override val deviceType = AnalogJoystick
 
 

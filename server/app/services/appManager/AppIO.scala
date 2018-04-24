@@ -51,14 +51,14 @@ class AppIO(val config:AppConfig) extends IO {
   // sinkPorts ++= config.io.sinks
 
 	
-  override def sources:Map[String,Source[Float,akka.NotUsed]] = config.io.sources.map { case IOPort(name,types) =>
-    val src = Source.actorRef[Float](bufferSize = 0, OverflowStrategy.fail)
+  override def sources:Map[String,Source[Any,akka.NotUsed]] = config.io.sources.map { case IOPort(name,types) =>
+    val src = Source.actorRef[Any](bufferSize = 0, OverflowStrategy.fail)
       .mapMaterializedValue( (a:ActorRef) => { sourceActors(name) = a; akka.NotUsed } )
     name -> src
   }.toMap
 
-  override def sinks:Map[String,Sink[Float,akka.NotUsed]] = config.io.sinks.map { case IOPort(name,types) =>
-    val sink = Sink.foreach( (f:Float) => {
+  override def sinks:Map[String,Sink[Any,akka.NotUsed]] = config.io.sinks.map { case IOPort(name,types) =>
+    val sink = Sink.foreach( (f:Any) => {
       try{ oscSend.send(s"/$name", f) }
       catch{ case e:Exception => AppManager.close(config.io.name) }
     }).mapMaterializedValue{ case _ => akka.NotUsed}
@@ -66,7 +66,7 @@ class AppIO(val config:AppConfig) extends IO {
   }.toMap
 
   val handler:OSC.OSCHandler = {
-    case (Message(name:String, value:Float), addr) => 
+    case (Message(name:String, value:Any), addr) => 
       // sourceNames += name
       // XXX need to strip /s?
       sourceActors.get(name).foreach(_ ! value)

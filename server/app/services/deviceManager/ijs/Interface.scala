@@ -69,15 +69,15 @@ class InterfaceBuilder(val name:String) extends IO {
   // val sourceActors = HashMap[String,ActorRef]()
   var sinkActors = ListBuffer[ActorRef]()
   
-  override def sources:Map[String,Source[Float,akka.NotUsed]] = widgets.map { case w =>
+  override def sources:Map[String,Source[Any,akka.NotUsed]] = widgets.map { case w =>
     val src = broadcastSource.collect{ case (name,value) if name == w.name => value }
       // Source.actorRef[Float](bufferSize = 0, OverflowStrategy.fail)
       // .mapMaterializedValue( (a:ActorRef) => { sourceActors(w.name) = a; akka.NotUsed } )
     w.name -> src
   }.toMap
 
-  override def sinks:Map[String,Sink[Float,akka.NotUsed]] = widgets.map { case w =>
-    val sink = Sink.foreach( (f:Float) => {
+  override def sinks:Map[String,Sink[Any,akka.NotUsed]] = widgets.map { case w =>
+    val sink = Sink.foreach( (f:Any) => {
       sinkActors.foreach( _ ! (w.name,f))
       // try{ oscSend.send(s"/$name", f) }
       // catch{ case e:Exception => AppManager.close(config.io.name) }

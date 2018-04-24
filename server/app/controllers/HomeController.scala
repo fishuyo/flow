@@ -20,6 +20,8 @@ class HomeController @Inject()(cc: ControllerComponents)(implicit system: ActorS
 
   // Initialize services here, because I don't want to change everything to use play's DI
   // works since HomeController a Singleton
+  Hack.unsafeAddDir("lib")
+  Hack.unsafeAddDir("../lib")
   System() = system
   OSCApi.listen(12000) 
   DeviceManager.startPolling()

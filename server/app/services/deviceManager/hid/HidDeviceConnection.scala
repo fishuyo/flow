@@ -11,6 +11,7 @@ import purejavahidapi._
 import akka.actor._
 import akka.stream._
 import akka.stream.scaladsl._
+import concurrent.ExecutionContext.Implicits.global
 
 import collection.mutable.HashMap
 
@@ -35,9 +36,9 @@ class HidDeviceConnection(val name:String, val index:Int) {
   
   // materialize BroadcastHub for dynamic usage as source, which drops previous frame
   val source:Source[Array[Byte],akka.NotUsed] = byteStreamSource.via(kill.flow).toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
-  //.watchTermination()((_, f) => {f.onComplete {  // for debugging
-    // case t => println(t)
-  // }; akka.NotUsed })
+  .watchTermination()((_, f) => {f.onComplete {  // for debugging
+    case t => println(s"Device source terminated: $name $index: $t")
+  }; akka.NotUsed })
 
   // sink sends bytes to open HidDevice
   private val byteStreamSink:Sink[Array[Byte],akka.NotUsed] = Sink.foreach( (bytes:Array[Byte]) => {
