@@ -5,6 +5,9 @@ import akka.actor._
 import akka.stream._
 import akka.stream.scaladsl._
 
+import de.sciss.osc.Message
+
+import collection.mutable.HashMap
 
 class OSCSink extends OSCSend with IO {
   var prefix = ""
