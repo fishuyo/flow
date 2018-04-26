@@ -10,3 +10,24 @@ class OSCSink extends OSCSend with IO {
   var prefix = ""
   override def sink(name:String) = Some(Sink.foreach(send(prefix + "/" + name, _:Any)).mapMaterializedValue(x => akka.NotUsed))
 }
+
+///XXX hmm
+class OSCSource extends IO {
+  var prefix = ""
+  val sourceActors = HashMap[String,ActorRef]()
+  override def source(name:String) = Some(
+    Source.actorRef[Any](bufferSize = 0, OverflowStrategy.fail)
+      .mapMaterializedValue( (a:ActorRef) => { sourceActors(name) = a; akka.NotUsed } )
+  )
+  
+  val handler:OSC.OSCHandler = {
+    case (Message(name:String, value:Any), addr) => 
+      sourceActors.get(name).foreach(_ ! value)
+    case msg => println(s"Unhandled msg in OSCIO: $msg")  
+  }
+
+  def listen(port:Int) = {
+    OSCManager() ! OSCManagerActor.Unbind(port, handler) //XXX find better way to make this work
+    OSCManager() ! OSCManagerActor.Bind(port, handler)
+  }
+}
