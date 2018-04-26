@@ -78,6 +78,7 @@ case class IOSource[T,M](src:Source[T,M]){
   implicit val materializer = ActorMaterializer()
 
   def >>[U >: T,N](sink:Sink[U,N])(implicit kill:SharedKillSwitch) = src.via(kill.flow).runWith(sink)
+  def >>[U >: T,N](sink:Option[Sink[U,N]])(implicit kill:SharedKillSwitch) = src.via(kill.flow).runWith(sink.get)
 }
 
 
