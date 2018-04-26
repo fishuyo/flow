@@ -112,6 +112,7 @@ trait OSCSender {
   def send(address:String, value:Any){
     val msg = value match{
       case v:Float => Message(address,v)
+      case v:Seq[Float] => Message(address,v:_*)
       case v:Double => Message(address,v)
       case v:Int => Message(address,v)
       case v:Long => Message(address,v.toInt)
@@ -121,9 +122,10 @@ trait OSCSender {
     send(msg)
   }
 
-  def send(address:String, f1:Float, f2:Float){ send(Message(address,f1,f2)) }
-  def send(address:String, f1:Float, f2:Float, f3:Float){ send(Message(address,f1,f2,f3)) }
-  def send(address:String, f1:Float, f2:Float, f3:Float, f4:Float){ send(Message(address,f1,f2,f3,f4)) }
+  def send(address:String, fs:Float*){ send(Message(address,fs:_*)) }
+  // def send(address:String, f1:Float, f2:Float){ send(Message(address,f1,f2)) }
+  // def send(address:String, f1:Float, f2:Float, f3:Float){ send(Message(address,f1,f2,f3)) }
+  // def send(address:String, f1:Float, f2:Float, f3:Float, f4:Float){ send(Message(address,f1,f2,f3,f4)) }
   def send(address:String, s1:String, s2:String){ send(Message(address,s1,s2)) }
 
   /** Connect and send message */

@@ -18,13 +18,16 @@ val (nx,ny) = (3,3)
 for(x <- 0 until nx; y <- 0 until ny)
   io += Button(s"b$x$y", 0.5+x*(0.5/nx), 0.5+y*(0.5/ny), 0.5/nx, 0.5/ny)
 
+// 2D slider
+// io += XY("xy",0.5,0.5,0.5,0.5)
+
 // Generate interface.js html file
 // now available at --> localhost:9000/ijs/test.html
 io.save()
 
 // stream interface.js io to itself
 // effectively synchronizing multiple instances of the interface
-io >> io
+// io >> io
 
 // also make an OSCSink and stream io over osc
 val osc = new OSCSink

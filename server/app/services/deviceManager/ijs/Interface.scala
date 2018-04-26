@@ -25,6 +25,7 @@ sealed trait Widget{
 }
 case class Slider(name:String,x:Float,y:Float,w:Float,h:Float) extends Widget
 case class Button(name:String, x:Float,y:Float,w:Float,h:Float) extends Widget
+case class XY(name:String, x:Float,y:Float,w:Float,h:Float) extends Widget
 
 object Interface {
 
@@ -62,9 +63,9 @@ class InterfaceBuilder(val name:String) extends IO {
   def +=(w:Widget) = widgets += w
 
   var sourceActor:Option[ActorRef] = None
-  val _src = Source.actorRef[(String,Float)](bufferSize = 0, OverflowStrategy.fail)
+  val _src = Source.actorRef[(String,Any)](bufferSize = 0, OverflowStrategy.fail)
                                     .mapMaterializedValue( (a:ActorRef) => sourceActor = Some(a) )
-  val broadcastSource: Source[(String,Float),akka.NotUsed] = _src.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
+  val broadcastSource: Source[(String,Any),akka.NotUsed] = _src.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
 
   // val sourceActors = HashMap[String,ActorRef]()
   var sinkActors = ListBuffer[ActorRef]()
@@ -99,6 +100,7 @@ class InterfaceBuilder(val name:String) extends IO {
     widgets.map{ 
       case Slider(name,x,y,w,h) => s"""$name = new Interface.Slider({ name:"$name", label:"$name", bounds: [$x,$y,$w,$h] ${if(w>h) ",isVertical:false" else ""} })"""
       case Button(name,x,y,w,h) => s"""$name = new Interface.Button({ name:"$name", label:"$name", mode:"momentary", bounds: [$x,$y,$w,$h] })"""
+      case XY(name,x,y,w,h) => s"""$name = new Interface.XY({ name:"$name", label:"$name", childWidth:15, numChildren:1, usePhysics:false, bounds: [$x,$y,$w,$h] })"""
 
     }.mkString("\n") + "\n" +
     s"panel.add( ${widgets.map(_.name).mkString(",")} )" +

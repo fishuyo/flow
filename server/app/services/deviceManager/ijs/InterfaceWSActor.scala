@@ -33,12 +33,14 @@ class InterfaceWSActor(out:ActorRef, name:String, request:String) extends Actor 
         case Msg("osc", addr, tt, params) => 
           // println(s"OSC $addr $tt $params")
           // io.sourceActors.get(addr.tail).foreach( _ ! params.head )
-          io.sourceActor.foreach(_ ! (addr.tail, params.head))
+          io.sourceActor.foreach(_ ! (addr.tail, params))
         case m => println(m)
       }
 
     case (name:String, value:Float) => 
       out ! Json.toJson(Msg("osc", "/"+name, "f", Seq(value))).toString
+    case (name:String, value:Seq[Float]) => 
+      out ! Json.toJson(Msg("osc", "/"+name, "f"*value.length, value)).toString
 
   }
 }
