@@ -23,9 +23,11 @@ sealed trait Widget{
   def w:Float
   def h:Float
 }
+// config:(String,Any)*
 case class Slider(name:String,x:Float,y:Float,w:Float,h:Float) extends Widget
 case class Button(name:String, x:Float,y:Float,w:Float,h:Float) extends Widget
 case class XY(name:String, x:Float,y:Float,w:Float,h:Float) extends Widget
+case class Value(name:String, x:Float,y:Float,w:Float,h:Float) extends Widget
 
 object Interface {
 
@@ -101,6 +103,7 @@ class InterfaceBuilder(val name:String) extends IO {
       case Slider(name,x,y,w,h) => s"""$name = new Interface.Slider({ name:"$name", label:"$name", bounds: [$x,$y,$w,$h] ${if(w>h) ",isVertical:false" else ""} })"""
       case Button(name,x,y,w,h) => s"""$name = new Interface.Button({ name:"$name", label:"$name", mode:"momentary", bounds: [$x,$y,$w,$h] })"""
       case XY(name,x,y,w,h) => s"""$name = new Interface.XY({ name:"$name", label:"$name", childWidth:15, numChildren:1, usePhysics:false, bounds: [$x,$y,$w,$h] })"""
+      case Value(name,x,y,w,h) => s"""$name = new Interface.Label({ name:"$name", value:0, bounds: [$x,$y,$w,$h], vAlign:"middle", hAlign:"center" })"""
 
     }.mkString("\n") + "\n" +
     s"panel.add( ${widgets.map(_.name).mkString(",")} )" +

@@ -33,15 +33,18 @@ class InterfaceWSActor(out:ActorRef, name:String, request:String) extends Actor 
         case Msg("osc", addr, tt, params) => 
           // println(s"OSC $addr $tt $params")
           // io.sourceActors.get(addr.tail).foreach( _ ! params.head )
-          io.sourceActor.foreach(_ ! (addr.tail, params))
+          if(params.length == 1) io.sourceActor.foreach(_ ! (addr.tail, params.head))
+          else io.sourceActor.foreach(_ ! (addr.tail, params))
         case m => println(m)
       }
 
     case (name:String, value:Float) => 
       out ! Json.toJson(Msg("osc", "/"+name, "f", Seq(value))).toString
+    case (name:String, value:Int) => 
+      out ! Json.toJson(Msg("osc", "/"+name, "f", Seq(value.toFloat))).toString
     case (name:String, value:Seq[Float]) => 
       out ! Json.toJson(Msg("osc", "/"+name, "f"*value.length, value)).toString
-
+    case m => println(s"InterfaceWSActor unhandled msg: $m")
   }
 }
 // class InterfaceOSCActor(out:ActorRef, config:OSCConfig, request:String) extends Actor with ActorLogging {
