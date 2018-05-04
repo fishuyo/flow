@@ -2656,6 +2656,36 @@ Interface.XY = function() {
       this.ctx.closePath();
       this.ctx.restore();
     },
+
+    setValue : function(x, yt, index) {
+      var indx = index | 0;
+      var trgt = yt || "x";
+      if(typeof(trgt) == "string"){
+        this.values[ indx ][trgt] = x
+        this._values[ indx ][trgt] = x
+      } else {
+        this.values[ indx ] = {x:x, y:yt}
+        this._values[ indx ] = {x:x, y:yt}
+      }
+      this.updateChildren()
+      this.refresh()
+    },
+
+    updateChildren : function() {
+      var width   = this._width(),
+          height  = this._height()
+
+      var range = this.max - this.min;
+          
+      for(var i = 0; i < this.children.length; i++) {
+        var child = this.children[i];
+        
+        var x = (this.values[child.id].x - this.min) / range;
+        var y = (this.values[child.id].y - this.min) / range;
+        this.children[i].x = x*width;
+        this.children[i].y = y*height;    
+      }
+    },
     
     changeValue : function( touch, xOffset, yOffset ) {
       if(this.hasFocus || !this.requiresFocus) {
