@@ -16,7 +16,7 @@ import com.fishuyo.seer.spatial._
 import com.fishuyo.seer.util._
 
 import flow._
-import flow.hid._
+//import flow.hid._
 import flow.ijs._
 import flow.script._
 

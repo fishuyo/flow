@@ -77,6 +77,8 @@ case class IOSource[T,M](src:Source[T,M]){
   implicit val system = System()
   implicit val materializer = ActorMaterializer()
 
+  def orLast = src.via(Flow[T].expand(Iterator.continually(_)))
+  // def orLast(initial:T) = src.via(Flow[T].extrapolate(Iterator.continually(_),Some(initial)))
   def >>[U >: T,N](sink:Sink[U,N])(implicit kill:SharedKillSwitch) = src.via(kill.flow).runWith(sink)
   def >>[U >: T,N](sink:Option[Sink[U,N]])(implicit kill:SharedKillSwitch) = src.via(kill.flow).runWith(sink.get)
 }
