@@ -11,6 +11,7 @@ import java.io.FileOutputStream
 import akka.actor._
 import akka.stream._
 import akka.stream.scaladsl._
+import concurrent.ExecutionContext.Implicits.global
 
 import collection.mutable.ListBuffer
 import collection.mutable.HashMap
@@ -68,7 +69,9 @@ class InterfaceBuilder(val name:String) extends IO {
   val _src = Source.actorRef[(String,Any)](bufferSize = 0, OverflowStrategy.fail)
                                     .mapMaterializedValue( (a:ActorRef) => sourceActor = Some(a) )
   val broadcastSource: Source[(String,Any),akka.NotUsed] = _src.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
-
+    .watchTermination()((_, f) => {f.onComplete {  // for debugging
+      case t => println(s"Interface source terminated: $name: $t")
+    }; akka.NotUsed })
   // val sourceActors = HashMap[String,ActorRef]()
   var sinkActors = ListBuffer[ActorRef]()
   

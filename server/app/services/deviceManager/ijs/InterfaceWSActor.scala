@@ -13,6 +13,15 @@ import akka.stream.scaladsl._
 
 object InterfaceWSActor {
 
+  type ¬[A] = A => Nothing
+  type ∨[T, U] = ¬[¬[T] with ¬[U]]
+  type ¬¬[A] = ¬[¬[A]]
+  type |∨|[T, U] = { type λ[X] = ¬¬[X] <:< (T ∨ U) }
+  // def size[T : (Int |∨| String)#λ](t : T) = t match {
+  //   case i : Int => i
+  //   case s : String => s.length
+  // }
+
   case class Msg(`type`:String, address:String, typetags:String, parameters:Seq[Float])
   implicit val msgFormat = oformat[Msg]()
 
@@ -44,6 +53,8 @@ class InterfaceWSActor(out:ActorRef, name:String, request:String) extends Actor 
       out ! Json.toJson(Msg("osc", "/"+name, "f", Seq(value.toFloat))).toString
     case (name:String, value:Seq[Float]) => 
       out ! Json.toJson(Msg("osc", "/"+name, "f"*value.length, value)).toString
+    case (name:String, value:(Float,Float)) =>
+      out ! Json.toJson(Msg("osc", "/"+name, "ff", Seq(value._1, value._2))).toString
     case m => println(s"InterfaceWSActor unhandled msg: $m")
   }
 }
