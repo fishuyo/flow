@@ -10,8 +10,8 @@ for(i <- 0 until ns)
   io += Slider(s"s$i", i*(1f/ns), 0, 1f/ns, 0.5)
 
 // Add 2 more sliders
-io += Slider("h1", x=0, y=0.5, w=0.5, h=0.25)
-io += Slider("h2",0,0.75,0.5,0.25)
+io += Slider("h1", x=0, y=0.5, w=0.5, h=0.25, min=0.0, max=10.0)
+io += RangeSlider("h2",0,0.75,0.5,0.25)
 
 // Add a 3 by 3 grid of buttons
 val (nx,ny) = (3,3)

@@ -3793,13 +3793,28 @@ Interface.Range = function() {
         }
 
         var range = this.max - this.min
-      	if(Math.abs( value - this._values[0]) < Math.abs( value - this._values[1])) {
+        var center = (this._values[0]+this._values[1]) / 2
+        var d0 = Math.abs(value - this._values[0])
+        var d1 = Math.abs(value - this._values[1])
+        var dc = Math.abs(value - center)
+        var min = Math.min(dc,d1,d0)
+      	if(min == d0){
           this._values[0] = value;
       		this.values[0] = this.min + range * value;
-      	}else{
+      	}else if(min == d1){
           this._values[1] = value;
       		this.values[1] = this.min + range * value;
-      	}
+      	}else {
+          var v0 = value + (this._values[0]-center)
+          var v1 = value + (this._values[1]-center)
+          if(v0 >= 0 && v1 <= 1){
+            this._values[0] = v0
+            this._values[1] = v1
+            this.values[0] = this.min + range*v0
+            this.values[1] = this.min + range*v1
+          }
+          // console.log(v0,v1)
+        }
         
         this.refresh();
         

@@ -106,7 +106,10 @@ trait OSCSender {
         endBundle()
         startBundle()
       }
-    } else out ! msg
+    } else{ 
+      try { out ! msg }
+      catch { case e:Exception => () }//println(e) }
+    }
   }
 
   def send(address:String, value:Any){
