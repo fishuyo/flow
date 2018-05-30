@@ -30,6 +30,7 @@ case class Button(name:String, x:Float,y:Float,w:Float,h:Float,mode:String="mome
 case class XY(name:String, x:Float,y:Float,w:Float,h:Float) extends Widget
 case class Value(name:String, x:Float,y:Float,w:Float,h:Float) extends Widget
 case class RangeSlider(name:String, x:Float,y:Float,w:Float,h:Float,min:Float=0f,max:Float=1f) extends Widget
+case class Menu(name:String, x:Float,y:Float,w:Float,h:Float, options:Seq[Any]) extends Widget
 
 object Interface {
 
@@ -109,6 +110,7 @@ class InterfaceBuilder(val name:String) extends IO {
       case XY(name,x,y,w,h) => s"""$name = new Interface.XY({ name:"$name", label:"$name", childWidth:15, numChildren:1, usePhysics:false, bounds: [$x,$y,$w,$h] })"""
       case Value(name,x,y,w,h) => s"""$name = new Interface.Label({ name:"$name", value:0, bounds: [$x,$y,$w,$h], vAlign:"middle", hAlign:"center" })"""
       case RangeSlider(name,x,y,w,h,min,max) => s"""$name = new Interface.Range({ name:"$name", bounds: [$x,$y,$w,$h], min:$min, max:$max })"""
+      case Menu(name,x,y,w,h,opts) => s"""$name = new Interface.Menu({ name:"$name", bounds: [$x,$y,$w,$h], options:[${opts.map{case s:String => s"'$s'"; case a => a}.mkString(",")}] })"""
 
     }.mkString("\n") + "\n" +
     s"panel.add( ${widgets.map(_.name).mkString(",")} )" +

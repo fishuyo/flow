@@ -46,7 +46,7 @@ object UnmanagedLibs {
   }
 
   def getOpenNI2(dest:File){
-    if(dest.exists) return
+    if(new File(dest,"org.openni.jar").exists) return
     val zipFile = download("openni2.zip")
     val lib = file("lib")
     unzip(zipFile, dest, matchfile("org.openni.jar"))

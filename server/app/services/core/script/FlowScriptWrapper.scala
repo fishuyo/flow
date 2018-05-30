@@ -28,6 +28,8 @@ class FlowScript extends Script {
   implicit def source2io[T,M](src:Source[T,M]) = IOSource(src)
   implicit val kill = KillSwitches.shared("script")
 
+  implicit def d2f(d:Double) = d.toFloat
+
   val Print = Sink.foreach(println(_:Any))
 
   override def load(){

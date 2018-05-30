@@ -4,14 +4,18 @@ import ijs._
 // Create an interface.js io named test
 val io = Interface.create("test")
 
-// Add 20 sliders
-val ns = 20
+// Add 10 sliders
+val ns = 10
 for(i <- 0 until ns)
-  io += Slider(s"s$i", i*(1f/ns), 0, 1f/ns, 0.5)
+  io += Slider(s"s$i", i*(0.5/ns), 0, 0.5/ns, 0.5)
 
 // Add 2 more sliders
 io += Slider("h1", x=0, y=0.5, w=0.5, h=0.25, min=0.0, max=10.0)
 io += RangeSlider("h2",0,0.75,0.5,0.25)
+
+// Add Menu
+io += Menu("menu", 0.6, 0.2, 0.3, 0.1, Seq(0.0,1.0,2.0))
+io.menu >> Print
 
 // Add a 3 by 3 grid of buttons
 val (nx,ny) = (3,3)
@@ -33,7 +37,6 @@ io.save()
 val osc = new OSCSink
 osc.connect("localhost", 8000)
 io >> osc
-
 
 // Create an interface.js from an AppIO
 // val app = AppManager("defaultApp")

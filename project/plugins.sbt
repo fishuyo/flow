@@ -9,7 +9,8 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.13")
 
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.5")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.17")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.23")
+addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "0.4.0")
 
 // addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.0-M1")
 

@@ -10,6 +10,8 @@ socketString = 'ws://' + window.location.host + '/' + window.location.pathname.s
 
 Interface.Socket = new WebSocket( socketString );
 
+setInterval(function(){Interface.Socket.send("keepalive")}, 3000)
+
 Interface.Socket.onmessage = function (event) {
   var data = JSON.parse( event.data )
   if( data.type === 'osc' ) {

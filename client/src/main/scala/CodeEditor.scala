@@ -5,6 +5,7 @@ import protocol._
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation._
+import scala.scalajs.js.Dynamic.global
 import org.scalajs.dom.document
 import org.scalajs.dom.window
 import org.scalajs.dom.console
@@ -18,7 +19,7 @@ import org.denigma.codemirror.extensions.EditorConfig
 import org.denigma.codemirror._
 
 import org.querki.jquery._
-import com.definitelyscala.materializecss.{JQuery => JQ}
+// import com.definitelyscala.materializecss.{JQuery => JQ}
 
 object CodeEditor {
 
@@ -121,7 +122,7 @@ object CodeEditor {
       var info = editor.lineInfo(line)
       editor.setGutterMarker(line, "errors", makeMarker(msg));
     }
-    $(".tooltipped").asInstanceOf[JQ].tooltip()
+    global.jQuery(".tooltipped").tooltip()
   }
 
 

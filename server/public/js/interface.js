@@ -255,7 +255,7 @@ Interface.Panel = function() {
     },
     
     mouseEvent : function(e) {
-      if(self.active) {
+      if(self.active && e.target == self.canvas) {  //fixes mouse events on dropdown element to not change unwanted widgets
         if(e.type === 'mousedown') {
           Interface.mouseDown = true;
         }else if(e.type === 'mouseup') {
@@ -3017,7 +3017,7 @@ Interface.Menu = function() {
           var oldValue = self.value;
           self.value = self.element.val();
           self.sendTargetMessage();
-          self.onvaluechange(self.value, oldValue);
+          if(self.onvaluechange) self.onvaluechange(self.value, oldValue);
         }
       );
       

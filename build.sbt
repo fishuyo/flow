@@ -1,9 +1,11 @@
+import sbtcrossproject.{crossProject, CrossType}
+
 name := """flow"""
 organization := "com.fishuyo"
 
 version := "0.1-SNAPSHOT"
 
-val scalaV = "2.11.11"
+val scalaV = "2.12.5" //"2.11.11"
 
 // lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -33,21 +35,20 @@ lazy val server = (project in file("server")).settings(
     "com.vmunier" %% "scalajs-scripts" % "1.1.1",
     guice,
     specs2 % Test,
-    
+  
     "net.java.dev.jna" % "jna" % "4.0.0",
-
     "org.hid4java" % "hid4java" % "0.5.0",
-
-    "de.sciss" %% "scalaosc" % "1.1.+",
     "org.spire-math" %% "spire" % "0.13.0",
 
-    "com.twitter" % "util-eval_2.11" % "6.29.0",
-    "org.scala-lang" % "scala-reflect" % "2.11.8",
-    "org.scala-lang" % "scala-compiler" % "2.11.8",
-    "org.scala-lang" % "scala-library" % "2.11.8",
+    "com.twitter" %% "util-eval" % "6.43.0",
+    "org.scala-lang" % "scala-reflect" % scalaV,
+    "org.scala-lang" % "scala-compiler" % scalaV,
+    "org.scala-lang" % "scala-library" % scalaV,
 
+    "org.scodec" %% "scodec-core" % "1.10.3",
 
-    "de.sciss" %% "scalaaudiofile" % "1.4.3+",
+    "de.sciss" %% "scalaosc" % "1.1.6",
+    "de.sciss" %% "scalaaudiofile" % "1.4.7",
     // "com.fishuyo.seer" %% "interface_server" % "0.1-SNAPSHOT",
     "com.fishuyo.seer" %% "core" % "0.1-SNAPSHOT",
     //"script" %% "script" % "0.1-SNAPSHOT",
@@ -76,7 +77,7 @@ lazy val client = (project in file("client")).settings(
     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
     "com.thoughtworks.binding" %%% "dom" % "latest.release",
     "org.querki" %%% "jquery-facade" % "1.0",
-    "com.definitelyscala" %%% "scala-js-materializecss" % "1.0.0",
+    // "com.definitelyscala" % "scala-js-materializecss_sjs0.6_2.11" % "1.0.0",
     "org.denigma" %%% "codemirror-facade" % "5.13.2-0.8",
     compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
   ),
@@ -93,7 +94,7 @@ lazy val client = (project in file("client")).settings(
   dependsOn(sharedJs)
 
 
-lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared")).settings(
+lazy val shared = (crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure) in file("shared")).settings(
     scalaVersion := scalaV,
     libraryDependencies ++= Seq(
       // "com.typesafe.play" %% "play-json" % "2.6.1",
