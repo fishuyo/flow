@@ -14,10 +14,23 @@ object AppManager {
 
 	def apply(name:String) = open(name)
 
-	def handshake(name:String, addr:SocketAddress, port:Int=9010) = {  // TODO split into two functions, one for backwards compat with old DeviceServer
+	def handshake(name:String, addr:SocketAddress, port:Int) = { 
 		val app = open(name)
 
 		app.hostname = addr.asInstanceOf[InetSocketAddress].getHostName
+		app.sinkPort = port
+		app.connect()
+		app.listen() 
+		
+		app.runDefaultMappings()
+		
+		controllers.WebsocketActor.sendAppList()
+	}
+
+	def handshake(name:String, addr:String, port:Int) = {
+		val app = open(name)
+
+		app.hostname = addr
 		app.sinkPort = port
 		app.connect()
 		app.listen() 
