@@ -31,6 +31,18 @@ lazy val server = (project in file("server")).settings(
   compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
   resolvers += Resolver.sonatypeRepo("snapshots"),
   //updateOptions := updateOptions.value.withLatestSnapshots(false),
+
+  resolvers += Resolver.bintrayRepo("hseeberger", "maven"),
+  libraryDependencies ++= List(
+    "de.heikoseeberger" %% "akka-http-circe" % "1.21.0"
+    // "com.typesafe.akka" %% "akka-http" % "10.0.9"
+  ),
+  libraryDependencies ++= Seq(
+    "io.circe" %% "circe-core",
+    "io.circe" %% "circe-generic",
+    "io.circe" %% "circe-parser"
+  ).map(_ % "0.8.0"),
+
   libraryDependencies ++= Seq(
     "com.vmunier" %% "scalajs-scripts" % "1.1.1",
     guice,
