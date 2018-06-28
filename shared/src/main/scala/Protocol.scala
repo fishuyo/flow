@@ -15,7 +15,7 @@ case class Device(io:IOConfig, count:Int) extends Message
 case class DeviceList(devices:Seq[Device]) extends Message
 
 // case class OSCConfig(address:String, sinkPort:Int) extends Message
-case class AppConfig(io:IOConfig, defaultMappings:Seq[String]) extends Message
+case class AppConfig(io:IOConfig, defaultMappings:Seq[String]=Seq()) extends Message
 case class AppList(apps:Seq[AppConfig]) extends Message
 
 case class MappingError(line:Int, message:String) extends Message

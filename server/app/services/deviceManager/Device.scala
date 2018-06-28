@@ -13,6 +13,7 @@ object Device {
   register("PLAYSTATION(R)3 Controller", new PS3Controller(_))
   register("Joy-Con (L)", new JoyconL(_))
   register("Joy-Con (R)", new JoyconR(_))
+  register("Nintendo RVL-CNT-01", new Wiimote(_))
 
   // def apply(info:HidDeviceInfo, index:Int):Device = apply(info.getProductString, index)
   def apply(name:String, index:Int=0):IO = registeredDevices.getOrElse(name, (i:Int) => new UnknownDevice(name,i))(index)

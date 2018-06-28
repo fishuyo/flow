@@ -65,7 +65,7 @@ class WebsocketActor(out: ActorRef) extends Actor {
   }
 
   def sendAppList() = {
-    val apps = AppManager.apps.values.map(_.config).toSeq
+    val apps = AppManager.getAppList() 
     out ! Json.toJson(AppList(apps)).toString
   }
 

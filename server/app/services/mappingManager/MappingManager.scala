@@ -54,14 +54,15 @@ object MappingManager {
       script ! Reload
       val future = script ? Status
       future.onSuccess {
-        case status:Seq[(Int,String)] => 
-          if(status.length > 0 || m.errors.length > 0){
+        case status:Seq[(Int,String)] =>
+          var mapping = m
+          if(status.length > 0 || mapping.errors.length > 0){
             val off = FlowScriptWrapper.headerLength 
             val errs = status.map { case (i,s) => MappingError(i-off-1,s) }
-            val mapping = m.copy(errors = errs)
-            mappings(m.name) = mapping
-            controllers.WebsocketActor.sendMapping(mapping)
-          }
+            mapping = mapping.copy(errors = errs)
+          } else { mapping = mapping.copy(running = true) }
+          mappings(mapping.name) = mapping
+          controllers.WebsocketActor.sendMapping(mapping)  
       }
   }
   

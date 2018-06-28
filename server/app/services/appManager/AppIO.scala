@@ -24,6 +24,11 @@ object AppIO{
     new AppIO(AppConfig(IOConfig(name,Seq(),Seq()),Seq()))
 	}
 
+  def fromConfig(conf:String):AppIO = {
+    val config = Json.parse(conf).as[AppConfig]
+    new AppIO(config)
+  }
+  
 	def fromConfigFile(file:java.io.File):AppIO = {
     val stream = new java.io.FileInputStream(file)
     val config = try {  Json.parse(stream).as[AppConfig] } finally { stream.close() }
