@@ -19,12 +19,16 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import concurrent.ExecutionContext.Implicits.global
 
+/**
+  * The Mapping Manager handles mapping related events and state 
+  */
 object MappingManager {
 
   val mappingPath = "data/mappings/"
   val mappings = HashMap[String, Mapping]()
   val scripts = HashMap[String, ActorRef]()
 
+  /** loads stored mappings from disk */
   def readMappingsDir(){
     val d = new File(mappingPath)
     
@@ -43,8 +47,10 @@ object MappingManager {
     }
   }
 
+  /** get Mapping with name */
   def apply(name:String) = mappings(name)
 
+  /** run */
   def run(name:String):Unit = run(mappings(name))
   def run(m:Mapping):Unit = m match {
     case Mapping(name, code, modified, running, errors) =>

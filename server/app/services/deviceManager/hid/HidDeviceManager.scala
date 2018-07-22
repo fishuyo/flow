@@ -17,6 +17,7 @@ sealed trait DeviceConnectionEvent { def device:HidDeviceInfoW; def index:Int }
 case class DeviceAttached(device:HidDeviceInfoW, index:Int) extends DeviceConnectionEvent
 case class DeviceDetached(device:HidDeviceInfoW, index:Int) extends DeviceConnectionEvent
 
+
 /** Wrapper for device polling, override equality checking of HidDeviceInfo */
 class HidDeviceInfoW(val info:HidDeviceInfo) {
   override def equals(other:Any) = other match {
@@ -29,6 +30,7 @@ class HidDeviceInfoW(val info:HidDeviceInfo) {
     41*(41+info.getProductId) + info.getVendorId + (if(s == null) 0 else s.hashCode)
   }
 }
+
 
 /** 
   * Device Manager handles connection events of HidDevices 

@@ -80,7 +80,10 @@ case class IOSource[T,M](src:Source[T,M]){
   def orLast = src.via(Flow[T].expand(Iterator.continually(_)))
   // def orLast(initial:T) = src.via(Flow[T].extrapolate(Iterator.continually(_),Some(initial)))
   def >>[U >: T,N](sink:Sink[U,N])(implicit kill:SharedKillSwitch) = src.via(kill.flow).runWith(sink)
-  def >>[U >: T,N](sink:Option[Sink[U,N]])(implicit kill:SharedKillSwitch) = src.via(kill.flow).runWith(sink.get)
+  def >>[U >: T,N](sink:Option[Sink[U,N]])(implicit kill:SharedKillSwitch) = sink match {
+    case Some(s) => src.via(kill.flow).runWith(s)
+    case None => println("Warning: >> encountered empty sink, check Sink exists and using correct name..")
+  }
 }
 
 

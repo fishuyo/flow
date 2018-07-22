@@ -14,7 +14,7 @@ io += Slider("h1", x=0, y=0.5, w=0.5, h=0.25, min=0.0, max=10.0)
 io += RangeSlider("h2",0,0.75,0.5,0.25)
 
 // Add Menu
-io += Menu("menu", 0.6, 0.2, 0.3, 0.1, Seq(0.0,1.0,2.0))
+io += Menu("menu", 0.6, 0.2, 0.3, 0.1, Seq("option1","option2",0.0,1.0,2.0))
 io.menu >> Print
 
 // Add a 3 by 3 grid of buttons

@@ -9,11 +9,17 @@ import play.api.libs.json._
 
 import protocol.Mapping
 
+/**
+  * The OSCApi exposes functionality for controlling the flow server through an OSC namespace
+  */
 object OSCApi {
+
+  /** Starts listening for osc api message on port provided */
+  def listen(port:Int) = OSCManager() ! OSCManagerActor.Bind(port, handler)
 
   val handler:OSC.OSCHandler = {
     
-    // AppManager
+    /** AppManager */
     case ( Message("/handshake", name:String), addr) => 
       println(s"OSCApi handshake: $name $addr")
       val hostname = addr.asInstanceOf[InetSocketAddress].getHostName
@@ -48,5 +54,4 @@ object OSCApi {
   
   }
 
-  def listen(port:Int) = OSCManager() ! OSCManagerActor.Bind(port, handler)
 }
