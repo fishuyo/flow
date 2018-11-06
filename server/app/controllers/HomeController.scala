@@ -48,12 +48,37 @@ class HomeController @Inject()(cc: ControllerComponents)(implicit system: ActorS
       maybeName = Some(s"ijs.${com.fishuyo.seer.util.Random.int()}")
     )
   }
-  // def ijsSocket(name:String) = WebSocket.acceptOrResult[String, String] { request =>
-  //   println(request)
-  //   Future.successful( AppConfig.apps.find( _.name == name ) match {
-  //     case None => Left(NotFound)
-  //     case Some(app) => Right(ActorFlow.actorRef(out => OSCActor.props(out, oscManager, app.oscConfig,request.remoteAddress )))
-  //   })
-  // }
+
+  def ijsSocket2(name:String) = WebSocket.accept[String, String] { request =>
+    NamedActorFlow.actorRef(out =>
+      ijs.InterfaceWSActor.props(out, name, request.remoteAddress),
+      maybeName = Some(s"ijs.${com.fishuyo.seer.util.Random.int()}")
+    )
+  }
+
+  def ijsTemplate(name:String) = Action { implicit request: Request[AnyContent] =>
+    val template = """
+<html>
+<head>
+  <script src="/assets/js/interface.js"></script>
+  <script src="/assets/js/interface.client.js"></script>
+</head>
+<body>
+  <script>
+    panel = new Interface.Panel({ useRelativeSizesAndPositions:true })
+    panel.background = 'black'
+
+    Interface.OSC.receive = function( address, typetags, parameters ) {
+      console.log( address, typetags, parameters );
+      if(address == "/_eval"){
+        eval(parameters[0])
+      }
+    }
+  </script>
+</body>
+</html>
+    """
+    Ok(play.twirl.api.Html(template))
+  }
 
 }

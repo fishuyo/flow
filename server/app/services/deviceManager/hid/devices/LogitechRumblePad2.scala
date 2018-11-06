@@ -4,9 +4,9 @@ package hid
 
 import spire.math.UByte
 
-class LogitechRumblePad2USB(index:Int) extends HidDeviceIO("Logitech RumblePad 2 USB", index) {
-
-  override val deviceType = DualAnalogJoystick
+class LogitechRumblePad2USB(index:Int) extends HidDeviceIO(index) {
+  override lazy val name = Some("Logitech RumblePad 2 USB")
+  override lazy val deviceType = DualAnalogJoystick
 
   val sourceElements = List(
     Analog("leftX", 0),

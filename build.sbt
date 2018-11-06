@@ -64,6 +64,8 @@ lazy val server = (project in file("server")).settings(
     // "com.fishuyo.seer" %% "interface_server" % "0.1-SNAPSHOT",
     "com.fishuyo.seer" %% "core" % "0.1-SNAPSHOT",
     //"script" %% "script" % "0.1-SNAPSHOT",
+    "phasespace" %% "core" % "0.1-SNAPSHOT",
+    "phasespace" % "native" % "0.1-SNAPSHOT",
 
     "org.webjars" %% "webjars-play" % "2.6.0",
     "org.webjars" % "jquery" % "3.2.1",
@@ -78,6 +80,7 @@ lazy val server = (project in file("server")).settings(
   ) else Seq()
 ).enablePlugins(PlayScala).
   dependsOn(sharedJvm)
+
 
 lazy val client = (project in file("client")).settings(
   scalaVersion := scalaV,

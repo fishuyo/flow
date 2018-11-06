@@ -4,7 +4,9 @@ package hid
 
 import spire.math.UByte
 
-class Wiimote(index:Int) extends HidDeviceIO("Nintendo RVL-CNT-01", index) {
+class Wiimote(index:Int) extends HidDeviceIO(index) {
+
+  override lazy val name = Some("Nintendo RVL-CNT-01")
 
   val sourceElements = List(
     Button("A", 2, 8),

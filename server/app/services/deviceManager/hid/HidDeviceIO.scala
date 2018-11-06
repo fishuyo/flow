@@ -40,28 +40,21 @@ sealed trait Joystick extends DeviceType
 case object AnalogJoystick extends Joystick
 case object DualAnalogJoystick extends Joystick 
 
-abstract class HidDeviceIO(val name:String, val index:Int) extends IO {
+// Move name into body -- override in impl instead, of in constructor..
+// pass name, type, index to DM getDeviceConnection...decide there
+abstract class HidDeviceIO(val index:Int) extends IO {
 
   import concurrent.ExecutionContext.Implicits.global
   
-  val device:HidDeviceConnection = DeviceManager.getDeviceConnection(name,index)
-  // def productString:String
   val sourceElements:List[SourceElement]
   val sinkElements:List[SinkElement] = List()
   val outputBuffer:Array[Byte] = Array[Byte]()
-  val deviceType:DeviceType = Unknown
+  
+  lazy val name:Option[String] = None
+  lazy val deviceType:DeviceType = Unknown
 
-  // val kill = KillSwitches.shared("device")
+  val device:HidDeviceConnection = DeviceManager.getDeviceConnection(name, deviceType, index)
 
-  def open() = {}
-  def close() = {
-    // println(s"Device closed: $productString")
-    // openDevice.foreach(_.close) // never returns.. :(
-    // kill.shutdown
-    // openDevice = None
-  }
-
-  // def debugPrint(count:Int=1024) = byteStream.runForeach(msg => println(msg.take(count).mkString(" ")))
 
   override def sources:Map[String,Source[Any,akka.NotUsed]] = {
     sourceElements.map { 
@@ -83,22 +76,6 @@ abstract class HidDeviceIO(val name:String, val index:Int) extends IO {
         }.via(destutter)
     }.toMap
   }
-
-
-  // val outputStreamSink:Sink[(SinkElement,Float),akka.NotUsed] = Sink.foreach( (t:(SinkElement,Float)) => {
-  //   val f = t._2
-  //   t._1 match {
-  //     case Bitmask(name, idx, mask) => 
-  //       val b = outputBuffer(idx)
-  //       if(f == 1f) outputBuffer(idx) = (b | mask).toByte
-  //       else outputBuffer(idx) = (b & ~mask).toByte
-  //     case BByte(name, idx) => outputBuffer(idx) = f.toByte
-  //     case FFloat(name, idx) => outputBuffer(idx) = (f*255).toByte
-  //   }
-  //   openDevice.foreach(_.setOutputReport(0, outputBuffer, outputBuffer.length))
-  // }).mapMaterializedValue{ case _ => akka.NotUsed}
-
-  // val outputStream:Sink[(SinkElement,Float), akka.NotUsed] = MergeHub.source[(SinkElement,Float)].via(kill.flow).to(outputStreamSink).run()
 
   override def sinks:Map[String,Sink[Any,akka.NotUsed]] = {
     sinkElements.map { case e =>

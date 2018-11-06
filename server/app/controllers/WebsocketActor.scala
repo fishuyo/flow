@@ -49,7 +49,7 @@ class WebsocketActor(out: ActorRef) extends Actor {
   def sendDeviceList() = {
     val devices = DeviceManager.getDevices()
     // val devices = DeviceManager.getRegisteredDevices()
-    val seq = devices.collect { case ds if ds.length > 0 => 
+    val seq = devices.groupBy(_.info.getProductString).map { case (k,ds) => 
       val di = ds.head.info
       val d = flow.Device(di.getProductString, -1) // temporary device, negative index
       protocol.Device(

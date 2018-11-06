@@ -3,10 +3,17 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
-# An example controller showing a sample home page
+# main page and websocket
 GET     /                           controllers.HomeController.index
 GET     /ws                         controllers.HomeController.socket
+
+# Interface.js websocket
 GET     /ijs/:name/ws               controllers.HomeController.ijsSocket(name:String)
+GET     /ijs2/:name/ws               controllers.HomeController.ijsSocket2(name:String)
+
+GET     /ijs2/:name               controllers.HomeController.ijsTemplate(name:String)
+
+
 
 # Serve interface.js files from /public folder to /ijs URL path
 GET     /ijs/*file                   controllers.Assets.at(path="/public/interfaces", file)

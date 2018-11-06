@@ -4,9 +4,14 @@ package hid
 
 import spire.math.UByte
 
-class PS3Controller(index:Int) extends HidDeviceIO("PLAYSTATION(R)3 Controller", index) {
-  // lazy val productString = "PLAYSTATION(R)3 Controller"
-  override val deviceType = DualAnalogJoystick
+// object PS3Controller {
+//   Device.register("PLAYSTATION(R)3 Controller", PS3Controller(_))
+//   def apply(index:Int) = new PS3Controller(index)
+// }
+
+class PS3Controller(index:Int) extends HidDeviceIO(index) {
+  override lazy val name = Some("PLAYSTATION(R)3 Controller")
+  override lazy val deviceType = DualAnalogJoystick
 
   val sourceElements = List(
     Analog("leftX", 6),
