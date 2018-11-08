@@ -7,7 +7,7 @@ import akka.stream._
 import akka.stream.scaladsl._
 
 import com.fishuyo.seer.spatial.Vec3
-import phasespace.Glove
+// import phasespace.Glove
 
 import concurrent.ExecutionContext.Implicits.global
 
@@ -78,8 +78,8 @@ object Phasespace {
     phasespace.Phasespace.update()
     // phasespace.Phasespace.updatePlay()
     phasespace.Phasespace.getMarkers(state.markers)
-    state.leftGlove.update(0.002f)
-    state.rightGlove.update(0.002f)
+    state.leftGlove.update(0.015f)
+    state.rightGlove.update(0.015f)
     state.headPosition.set(state.markers(17)) //
     
     streamActor.foreach(_ ! state)
@@ -89,7 +89,7 @@ object Phasespace {
     import concurrent.duration._
     import concurrent.ExecutionContext.Implicits.global
     if(scheduled.isDefined) return
-    scheduled = Some( system.scheduler.schedule(2 seconds, 2 millis)(update) )
+    scheduled = Some( system.scheduler.schedule(0 seconds, 15 millis)(update) )
   }
 
   def stopUpdate(){
@@ -97,6 +97,98 @@ object Phasespace {
     scheduled = None
   }
 
+
+
+}
+
+object Led extends Enumeration {
+  val Pinky, Ring, Middle, Index,
+    DorsalPinky, DorsalIndex, ThumbProximal, Thumb = Value
+}
+
+class Glove(val markerOffset:Int) {
+  import Led._
+
+  val seen = Array.fill(8)(false)
+  val pos = Array.fill(8)(Vec3())
+  val oldPos = Array.fill(8)(Vec3())
+  val centroid = Vec3()
+  val thumbDir = Vec3()
+  val backDir = Vec3()
+
+  val pinchPos = Array.fill(4)(Vec3())
+  val pinchVel = Array.fill(4)(Vec3())
+  val wasPinched = Array.fill(4)(false)
+  val pinched = Array.fill(4)(false)
+  val pinchOn = Array.fill(4)(false)
+  val pinchOff = Array.fill(4)(false)
+
+  val pinches = Array.fill(4)(0)
+  val dtLastPinch = Array.fill(4)(0f)
+
+  var pinchThresh = 0.04f
+  var doublePinchSpeed = 0.5f
+
+
+  def getPinchTranslation(led:Led.Value):Vec3 = {
+    if(led.id >= 4 || !pinched(led.id)) return Vec3()
+    ((pos(led.id) + pos(Thumb.id)) * 0.5) - pinchPos(led.id)
+  }
+
+  def update(dt:Float) = {
+    val sum = Vec3()
+    var numSeen = 0
+    
+    for(i <- 0 until 8){
+      oldPos(i).set(pos(i))
+      seen(i) = phasespace.Phasespace.getMarker(i + markerOffset, pos(i))
+      if(seen(i)){
+        sum += pos(i)
+        numSeen += 1
+      }
+    }
+    if(numSeen > 0) centroid.set(sum / numSeen)
+
+    // update thumb and back of hand vectors
+    if(seen(Thumb.id) && seen(ThumbProximal.id)) 
+      thumbDir.set((pos(Thumb.id) - pos(ThumbProximal.id)).normalize)
+
+    if( seen(DorsalIndex.id) && seen(DorsalPinky.id) )
+      backDir.set((pos(DorsalPinky.id) - pos(DorsalIndex.id)).normalize)
+
+    // update pinched gestures
+    for(i <- 0 until 4){
+
+      pinchOn(i) = false
+      pinchOff(i) = false
+
+      // only if thumb and finger both seen
+      if( seen(Thumb.id) && seen(i)){
+        wasPinched(i) = pinched(i)
+        pinched(i) = (pos(i) - pos(Thumb.id)).mag() < pinchThresh
+        
+        // new pinch
+        if(!wasPinched(i) && pinched(i)){
+          pinchPos(i) = (pos(i)+pos(Thumb.id)) * 0.5
+          pinchOn(i) = true
+
+          if( dtLastPinch(i) < doublePinchSpeed) pinches(i) += 1
+          else pinches(i) = 1
+          dtLastPinch(i) = 0.0f
+
+        }else if( pinched(i) ){  // currently pinched
+            pinchVel(i).lerpTo( (pos(i) - oldPos(i)) / dt, 0.2f )
+
+        }else if( wasPinched(i) ){ // no longer pinched
+            pinchOff(i) = true
+        }
+      }
+      if( dtLastPinch(i) >= doublePinchSpeed) pinches(i) = 0
+      dtLastPinch(i) += dt
+
+    }
+
+  }
 
 
 }

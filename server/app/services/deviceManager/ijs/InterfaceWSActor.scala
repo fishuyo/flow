@@ -51,6 +51,8 @@ class InterfaceWSActor(out:ActorRef, name:String, request:String) extends Actor 
 
     case (name:String, value:Float) => 
       out ! Json.toJson(Msg("osc", "/"+name, "f", Seq(JsNumber(value)))).toString
+    case (name:String, value:Double) => 
+      out ! Json.toJson(Msg("osc", "/"+name, "f", Seq(JsNumber(value)))).toString
     case (name:String, value:Int) => 
       out ! Json.toJson(Msg("osc", "/"+name, "f", Seq(JsNumber(value)))).toString
     case (name:String, value:Seq[Float]) => 
