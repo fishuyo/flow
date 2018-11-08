@@ -67,6 +67,9 @@ lazy val server = (project in file("server")).settings(
     "phasespace" %% "core" % "0.1-SNAPSHOT",
     "phasespace" % "native" % "0.1-SNAPSHOT",
 
+    "org.lwjgl" % "lwjgl-openvr" % "3.2.0",
+    "org.lwjgl" % "lwjgl-openvr" % "3.2.0" classifier "natives-macos",
+
     "org.webjars" %% "webjars-play" % "2.6.0",
     "org.webjars" % "jquery" % "3.2.1",
     "org.webjars" % "materializecss" % "0.99.0",
