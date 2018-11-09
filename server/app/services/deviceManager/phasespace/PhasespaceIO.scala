@@ -34,6 +34,8 @@ class PhasespaceState {
   val rightGlove = new Glove(0)
   val leftGlove = new Glove(8)
   val headPosition = Vec3()
+
+  def gloves = Seq(rightGlove,leftGlove)
 }
 
 object Phasespace {
@@ -62,7 +64,7 @@ object Phasespace {
   def connect(){
     if( connected ) return
     phasespace.Phasespace.connect("192.168.0.99")
-    // phasespace.Phasespace.openPlaybackFile("../phasespaceJVM/core/gloves.txt")
+    // phasespace.Phasespace.openPlaybackFile("../phasespaceJNI/core/gloves.txt")
     scheduleUpdate()
     connected = true
   }
@@ -104,6 +106,8 @@ object Phasespace {
 object Led extends Enumeration {
   val Pinky, Ring, Middle, Index,
     DorsalPinky, DorsalIndex, ThumbProximal, Thumb = Value
+
+  def fingerTips = this.values.take(4)
 }
 
 class Glove(val markerOffset:Int) {
@@ -129,6 +133,9 @@ class Glove(val markerOffset:Int) {
   var pinchThresh = 0.04f
   var doublePinchSpeed = 0.5f
 
+  def isPinchOn(led:Led.Value):Boolean = pinchOn(led.id)
+  def isPinched(led:Led.Value):Boolean = pinched(led.id)
+  def isPinchOff(led:Led.Value):Boolean = pinchOff(led.id)
 
   def getPinchTranslation(led:Led.Value):Vec3 = {
     if(led.id >= 4 || !pinched(led.id)) return Vec3()

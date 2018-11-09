@@ -12,6 +12,7 @@ import collection.mutable.HashMap
 class OSCSink extends OSCSend with IO {
   var prefix = ""
   override def sink(name:String) = Some(Sink.foreach(send(prefix + "/" + name, _:Any)).mapMaterializedValue(x => akka.NotUsed))
+  def sink = Sink.foreach(send(_:Message))
 }
 
 ///XXX hmm
