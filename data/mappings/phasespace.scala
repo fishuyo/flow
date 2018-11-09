@@ -1,13 +1,13 @@
 
 
 
-// phasespace.Phasespace.disconnect
-// phasespace.Phasespace.connect
+// Phasespace.disconnect
+// Phasespace.connect
 val ps = new PhasespaceIO
 
 import de.sciss.osc.Message
 val osc = new OSCSink
-osc.connect("localhost", 9010)
+osc.connect("Thunder", 9010)
 
 // map pickable events for each glove (right/left)
 for(gloveID <- Seq(0,1)){
@@ -29,11 +29,11 @@ for(gloveID <- Seq(0,1)){
       if(g.isPinchOn(f)){
         Some(Message("/pick", gloveID, f.id, h.x,h.y,h.z, d.x,d.y,d.z))
       }else if(g.isPinched(f)){
-        Some(Message("/drag", gloveID, f.id, h.x,h.y,h.z, d.x,d.y,d.z))
+        val m = g.getPinchTranslation(f)
+        Some(Message("/drag", gloveID, f.id, h.x,h.y,h.z, d.x,d.y,d.z, m.x,m.y,m.z))
       }else if(g.isPinchOff(f)){
         Some(Message("/unpick", gloveID, f.id, h.x,h.y,h.z, d.x,d.y,d.z))
-      }
-      None
+      }else None
   	}.filter(_.isDefined).map(_.get) >> osc.sink
  	}
   
