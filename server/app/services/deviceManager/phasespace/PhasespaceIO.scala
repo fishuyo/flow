@@ -7,6 +7,7 @@ import akka.stream._
 import akka.stream.scaladsl._
 
 import com.fishuyo.seer.spatial.Vec3
+import com.fishuyo.seer.spatial.Ray
 // import phasespace.Glove
 
 import concurrent.ExecutionContext.Implicits.global
@@ -196,6 +197,61 @@ class Glove(val markerOffset:Int) {
     }
 
   }
+}
 
+object Intersect {
+
+  def ray2Allosphere(ray:Ray) = {
+    val t = allosphere(ray)
+    Ray(Vec3(),ray(t.get).normalized)
+  }
+
+  // intersect cylinder positioned at origin oriented with Z axis
+  def cylinderXY(ray:Ray, radius:Float):Float = {
+    val d = ray.d
+    val o = ray.o
+
+      val A = d.x*d.x + d.y*d.y;
+      val B = 2.0f * (d.x*o.x + d.y*o.y);
+      val C = (o.x*o.x + o.y*o.y) - radius*radius;
+      val det = B*B - 4*A*C;
+
+      if( det > 0.0f ){
+        val t1 = (-B - Math.sqrt(det).toFloat ) / (2.0f*A);
+        if ( t1 > 0.0f ) return t1;
+        val t2 = (-B + Math.sqrt(det).toFloat ) / (2.0f*A);
+        if ( t2 > 0.0f ) return t2;
+
+      } else if ( det == 0.0f ){
+        val t = -B / (2.0f*A);
+        if ( t > 0.0f ) return t;
+      }
+    return -1.0f; 
+  }
+
+  // intersect with the capsule shape of the AlloSphere
+  // assumes the ray is originating near the center of the sphere
+  // check this..
+  def allosphere(ray:Ray):Option[Float] = {
+    val radius = 4.842f;
+    val bridgeWidth2 = 2.09f / 2.0f;
+
+    // intersect with bridge cylinder
+    val t = cylinderXY( ray, radius );
+
+    // if no intersection intersect with appropriate hemisphere
+    if( t == -1.0f){
+      if(ray.d.z < 0.0f) return ray.intersectSphere( Vec3(0,0,-bridgeWidth2), radius);
+      else return ray.intersectSphere( Vec3(0,0,bridgeWidth2), radius);
+    }
+
+    val p = ray(t);
+    if( p.z < -bridgeWidth2){
+      return ray.intersectSphere( Vec3(0,0,-bridgeWidth2), radius);
+    } else if( p.z > bridgeWidth2 ){
+      return ray.intersectSphere( Vec3(0,0,bridgeWidth2), radius);
+    } else return Some(t);
+  }
 
 }
+
