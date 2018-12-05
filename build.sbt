@@ -69,6 +69,10 @@ lazy val server = (project in file("server")).settings(
 
     "org.lwjgl" % "lwjgl-openvr" % "3.2.0",
     "org.lwjgl" % "lwjgl-openvr" % "3.2.0" classifier "natives-macos",
+    "org.lwjgl" % "lwjgl-openvr" % "3.2.0" classifier "natives-windows",
+    "org.lwjgl" % "lwjgl" % "3.2.0",
+    "org.lwjgl" % "lwjgl" % "3.2.0" classifier "natives-macos",
+    "org.lwjgl" % "lwjgl" % "3.2.0" classifier "natives-windows",
 
     "org.webjars" %% "webjars-play" % "2.6.0",
     "org.webjars" % "jquery" % "3.2.1",
