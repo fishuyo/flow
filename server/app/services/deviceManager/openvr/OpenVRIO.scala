@@ -16,14 +16,20 @@ import java.nio.IntBuffer
 
 import org.lwjgl.openvr._
 
-// class OpenVRIO extends IO {
+class OpenVRIO extends IO {
 
-//   def state = OpenVR.source
+  OpenVR.connect
+  def state = OpenVR.source
+  def active = state.map(_.devices.filter(_.isValid == true))
+  def hmd = state.map(_.devices.filter(_.isValid == true).filter(_.deviceType == VRDeviceType.HMD))
+  def controllers = state.map(_.devices.filter(_.isValid == true).filter(_.deviceType == VRDeviceType.Controller))
+  def trackers = state.map(_.devices.filter(_.isValid == true).filter(_.deviceType == VRDeviceType.Generic))
 
-//   override def sources:Map[String,Source[Any,akka.NotUsed]] = Map(
-//     "state" -> state
-//   )
-// }
+
+  override def sources:Map[String,Source[Any,akka.NotUsed]] = Map(
+    "state" -> state
+  )
+}
 
 object VRDeviceType extends Enumeration {
   val HMD, Controller, BaseStation, Generic, Unknown = Value
@@ -33,6 +39,7 @@ object VRDeviceRole extends Enumeration {
 }
 
 class VRDevice(val index:Int) {
+  val pose = Pose()
   val mat = Mat4()
   val vel = Vec3()
   val angVel = Vec3()
@@ -50,24 +57,28 @@ class VRDevice(val index:Int) {
   }
 }
 
+class OpenVRState {
+  val devices = (0 until VR.k_unMaxTrackedDeviceCount).map(new VRDevice(_)).toArray
+}
+
 object OpenVR {
 
   implicit val system = System()
   implicit val materializer = ActorMaterializer()
-
-  // var streamActor:Option[ActorRef] = None
-  // private val streamSource = Source.actorRef[PhasespaceState](bufferSize = 0, OverflowStrategy.fail)
-                                    // .mapMaterializedValue( (a:ActorRef) => streamActor = Some(a) )
+  
+  private var streamActor:Option[ActorRef] = None
+  private val streamSource = Source.actorRef[OpenVRState](bufferSize = 0, OverflowStrategy.fail)
+                                    .mapMaterializedValue( (a:ActorRef) => streamActor = Some(a) )
   
   // materialize BroadcastHub for dynamic usage as source, which drops previous frame
-  // val source:Source[PhasespaceState,akka.NotUsed] = streamSource.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
-  // .watchTermination()((_, f) => {f.onComplete {  // for debugging
-    // case t => println(s"Phasespace source terminated: $t")
-  // }; akka.NotUsed })
+  val source:Source[OpenVRState,akka.NotUsed] = streamSource.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
+  .watchTermination()((_, f) => {f.onComplete {  // for debugging
+    case t => println(s"OpenVR source terminated: $t")
+  }; akka.NotUsed })
 
   
-  // val state = new PhasespaceState
-  // var connected = false
+  val state = new OpenVRState
+  var connected = false
 
   private var scheduled:Option[Cancellable] = None
 
@@ -75,11 +86,10 @@ object OpenVR {
   private val deviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount)
   private val event = VREvent.create()
 
-  val devices = (0 until VR.k_unMaxTrackedDeviceCount).map(new VRDevice(_)).toArray
-
   // connect()
   
   def connect(){
+    if(connected) return
     val error = ByteBuffer.allocateDirect(4).asIntBuffer
     val token = VR.VR_InitInternal(error, VR.EVRApplicationType_VRApplication_Overlay)
     checkInitError(error)    
@@ -91,11 +101,14 @@ object OpenVR {
     // VR.VR_GetGenericInterface(VR.IVRRenderModels_Version, error)
     // checkInitError(error)
     startUpdate()
+    connected = true
   }
 
   def disconnect(){
+    if(!connected) return
     stopUpdate()
     VR.VR_ShutdownInternal()
+    connected = false
   }
 
   def startUpdate(){
@@ -117,8 +130,10 @@ object OpenVR {
 
     for(id <- 0 until VR.k_unMaxTrackedDeviceCount){
       val pose = devicePoses.get(id)
-      val device = devices(id)
+      val device = state.devices(id)
       hmdMat34ToMatrix4(pose.mDeviceToAbsoluteTracking(), device.mat)
+      device.pose.pos.set(device.mat(12),device.mat(13),device.mat(14))
+      device.pose.quat.fromMatrix(device.mat)
       device.vel.set(pose.vVelocity().v(0), pose.vVelocity().v(1), pose.vVelocity().v(2))
       device.angVel.set(pose.vAngularVelocity().v(0), pose.vAngularVelocity().v(1), pose.vAngularVelocity().v(2))
       device.isConnected = pose.bDeviceIsConnected()
@@ -136,24 +151,23 @@ object OpenVR {
         case VR.EVREventType_VREvent_TrackedDeviceActivated =>            
           updateDevice(index)            
         case VR.EVREventType_VREvent_TrackedDeviceDeactivated =>
-
+          state.devices(index).isConnected = false
         case VR.EVREventType_VREvent_ButtonPress =>
           button = event.data().controller().button()
-          devices(index).setButton(button, true)
-          println(button)
+          state.devices(index).setButton(button, true)
         case VR.EVREventType_VREvent_ButtonUnpress =>           
           button = event.data().controller().button()
-          devices(index).setButton(button, false)
+          state.devices(index).setButton(button, false)
         case _ => ()
       }
     }
 
-
+    streamActor.foreach(_ ! state)
   }
 
   def updateDevice(index:Int){
     val dc = VRSystem.VRSystem_GetTrackedDeviceClass(index)
-    val d = devices(index)
+    val d = state.devices(index)
     dc match {
       case VR.ETrackedDeviceClass_TrackedDeviceClass_HMD => d.deviceType = VRDeviceType.HMD
       case VR.ETrackedDeviceClass_TrackedDeviceClass_Controller => d.deviceType = VRDeviceType.Controller

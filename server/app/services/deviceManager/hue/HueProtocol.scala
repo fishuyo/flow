@@ -1,8 +1,6 @@
 package flow
 
-// testing code
-// taken from https://github.com/meshelton/shue
-
+// adapted from https://github.com/meshelton/shue
 /*
  * Created by mshelton on 6/30/17.
  */
@@ -11,28 +9,22 @@ object HueProtocol extends io.circe.generic.AutoDerivation {
 
   //TODO(mshelton): Encode more powerful types for this
   sealed trait Effect
-
   case object colorloop extends Effect
 
   sealed trait AlertMode
-
   case object none extends AlertMode with Effect
-
   case object lselect extends AlertMode
-
   case object select extends AlertMode
 
   sealed trait ColorMode
-
   case object hs extends ColorMode
-
   case object xy extends ColorMode
-
   case object ct extends ColorMode
 
   case class LightSearchRequest(deviceId: List[String])
 
   case class CieColor(x: Float, y: Float) // Serialized as a list [x, y]
+  
   case class LightState(hue: Double,
                         on: Boolean,
                         effect: Effect,
@@ -53,7 +45,7 @@ object HueProtocol extends io.circe.generic.AutoDerivation {
                    swversion: String,
                    pointsymbol: Option[Map[String, String]])
 
-  case class SetLightStateRequest(on: Option[Boolean] = None,
+  case class SetLightState(on: Option[Boolean] = None,
                                   bri: Option[Int] = None, // [1, 254]
                                  hue: Option[Int] = None, // [0, 65535]
                                  sat: Option[Int] = None, // [0, 254]
