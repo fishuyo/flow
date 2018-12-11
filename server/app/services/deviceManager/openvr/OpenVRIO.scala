@@ -6,8 +6,7 @@ import akka.actor._
 import akka.stream._
 import akka.stream.scaladsl._
 
-import com.fishuyo.seer.spatial.Vec3
-import com.fishuyo.seer.spatial.Mat4
+import com.fishuyo.seer.spatial._
 
 import concurrent.ExecutionContext.Implicits.global
 
@@ -139,26 +138,27 @@ object OpenVR {
       device.isConnected = pose.bDeviceIsConnected()
       device.isValid = pose.bPoseIsValid()
       if(device.isConnected && device.deviceType == VRDeviceType.Unknown) updateDevice(id)
-      if(device.isValid) println(device.vel)
+      // if(device.isValid) println(device.vel)
     }
 
     while (VRSystem.VRSystem_PollNextEvent(event)) {
       val index = event.trackedDeviceIndex()
-      // if (index < 0 || index > VR.k_unMaxTrackedDeviceCount) continue;                  
-      var button:Int = 0
-      
-      event.eventType() match {
-        case VR.EVREventType_VREvent_TrackedDeviceActivated =>            
-          updateDevice(index)            
-        case VR.EVREventType_VREvent_TrackedDeviceDeactivated =>
-          state.devices(index).isConnected = false
-        case VR.EVREventType_VREvent_ButtonPress =>
-          button = event.data().controller().button()
-          state.devices(index).setButton(button, true)
-        case VR.EVREventType_VREvent_ButtonUnpress =>           
-          button = event.data().controller().button()
-          state.devices(index).setButton(button, false)
-        case _ => ()
+      if (index >= 0 || index < VR.k_unMaxTrackedDeviceCount){                  
+        var button:Int = 0
+        
+        event.eventType() match {
+          case VR.EVREventType_VREvent_TrackedDeviceActivated =>            
+            updateDevice(index)            
+          case VR.EVREventType_VREvent_TrackedDeviceDeactivated =>
+            state.devices(index).isConnected = false
+          case VR.EVREventType_VREvent_ButtonPress =>
+            button = event.data().controller().button()
+            state.devices(index).setButton(button, true)
+          case VR.EVREventType_VREvent_ButtonUnpress =>           
+            button = event.data().controller().button()
+            state.devices(index).setButton(button, false)
+          case _ => ()
+        }
       }
     }
 

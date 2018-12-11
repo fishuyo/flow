@@ -17,6 +17,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.Printer
 
+import com.fishuyo.seer.spatial.Vec2
+
 object Hue {
   import HueProtocol._
 
@@ -43,5 +45,43 @@ object Hue {
   def setLightState(id:Int, lightState:SetLightState): Future[Map[String, Map[String, String]]] = Marshal(lightState)
       .to[RequestEntity]
       .flatMap(e ⇒ apiRequest[Map[String, Map[String, String]]](HttpRequest(uri = s"$url/lights/$id/state", method = PUT, entity = e)))
+  
+  def setGroupState(id:Int, lightState:SetLightState): Future[Map[String, Map[String, String]]] = Marshal(lightState)
+      .to[RequestEntity]
+      .flatMap(e ⇒ apiRequest[Map[String, Map[String, String]]](HttpRequest(uri = s"$url/groups/$id/action", method = PUT, entity = e)))
+
+  def setLightMapState(pos:Vec2, width:Float, lightState:SetLightState) = {
+    LightMap.lights.foreach{ case l =>
+      val d = (l.pos - pos).mag
+      if(d < width){
+        setLightState(l.id, lightState)
+      }
+    }
+  }
+}
+
+case class LightPos(id:Int, pos:Vec2)
+object LightMap {
+// [-3.1957667 2.0330815 3.5609382] 1
+// [-2.971905 2.06142 1.1983707] 4
+// [-2.727625 2.0553503 -1.2889802] 2
+// [0.10216379 2.0348523 2.6770852] 10
+// [0.32669067 2.0022845 0.31212902] 9
+// [0.53138804 2.0044413 -2.0563166] 3
+// [2.3       x         3.8       ] 8
+// [2.5249105 1.2420385 1.5551238] 6
+// [2.7691389 1.6528126 -1.125459] 11
+  val lights = LightPos(1, Vec2(-3.1,3.5)) ::
+            LightPos(4, Vec2(-2.9,1.2)) ::
+            LightPos(2, Vec2(-2.7,-1.2)) ::
+            LightPos(10, Vec2(0.1,2.6)) ::
+            LightPos(9, Vec2(0.3,0.3)) ::
+            LightPos(3, Vec2(0.5,-2.0)) ::
+            LightPos(8, Vec2(2.3,3.8)) ::
+            LightPos(6, Vec2(2.5,1.5)) ::
+            LightPos(11, Vec2(2.7,-1.1)) :: List()
+
+  
+
 
 }
