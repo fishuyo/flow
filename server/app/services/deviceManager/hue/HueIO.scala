@@ -42,13 +42,11 @@ object Hue {
   def getLights: Future[Map[String, Light]] = apiRequest[Map[String,Light]](HttpRequest(uri = s"$url/lights"))
   def getLight(id: Int): Future[Light] = apiRequest[Light](HttpRequest(uri = s"$url/lights/$id"))
 
-  def setLightState(id:Int, lightState:SetLightState): Future[Map[String, Map[String, String]]] = Marshal(lightState)
-      .to[RequestEntity]
-      .flatMap(e ⇒ apiRequest[Map[String, Map[String, String]]](HttpRequest(uri = s"$url/lights/$id/state", method = PUT, entity = e)))
+  def setLightState(id:Int, lightState:SetLightState): Future[Map[String, Map[String, String]]] = Marshal(lightState).to[RequestEntity]
+    .flatMap(e ⇒ apiRequest[Map[String, Map[String, String]]](HttpRequest(uri = s"$url/lights/$id/state", method = PUT, entity = e)))
   
-  def setGroupState(id:Int, lightState:SetLightState): Future[Map[String, Map[String, String]]] = Marshal(lightState)
-      .to[RequestEntity]
-      .flatMap(e ⇒ apiRequest[Map[String, Map[String, String]]](HttpRequest(uri = s"$url/groups/$id/action", method = PUT, entity = e)))
+  def setGroupState(id:Int, lightState:SetLightState): Future[Map[String, Map[String, String]]] = Marshal(lightState).to[RequestEntity]
+    .flatMap(e ⇒ apiRequest[Map[String, Map[String, String]]](HttpRequest(uri = s"$url/groups/$id/action", method = PUT, entity = e)))
 
   def setLightMapState(pos:Vec2, width:Float, lightState:SetLightState) = {
     LightMap.lights.foreach{ case l =>
@@ -82,6 +80,7 @@ object LightMap {
             LightPos(11, Vec2(2.7,-1.1)) :: List()
 
   
-
-
+// 1  4  2
+// 10 9  3
+// 8  6  11
 }

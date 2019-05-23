@@ -1,4 +1,4 @@
-lazy val getLibs:TaskKey[Boolean] = TaskKey[Boolean]("Download unmanaged libs.")
+lazy val getLibs:TaskKey[Boolean] = TaskKey[Boolean]("download unmanaged libs.")
 
 getLibs := {
   val dir = baseDirectory.value / "lib"
@@ -7,4 +7,6 @@ getLibs := {
   UnmanagedLibs.getOpenNI2(dir)
   true
 }
-compile in Compile <<= (compile in Compile).dependsOn(getLibs)
+// compile in Compile <<= (compile in Compile).dependsOn(getLibs)
+compile in Compile := ((compile in Compile).dependsOn(getLibs)).value
+

@@ -15,13 +15,13 @@ class OSCSink extends OSCSend with IO {
   def sink = Sink.foreach(send(_:Message))
 }
 
-///XXX hmm
+
 class OSCSource extends IO {
   var prefix = ""
   val sourceActors = HashMap[String,ActorRef]()
   override def source(name:String) = Some(
     Source.actorRef[Any](bufferSize = 0, OverflowStrategy.fail)
-      .mapMaterializedValue( (a:ActorRef) => { sourceActors(name) = a; akka.NotUsed } )
+      .mapMaterializedValue( (a:ActorRef) => { sourceActors("/"+name) = a; akka.NotUsed } )
   )
   
   val handler:OSC.OSCHandler = {

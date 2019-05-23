@@ -46,7 +46,7 @@ trait IO extends Dynamic {
   def source(name:String) = sources.get(name)
   def sink(name:String) = sinks.get(name)
 
-  def selectDynamic[T](name:String)(implicit default:DefaultsTo[T,Float]) = sources(name).asInstanceOf[Source[T,akka.NotUsed]]
+  def selectDynamic[T](name:String)(implicit default:DefaultsTo[T,Float]) = source(name).get.asInstanceOf[Source[T,akka.NotUsed]]
 
   def destutter = Flow[Float].statefulMapConcat(() => {
     var last:Float = 0f

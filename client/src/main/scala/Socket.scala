@@ -37,7 +37,7 @@ object Socket {
       event
     }
 
-    ws.onerror = { (event: ErrorEvent) => () }
+    ws.onerror = { (event: Event) => () }
 
     ws.onmessage = { (event: MessageEvent) =>
       println(event.data.toString)
