@@ -10,15 +10,16 @@ import akka.stream._
 import akka.stream.scaladsl._
 
 import scala.concurrent.duration._
+import scala.math._
 
 import com.fishuyo.seer._
 import com.fishuyo.seer.spatial._
 import com.fishuyo.seer.util._
 
 import flow._
-//import flow.hid._
 import flow.ijs._
 import flow.script._
+
 
 class FlowScript extends Script {
 

@@ -36,9 +36,20 @@ object AppManager {
 		controllers.WebsocketActor.sendAppList()
 	}
 
+	def closeApps(name:String, addr:String, port:Int) = {
+		val close = apps.filter { case (n,a) =>
+			if(a.hostname == addr && a.sinkPort == port) true
+			else false
+		}
+		close.foreach { case (n,app) => apps.remove(n); app.close }
+	}
+
 	def handshakeConfig(config:String, addr:String, port:Int) = {
 		val app = AppIO.fromConfig(config)
 		val name = app.config.io.name
+		
+		// closeApps(name, addr, port)
+
 		apps.remove(name).foreach(_.close)
 		apps(name) = app
 
@@ -52,6 +63,8 @@ object AppManager {
 	}
 
 	def handshake(name:String, addr:String, port:Int) = {
+		// closeApps(name, addr, port)
+
 		val app = getOrElseOpen(name)
 
 		app.hostname = addr

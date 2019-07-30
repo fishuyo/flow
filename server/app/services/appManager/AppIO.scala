@@ -90,7 +90,8 @@ class AppIO(val config:AppConfig) extends IO {
   def close() = {
     stopDefaultMappings()
     OSCManager() ! OSCManagerActor.Unbind(12000, handler)
-    oscSend.disconnect
+    try { oscSend.disconnect }
+    catch { case e:Exception => () }
   }
 
   def runDefaultMappings() = config.defaultMappings.foreach(MappingManager.run(_))
