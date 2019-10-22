@@ -36,6 +36,12 @@ object AppManager {
 		controllers.WebsocketActor.sendAppList()
 	}
 
+	def closeAll() = {
+		apps.values.foreach(_.close)
+		apps.clear
+		controllers.WebsocketActor.sendAppList()
+	}
+
 	def closeApps(name:String, addr:String, port:Int) = {
 		val close = apps.filter { case (n,a) =>
 			if(a.hostname == addr && a.sinkPort == port) true
@@ -53,6 +59,8 @@ object AppManager {
 		apps.remove(name).foreach(_.close)
 		apps(name) = app
 
+		closeApps(name, addr, port)
+
 		app.hostname = addr 
 		app.sinkPort = port
 		app.connect()
@@ -66,6 +74,8 @@ object AppManager {
 		// closeApps(name, addr, port)
 
 		val app = getOrElseOpen(name)
+
+		closeApps(name, addr, port)
 
 		app.hostname = addr
 		app.sinkPort = port

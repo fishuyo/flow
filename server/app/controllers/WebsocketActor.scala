@@ -39,6 +39,9 @@ class WebsocketActor(out: ActorRef) extends Actor {
         case Run(mapping) => MappingManager.run(mapping)
         case Stop(mapping) => MappingManager.stop(mapping)
         case Save(mapping) => MappingManager.save(mapping)
+        case StopAll => 
+          MappingManager.stopAll()
+          AppManager.closeAll()
       }
 
     case m:Mapping => sendMapping(m)

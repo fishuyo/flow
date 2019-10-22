@@ -26,6 +26,7 @@ case class MappingList(mappings:Seq[Mapping]) extends Message
 case class Run(mapping:Mapping) extends Message
 case class Stop(mapping:Mapping) extends Message
 case class Save(mapping:Mapping) extends Message
+case object StopAll extends Message
 
 case class Success(text:String) extends Message
 case class Error(text:String) extends Message

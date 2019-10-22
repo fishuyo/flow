@@ -77,6 +77,10 @@ object MappingManager {
     val scriptOption = scripts.get(m.name)
     scriptOption.foreach(_ ! Unload)
   }
+
+  def stopAll() = {
+    scripts.values.foreach(_ ! Unload)
+  }
   
   def save(m:Mapping) = {
     val pw = new PrintWriter(new FileOutputStream(mappingPath + m.name + ".scala", false));

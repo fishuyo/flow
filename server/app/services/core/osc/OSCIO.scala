@@ -27,6 +27,8 @@ class OSCSource extends IO {
   val handler:OSC.OSCHandler = {
     case (Message(name:String, value:Any), addr) => 
       sourceActors.get(name).foreach(_ ! value)
+    case (Message(name:String), addr) => 
+      sourceActors.get(name).foreach(_ ! None)
     case msg => println(s"Unhandled msg in OSCIO: $msg")  
   }
 

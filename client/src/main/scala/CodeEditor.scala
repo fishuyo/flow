@@ -116,6 +116,13 @@ object CodeEditor {
     load(m)
   }
 
+  def stopAll(){
+    Socket.send(StopAll)
+    Mappings.mappings_.foreach{ case (s,m) => 
+      Mappings.update(s, m.copy(running = false))
+    }
+  }
+
   def setErrorMarkers(m:Mapping){
     editor.clearGutter("errors")
     m.errors.foreach { case MappingError(line,msg) =>
@@ -163,6 +170,12 @@ object CodeEditor {
               }>
                 <i class="material-icons left">add_circle_outline</i>
                 New
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick={ event:Event => event.preventDefault(); stopAll() }>
+                <i class="material-icons left">cancel</i>
+                Stop All
               </a>
             </li>
           </ul>
