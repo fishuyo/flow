@@ -1,1 +1,7 @@
+.bloop/
+.metals/
+data/
+server/public/interfaces/
 target/
+lib/
+

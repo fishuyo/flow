@@ -76,19 +76,19 @@ object CodeEditor {
   def run(){
     println("Run Code!")
     getCode()
-    if(!mapping.running){
-      mapping = mapping.copy(running = true)
+    // if(!mapping.running){
+      mapping = mapping.copy(loading = true)
       Mappings(mapping.name) = mapping
-    }
+    // }
     Socket.send(Run(mapping))
   }
 
   def stop(){
     println("Stop!")
-    if(mapping.running){
-      mapping = mapping.copy(running = false)
+    // if(mapping.running){
+      mapping = mapping.copy(loading = true)
       Mappings(mapping.name) = mapping
-    }
+    // }
     Socket.send(Stop(mapping))
   }
 
@@ -140,70 +140,6 @@ object CodeEditor {
 
     @dom
     def main = {
-      <nav>
-        <div class="nav-wrapper">
-          <!-- <a href="#!" class="brand-logo">Logo</a> -->
-          <ul class="left hide-on-small">
-            <li>
-              <a href="#" onclick={ event:Event => event.preventDefault(); run() }>
-                <i class="material-icons left">play_arrow</i>
-                Run
-              </a>
-            </li>
-            <li>
-              <a href="#" onclick={ event:Event => event.preventDefault(); stop() }>
-                <i class="material-icons left">stop</i>
-                Stop
-              </a>
-            </li>
-            <li>
-              <a href="#" onclick={ event:Event => event.preventDefault(); save() }>
-                <i class="material-icons left">save</i>
-                Save
-              </a>
-            </li>
-            <li>
-              <a class="waves-effect waves-light modal-trigger" href="#newModal" onclick={ event:Event => 
-                event.preventDefault() 
-                val input = document.getElementById("mappingName").asInstanceOf[HTMLInputElement]
-                input.value = ""
-              }>
-                <i class="material-icons left">add_circle_outline</i>
-                New
-              </a>
-            </li>
-            <li>
-              <a href="#" onclick={ event:Event => event.preventDefault(); stopAll() }>
-                <i class="material-icons left">cancel</i>
-                Stop All
-              </a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-
-      <!-- Modal Structure -->
-      <div id="newModal" class="modal">
-        <div class="modal-content">
-          <h4>New Mapping</h4>
-          <div class="row">
-            <div class="input-field col s6">
-              <input value="" id="mappingName" type="text" class="validate" />
-              <label class="active" for="mappingName">Mapping Name</label>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Cancel</a>
-          <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat" onclick={ event:Event => 
-                event.preventDefault() 
-                val input = document.getElementById("mappingName").asInstanceOf[HTMLInputElement]
-                if(input.value != "") newMapping(input.value)
-                else window.alert("Could not create mapping: Invalid name.")
-          }>Create</a>
-        </div>
-      </div>
-
       <div class="row">
         <div class="col s12"> 
           { textarea.bind }          

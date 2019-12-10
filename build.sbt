@@ -7,21 +7,6 @@ version := "0.1-SNAPSHOT"
 
 val scalaV = "2.12.5" //"2.11.11"
 
-// lazy val root = (project in file(".")).enablePlugins(PlayScala)
-
-// scalaVersion := "2.11.11"
-
-// libraryDependencies += guice
-// libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % Test
-// libraryDependencies += "hid" %% "hid" % "0.1-SNAPSHOT"
-// libraryDependencies += "interface_server" %% "interface_server" % "0.1-SNAPSHOT"
-
-// Adds additional packages into Twirl
-// TwirlKeys.templateImports += "com.fishuyo.controllers._"
-
-// Adds additional packages into conf/routes
-// play.sbt.routes.RoutesKeys.routesImport += "com.fishuyo.binders._"
-
 lazy val server = (project in file("server")).settings(
   scalaVersion := scalaV,
   scalaJSProjects := Seq(client),
@@ -88,6 +73,68 @@ lazy val server = (project in file("server")).settings(
 ).enablePlugins(PlayScala).
   dependsOn(sharedJvm)
 
+lazy val server2 = (project in file("server2")).settings(
+  scalaVersion := scalaV,
+  scalaJSProjects := Seq(client),
+  pipelineStages in Assets := Seq(scalaJSPipeline),
+  pipelineStages := Seq(digest, gzip),
+  // triggers scalaJSPipeline when using compile or continuous compilation
+  compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
+  WebKeys.packagePrefix in Assets := "public/",
+  managedClasspath in Runtime += (packageBin in Assets).value,
+  
+  resolvers += Resolver.sonatypeRepo("snapshots"),
+  //updateOptions := updateOptions.value.withLatestSnapshots(false),
+
+  resolvers += Resolver.bintrayRepo("hseeberger", "maven"),
+  libraryDependencies ++= List(
+    "de.heikoseeberger" %% "akka-http-circe" % "1.21.0"
+  ),
+  libraryDependencies ++= Seq(
+    "io.circe" %% "circe-core",
+    "io.circe" %% "circe-generic",
+    "io.circe" %% "circe-parser"
+  ).map(_ % "0.8.0"),
+
+  libraryDependencies ++= Seq(
+    "com.typesafe.akka" %% "akka-http"   % "10.1.10", 
+    "com.typesafe.akka" %% "akka-stream" % "2.5.26",
+
+    "com.vmunier" %% "scalajs-scripts" % "1.1.4",
+
+
+    "net.java.dev.jna" % "jna" % "4.0.0",
+    "org.hid4java" % "hid4java" % "0.5.0",
+    "org.spire-math" %% "spire" % "0.13.0",
+    "com.twitter" %% "util-eval" % "6.43.0",
+    "org.scala-lang" % "scala-reflect" % scalaV,
+    "org.scala-lang" % "scala-compiler" % scalaV,
+    "org.scala-lang" % "scala-library" % scalaV,
+
+    // "org.scodec" %% "scodec-core" % "1.10.3",
+
+    "de.sciss" %% "scalaosc" % "1.1.6",
+    // "de.sciss" %% "scalaaudiofile" % "1.4.7",
+    "com.fishuyo.seer" %% "core" % "0.1-SNAPSHOT",
+    "phasespace" %% "core" % "0.1-SNAPSHOT",
+    "phasespace" % "native" % "0.1-SNAPSHOT",
+
+    // "org.lwjgl" % "lwjgl-openvr" % "3.2.0",
+    // "org.lwjgl" % "lwjgl-openvr" % "3.2.0" classifier "natives-macos",
+    // "org.lwjgl" % "lwjgl-openvr" % "3.2.0" classifier "natives-windows",
+    // "org.lwjgl" % "lwjgl" % "3.2.0",
+    // "org.lwjgl" % "lwjgl" % "3.2.0" classifier "natives-macos",
+    // "org.lwjgl" % "lwjgl" % "3.2.0" classifier "natives-windows",
+
+    "org.webjars" %% "webjars-play" % "2.6.0",
+    "org.webjars" % "jquery" % "3.2.1",
+    "org.webjars" % "materializecss" % "0.99.0",
+    "org.webjars.npm" % "codemirror" % "5.27.4",
+    "io.kamon" %% "kamon-bundle" % "2.0.4",
+    "io.kamon" %% "kamon-apm-reporter" % "2.0.0"
+  )
+).enablePlugins(SbtWeb, SbtTwirl, JavaAppPackaging).dependsOn(sharedJvm)
+
 
 lazy val client = (project in file("client")).settings(
   scalaVersion := scalaV,
@@ -128,7 +175,7 @@ lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
 
 // loads the server project at sbt startup
-onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
+// onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
 
 
 

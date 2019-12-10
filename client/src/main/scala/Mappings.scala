@@ -27,7 +27,7 @@ object Mappings {
     if(m.name == CodeEditor.mapping.name) CodeEditor.setErrorMarkers(m)
   }
 
-  def ++=(seq:Seq[Mapping]) = {
+  def set(seq:Seq[Mapping]) = {
     seq.foreach { case m => mappings_(m.name) = m }
     mappings.value.clear 
     mappings.value ++= mappings_.values.toSeq.sortBy(_.name)
@@ -61,14 +61,28 @@ object Mappings {
     @dom
     def mappingList = {
       for(m <- mappings) yield m match {
-          case Mapping(name, code, modified, running, errors) =>
+          case Mapping(name, code, loading, modified, running, errors) =>
             <li> 
               <a href="#" onclick={ event:Event => event.preventDefault(); CodeEditor.load(m) }>
                 { name }  
-                { if(errors.length > 0) <i class="material-icons">error</i>
+                { 
+                  if(loading){
+                    <i class="material-icons"><div class="preloader-wrapper small active">
+                      <div class="spinner-layer spinner-green-only">
+                        <div class="circle-clipper left">
+                          <div class="circle"></div>
+                        </div><div class="gap-patch">
+                          <div class="circle"></div>
+                        </div><div class="circle-clipper right">
+                          <div class="circle"></div>
+                        </div>
+                      </div>
+                    </div></i>
+                  } else if(errors.length > 0) <i class="material-icons">error</i>
                   else if(modified) <i class="material-icons">edit</i>
                   else if(running) <i class="material-icons">directions_run</i>
-                  else <i></i> }
+                  else <i></i>
+                }
               </a>
  <!--              <a class="collapsible-header">
                 <i class="material-icons">arrow_drop_down</i>

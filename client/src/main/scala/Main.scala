@@ -51,6 +51,9 @@ object Main extends js.JSApp {
           { Apps.views.collapsibleList.bind }
         </li> 
         <li class="no-padding">
+          { Interfaces.views.collapsibleList.bind }
+        </li>
+        <li class="no-padding">
           { Mappings.views.collapsibleList.bind }
         </li>
       </ul>
@@ -74,6 +77,7 @@ object Main extends js.JSApp {
         </ul>
       </div> -->
 
+      { Toolbar.views.codeEditorNav.bind }
       { CodeEditor.views.main.bind }
       <!--{ ConsoleWindow.views.main.bind }-->
     </div>
@@ -101,7 +105,7 @@ object Main extends js.JSApp {
       </div>
       <div class="footer-copyright">
         <div class="container">
-        AlloSphere Device Server
+        // AlloSphere Device Server
         <a class="grey-text text-lighten-4 right" href="#!">More Services</a>
         </div>
       </div>

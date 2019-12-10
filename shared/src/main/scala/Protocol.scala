@@ -19,9 +19,11 @@ case class AppConfig(io:IOConfig, defaultMappings:Seq[String]=Seq()) extends Mes
 case class AppList(apps:Seq[AppConfig]) extends Message
 
 case class MappingError(line:Int, message:String) extends Message
-case class Mapping(name:String, code:String, modified:Boolean=false, running:Boolean=false, errors:Seq[MappingError]=Seq()) extends Message
+case class Mapping(name:String, code:String, loading:Boolean=false, modified:Boolean=false, running:Boolean=false, errors:Seq[MappingError]=Seq()) extends Message
 case class MappingList(mappings:Seq[Mapping]) extends Message
 // case class MappingTree(name:String, mappings:Seq[Mapping], trees:Seq[MappingTree]) extends Message
+
+case class InterfaceList(interfaces:Seq[String]) extends Message
 
 case class Run(mapping:Mapping) extends Message
 case class Stop(mapping:Mapping) extends Message
