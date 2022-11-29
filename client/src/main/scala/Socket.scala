@@ -14,7 +14,7 @@ import protocol._
 import protocol.Message.format
 
 
-@JSExport
+@JSExportTopLevel("Socket")
 object Socket {
   
   var ws:WebSocket = _
@@ -44,10 +44,11 @@ object Socket {
       val wsMsg = Json.parse(event.data.toString).as[Message]
 
       wsMsg match {
-        case DeviceList(ds) => Devices.set(ds)
-        case AppList(as) => Apps.set(as)
-        case MappingList(ms) => Mappings ++= ms
-        case m:Mapping => Mappings(m.name) = m
+        // case DeviceList(ds) => Devices.set(ds)
+        // case AppList(as) => Apps.set(as)
+        // case MappingList(ms) => Mappings ++= ms
+        // case m:Mapping => Mappings(m.name) = m
+        case _ => 0
       }
     }
 

@@ -12,9 +12,7 @@ import akka.stream.scaladsl._
 import scala.concurrent.duration._
 import scala.math._
 
-import com.fishuyo.seer._
-import com.fishuyo.seer.spatial._
-import com.fishuyo.seer.util._
+import seer.math._
 
 import flow._
 import flow.ijs._

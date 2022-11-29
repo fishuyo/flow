@@ -6,7 +6,7 @@ import julienrf.json.derived
 
 sealed trait Message
 
-case class ClientHandshake() extends Message
+case class ClientHandshake(msg:String="") extends Message
 
 case class IOPort(name:String, `type`:String) extends Message
 case class IOConfig(name:String, sources:Seq[IOPort], sinks:Seq[IOPort]) extends Message
@@ -36,15 +36,20 @@ case class WatchParameter(name:String, device:String) extends Message
 case class Parameter(name:String, device:String, value:Float) extends Message
 
 object Message {
+  implicit val handshake = derived.oformat[ClientHandshake]()
+  
   implicit val ioportFormat = derived.oformat[IOPort]()
   implicit val ioconfigFormat = derived.oformat[IOConfig]()
 
   implicit val deviceFormat = derived.oformat[Device]()
+  implicit val deviceListFormat = derived.oformat[DeviceList]()
   
   implicit val mappingErrorFormat = derived.oformat[MappingError]()
   implicit val mappingFormat = derived.oformat[Mapping]()
+  implicit val mappingListFormat = derived.oformat[MappingList]()
   // implicit val mappingTreeFormat = derived.oformat[MappingTree]()
   // implicit val oscConfigFormat = derived.oformat[OSCConfig]()
   implicit val appConfigFormat = derived.oformat[AppConfig]()
+  implicit val appListFormat = derived.oformat[AppList]()
   implicit val format = derived.oformat[Message]()
 }

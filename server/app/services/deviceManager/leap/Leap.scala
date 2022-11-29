@@ -1,7 +1,7 @@
 package flow
 package leap
 
-import com.fishuyo.seer.spatial._
+import seer.math._
 
 import collection.mutable.ListBuffer
 

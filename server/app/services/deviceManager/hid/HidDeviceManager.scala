@@ -156,7 +156,7 @@ object DeviceManager {
     import concurrent.duration._
     import concurrent.ExecutionContext.Implicits.global
     if(poller.isDefined) return
-    poller = Some( system.scheduler.schedule(0 seconds, 1000 millis)(poll) )
+    poller = Some( system.scheduler.schedule(0.seconds, 1000.millis)(poll) )
   }
 
   def stopPolling(){

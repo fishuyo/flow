@@ -31,7 +31,7 @@ class WebsocketActor(out: ActorRef) extends Actor {
       println(msg)
       val message = Json.parse(msg).as[Message]
       message match {
-        case ClientHandshake() => 
+        case ClientHandshake(msg) => 
           sendDeviceList()
           sendAppList()
           sendMappingList()

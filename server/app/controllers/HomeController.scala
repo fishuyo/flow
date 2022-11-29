@@ -20,8 +20,8 @@ class HomeController @Inject()(cc: ControllerComponents)(implicit system: ActorS
 
   // Initialize services here, because I don't want to change everything to use play's DI
   // works since HomeController a Singleton
-  Hack.unsafeAddDir("lib")
-  Hack.unsafeAddDir("../lib")
+  // Hack.unsafeAddDir("lib")
+  // Hack.unsafeAddDir("../lib")
   System() = system
   OSCApi.listen(12000) 
   DeviceManager.startPolling()
@@ -38,21 +38,21 @@ class HomeController @Inject()(cc: ControllerComponents)(implicit system: ActorS
   def socket = WebSocket.accept[String, String] { request =>
     NamedActorFlow.actorRef(out =>
       WebsocketActor.props(out),
-      maybeName = Some(s"client.${com.fishuyo.seer.util.Random.int()}")
+      maybeName = Some(s"client.${seer.math.Random.int()}")
     )
   }
 
   def ijsSocket(name:String) = WebSocket.accept[String, String] { request =>
     NamedActorFlow.actorRef(out =>
       ijs.InterfaceWSActor.props(out, name, request.remoteAddress),
-      maybeName = Some(s"ijs.${com.fishuyo.seer.util.Random.int()}")
+      maybeName = Some(s"ijs.${seer.math.Random.int()}")
     )
   }
 
   def ijsSocket2(name:String) = WebSocket.accept[String, String] { request =>
     NamedActorFlow.actorRef(out =>
       ijs.InterfaceWSActor.props(out, name, request.remoteAddress),
-      maybeName = Some(s"ijs.${com.fishuyo.seer.util.Random.int()}")
+      maybeName = Some(s"ijs.${seer.math.Random.int()}")
     )
   }
 

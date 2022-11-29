@@ -142,7 +142,7 @@ trait OSCSender {
     bundle = false
     if( messageBuffer.length > 0){
       // println("sending bundle size " + messageBuffer.length)
-      out ! Bundle.now( messageBuffer : _* )
+      out ! Bundle.now( messageBuffer.toSeq : _* )
       messageBuffer.clear
     }
   }

@@ -1,6 +1,6 @@
 package flow
 
-import com.fishuyo.seer.spatial.Vec2
+import seer.math.Vec2
 
 import collection.mutable.Map
 import collection.mutable.ListBuffer

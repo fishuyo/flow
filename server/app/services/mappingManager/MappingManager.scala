@@ -54,13 +54,13 @@ object MappingManager {
   def run(name:String):Unit = run(mappings(name))
   def run(m:Mapping):Unit = m match {
     case Mapping(name, code, modified, running, errors) =>
-      implicit val duration: Timeout = 10 seconds
+      implicit val duration: Timeout = 10.seconds
       val script = scripts.getOrElseUpdate(name, ScriptManager())
       script ! Code(FlowScriptWrapper(code))
       script ! Reload
       val future = script ? Status
-      future.onSuccess {
-        case status:Seq[(Int,String)] =>
+      future.onComplete {
+        case scala.util.Success(status:Seq[(Int,String)]) =>
           var mapping = m
           if(status.length > 0 || mapping.errors.length > 0){
             val off = FlowScriptWrapper.headerLength 
@@ -68,7 +68,8 @@ object MappingManager {
             mapping = mapping.copy(errors = errs)
           } else { mapping = mapping.copy(running = true) }
           mappings(mapping.name) = mapping
-          controllers.WebsocketActor.sendMapping(mapping)  
+          controllers.WebsocketActor.sendMapping(mapping) 
+        case _ => println("MappingManager future complete error") 
       }
   }
   

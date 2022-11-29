@@ -40,8 +40,8 @@ object Interface {
 
   def create(name:String) = {
     val io = interfaces.getOrElseUpdate(name, new InterfaceBuilder(name))
-    io.widgets.clear
-    io.layouts.clear
+    io.widgets.clear()
+    io.layouts.clear()
     io
   }
   
@@ -133,7 +133,7 @@ class InterfaceBuilder(val name:String) extends IO {
   }
 
 
-  def save(){
+  def save() = {
     val path = "server/public/interfaces/"
     val pw = new PrintWriter(new FileOutputStream(path + name + ".html", false));
     pw.write(toHtml)
@@ -141,12 +141,12 @@ class InterfaceBuilder(val name:String) extends IO {
   }
 
   def toHtml() = {
-    htmlHeader +
+    htmlHeader() +
     "panel = new Interface.Panel({ useRelativeSizesAndPositions:true })\n" +
     "panel.background = 'black'\n" +
     widgets.map(widget2String(_)).mkString("\n") + "\n" +
     s"panel.add( ${widgets.map(_.name).mkString(",")} )" +
-    htmlFooter
+    htmlFooter()
   }
 
     def htmlHeader() = """

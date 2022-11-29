@@ -2,7 +2,7 @@
 package flow
 package hid
 
-import com.fishuyo.seer.actor._
+import seer.actor._
 
 import spire.math.UByte
 

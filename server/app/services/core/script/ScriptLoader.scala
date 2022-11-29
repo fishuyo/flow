@@ -10,7 +10,7 @@ import reflect.runtime.universe._
 import reflect.runtime.currentMirror
 import tools.reflect.ToolBox
 
-import com.twitter.util.Eval
+// import com.twitter.util.Eval
 
 import akka.actor._
 import akka.event.Logging
@@ -36,7 +36,7 @@ object ScriptLoaderActor {
 
   // def props = propsEval
   def props = propsToolbox
-  def propsEval = Props(new ScriptLoaderActor(new EvalScriptLoader()))
+  // def propsEval = Props(new ScriptLoaderActor(new EvalScriptLoader()))
   def propsToolbox = Props(new ScriptLoaderActor(new ToolboxScriptLoader()))
 }
 /**
@@ -177,17 +177,17 @@ class ToolboxScriptLoader extends ScriptLoader {
 /**
   * Twitter Eval implementation of a ScriptLoader
   */
-object EvalScriptLoader {
-  val eval = new Eval()
-  def apply() = eval
-}
-class EvalScriptLoader extends ScriptLoader {
-  def compile() = {
-    val source = getCode()
-    val script = EvalScriptLoader.eval[AnyRef](source) 
-    script
-  }
-}
+// object EvalScriptLoader {
+//   val eval = new Eval()
+//   def apply() = eval
+// }
+// class EvalScriptLoader extends ScriptLoader {
+//   def compile() = {
+//     val source = getCode()
+//     val script = EvalScriptLoader.eval[AnyRef](source) 
+//     script
+//   }
+// }
 
 
 

@@ -17,7 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.Printer
 
-import com.fishuyo.seer.spatial.Vec2
+import seer.math.Vec2
 
 object Hue {
   import HueProtocol._
@@ -43,14 +43,14 @@ object Hue {
   def getLight(id: Int): Future[Light] = apiRequest[Light](HttpRequest(uri = s"$url/lights/$id"))
 
   def setLightState(id:Int, lightState:SetLightState): Future[Map[String, Map[String, String]]] = Marshal(lightState).to[RequestEntity]
-    .flatMap(e ⇒ apiRequest[Map[String, Map[String, String]]](HttpRequest(uri = s"$url/lights/$id/state", method = PUT, entity = e)))
+    .flatMap(e => apiRequest[Map[String, Map[String, String]]](HttpRequest(uri = s"$url/lights/$id/state", method = PUT, entity = e)))
   
   def setGroupState(id:Int, lightState:SetLightState): Future[Map[String, Map[String, String]]] = Marshal(lightState).to[RequestEntity]
-    .flatMap(e ⇒ apiRequest[Map[String, Map[String, String]]](HttpRequest(uri = s"$url/groups/$id/action", method = PUT, entity = e)))
+    .flatMap(e => apiRequest[Map[String, Map[String, String]]](HttpRequest(uri = s"$url/groups/$id/action", method = PUT, entity = e)))
 
   def setLightMapState(pos:Vec2, width:Float, lightState:SetLightState) = {
     LightMap.lights.foreach{ case l =>
-      val d = (l.pos - pos).mag
+      val d = (l.pos - pos).mag()
       if(d < width){
         setLightState(l.id, lightState)
       }

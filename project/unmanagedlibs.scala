@@ -14,7 +14,7 @@ object UnmanagedLibs {
     val zipFile = new File(name)
     println(s"Pulling $name")
     val url = new URL("%s/%s" format(baseUrl, name))
-    IO.download(url, zipFile)
+    // IO.download(url, zipFile)
     println(s"Downloaded $name")
     zipFile
   }
@@ -24,52 +24,52 @@ object UnmanagedLibs {
     if(file.exists) return
     println(s"Pulling purejavahidapi.jar")
     val url = new URL("%s/%s" format(baseUrl, "purejavahidapi.jar"))
-    IO.download(url, file)
+    // IO.download(url, file)
     println(s"Downloaded purejavahidapi.jar")
   }
 
   def getGlulogic(dest:File){
     if(new File(dest,"GlulogicMT.jar").exists) return
     val zipFile = download("glulogic.zip")
-    unzip(zipFile, dest, matchfile("GlulogicMT.jar"))
-    unzip(zipFile, file("lib"), matchfile("libGlulogicMT.dylib"))
-    zipFile.delete
+    // unzip(zipFile, dest, matchfile("GlulogicMT.jar"))
+    // unzip(zipFile, file("lib"), matchfile("libGlulogicMT.dylib"))
+    // zipFile.delete
   }
 
   def getLeap(dest:File){
     if(new File(dest,"LeapJava.jar").exists) return
     val zipFile = download("leap.zip")
-    unzip(zipFile, dest, matchfile("LeapJava.jar"))
-    unzip(zipFile, dest, matchfile("libLeap.dylib"))
-    unzip(zipFile, dest, matchfile("libLeapJava.dylib"))
-    zipFile.delete
+    // unzip(zipFile, dest, matchfile("LeapJava.jar"))
+    // unzip(zipFile, dest, matchfile("libLeap.dylib"))
+    // unzip(zipFile, dest, matchfile("libLeapJava.dylib"))
+    // zipFile.delete
   }
 
   def getOpenNI2(dest:File){
     if(new File(dest,"org.openni.jar").exists) return
     val zipFile = download("openni2.zip")
     val lib = file("lib")
-    unzip(zipFile, dest, matchfile("org.openni.jar"))
-    unzip(zipFile, dest, matchfile("com.primesense.nite.jar"))
-    unzip(zipFile, lib, matchfile("OpenNI.ini"))
-    unzip(zipFile, new File(lib,"NiTE2"), matchdir("openni2/NiTE2/"))
-    IO.write(new File(lib,"NiTE.ini"), s"""
-[General]
-DataDir=${new File(lib,"NiTE2").getAbsolutePath}
+    // unzip(zipFile, dest, matchfile("org.openni.jar"))
+    // unzip(zipFile, dest, matchfile("com.primesense.nite.jar"))
+    // unzip(zipFile, lib, matchfile("OpenNI.ini"))
+    // unzip(zipFile, new File(lib,"NiTE2"), matchdir("openni2/NiTE2/"))
+    // IO.write(new File(lib,"NiTE.ini"), s"""
+// [General]
+// DataDir=${new File(lib,"NiTE2").getAbsolutePath}
 
-[Log]
-; 0 - Verbose; 1 - Info; 2 - Warning; 3 - Error. Default - None
-Verbosity=3
-LogToConsole=0
-LogToFile=0
-    """)
-    val arch = sys.props.get("os.arch")
-    sys.props.get("os.name") match {
-      case Some(s) if s.contains("Mac") => unzip(zipFile, lib, matchdir("openni2/macos/"))
-      case Some(s) if s.contains("Win") && arch.get.contains("64") => unzip(zipFile, lib, matchdir("openni2/win64/"))
-      case _ => () 
-    }
-    zipFile.delete
+// [Log]
+// ; 0 - Verbose; 1 - Info; 2 - Warning; 3 - Error. Default - None
+// Verbosity=3
+// LogToConsole=0
+// LogToFile=0
+//     """)
+    // val arch = sys.props.get("os.arch")
+    // sys.props.get("os.name") match {
+    //   case Some(s) if s.contains("Mac") => unzip(zipFile, lib, matchdir("openni2/macos/"))
+    //   case Some(s) if s.contains("Win") && arch.get.contains("64") => unzip(zipFile, lib, matchdir("openni2/win64/"))
+    //   case _ => () 
+    // }
+    // zipFile.delete
   }
 
   def getJPA(dest:File){
