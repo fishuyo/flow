@@ -7,7 +7,8 @@ import collection.mutable.HashMap
 
 object AppManager {
 
-	val appConfigPath = "data/apps/"
+	val appConfigPath = Config("dataPath") + "/apps/"
+
 	val apps = HashMap[String, AppIO]()
 
 	def getAppList() = apps.values.map(_.config).toSeq
@@ -33,13 +34,13 @@ object AppManager {
 
 	def close(name:String) = {
 		apps.remove(name).foreach(_.close)
-		controllers.WebsocketActor.sendAppList()
+		WebsocketActor.sendAppList()
 	}
 
 	def closeAll() = {
 		apps.values.foreach(_.close)
 		apps.clear
-		controllers.WebsocketActor.sendAppList()
+		WebsocketActor.sendAppList()
 	}
 
 	def closeApps(name:String, addr:String, port:Int) = {
@@ -67,7 +68,7 @@ object AppManager {
 		app.listen()
 
 		app.runDefaultMappings()
-		controllers.WebsocketActor.sendAppList()
+		WebsocketActor.sendAppList()
 	}
 
 	def handshake(name:String, addr:String, port:Int) = {
@@ -84,7 +85,7 @@ object AppManager {
 		
 		app.runDefaultMappings()
 		
-		controllers.WebsocketActor.sendAppList()
+		WebsocketActor.sendAppList()
 	}
 
 

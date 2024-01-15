@@ -1,14 +1,15 @@
-package controllers
 
-import flow._
-import flow.protocol._
-import flow.protocol.Message.format
+package flow
 
-import flow.hid.DeviceManager
+import protocol._
+import protocol.Message.format
 
-import julienrf.json.derived._
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import hid.DeviceManager
+
+import com.github.plokhotnyuk.jsoniter_scala.core._
+// import julienrf.json.derived._
+// import play.api.libs.json._
+// import play.api.libs.functional.syntax._
 
 import akka.actor._
 
@@ -29,7 +30,7 @@ class WebsocketActor(out: ActorRef) extends Actor {
     case msg:String if msg == "sendAppList" => sendAppList()
     case msg:String => 
       println(msg)
-      val message = Json.parse(msg).as[Message]
+      val message = readFromString[Message](msg)
       message match {
         case ClientHandshake(msg) => 
           sendDeviceList()
@@ -42,6 +43,7 @@ class WebsocketActor(out: ActorRef) extends Actor {
         case StopAll => 
           MappingManager.stopAll()
           AppManager.closeAll()
+        case m => println(m)
       }
 
     case m:Mapping => sendMapping(m)
@@ -64,22 +66,22 @@ class WebsocketActor(out: ActorRef) extends Actor {
         ds.length
       ) 
     }.toSeq
-    out ! Json.toJson(DeviceList(seq)).toString
+    out ! writeToString(DeviceList(seq))
   }
 
   def sendAppList() = {
     val apps = AppManager.getAppList() 
-    out ! Json.toJson(AppList(apps)).toString
+    out ! writeToString(AppList(apps))
   }
 
   def sendMappingList() = {
     MappingManager.readMappingsDir() // XXX modifying state, probs not safe
     val ms = MappingManager.mappings.values.toSeq 
-    out ! Json.toJson(MappingList(ms)).toString
+    out ! writeToString(MappingList(ms))
   }
 
   def sendMapping(m:Mapping) = {
-    out ! Json.toJson(m).toString
+    out ! writeToString(m)
   }
 
 }

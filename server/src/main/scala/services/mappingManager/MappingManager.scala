@@ -24,7 +24,7 @@ import concurrent.ExecutionContext.Implicits.global
   */
 object MappingManager {
 
-  val mappingPath = "data/mappings/"
+  val mappingPath = Config("dataPath") + "/mappings/"
   val mappings = HashMap[String, Mapping]()
   val scripts = HashMap[String, ActorRef]()
 
@@ -68,7 +68,7 @@ object MappingManager {
             mapping = mapping.copy(errors = errs)
           } else { mapping = mapping.copy(running = true) }
           mappings(mapping.name) = mapping
-          controllers.WebsocketActor.sendMapping(mapping) 
+          WebsocketActor.sendMapping(mapping) 
         case _ => println("MappingManager future complete error") 
       }
   }

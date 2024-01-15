@@ -1,33 +1,15 @@
-// Comment to get more information during initialization
-// logLevel := Level.Warn
+addSbtPlugin("org.scala-js"                % "sbt-scalajs"               % "1.13.0")
+addSbtPlugin("org.portable-scala"          % "sbt-scalajs-crossproject"  % "1.2.0")
 
-ThisBuild / libraryDependencySchemes ++= Seq(
-  "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always,
-  // "org.scala-js" %% "scalajs-dom" % VersionScheme.Always
-)
+addSbtPlugin("com.vmunier"                 % "sbt-web-scalajs"           % "1.2.0")
+addSbtPlugin("ch.epfl.scala"               % "sbt-web-scalajs-bundler"       % "0.21.1")
+// addSbtPlugin("ch.epfl.scala"               % "sbt-scalajs-bundler"       % "0.21.1")
 
-// Resolvers
-resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
+addSbtPlugin("org.scalablytyped.converter" % "sbt-converter"             % "1.0.0-beta41")
 
-// Sbt plugins
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.18") //"2.6.13")
+addSbtPlugin("io.spray"                    % "sbt-revolver"              % "0.9.1")
 
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.5")
+addSbtPlugin("com.eed3si9n"                % "sbt-assembly"              % "1.1.1")
+addSbtPlugin("com.github.sbt"              % "sbt-native-packager"       % "1.9.11")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.11.0")
 
-// addSbtPlugin("org.scala-js" % "sbt-jsdependencies" % "1.0.2")
-
-addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.1.0")
-
-addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.2.0")
-
-addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.2")
-
-addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.3")
-
-addSbtPlugin("com.typesafe.sbt" % "sbt-less" % "1.1.2")
-
-addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta40")
-
-// addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "4.0.0")

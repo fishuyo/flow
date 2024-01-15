@@ -2,7 +2,10 @@
 package flow
 package protocol
 
-import julienrf.json.derived
+// import julienrf.json.derived
+import com.github.plokhotnyuk.jsoniter_scala.macros._
+import com.github.plokhotnyuk.jsoniter_scala.core._
+
 
 sealed trait Message
 
@@ -36,20 +39,20 @@ case class WatchParameter(name:String, device:String) extends Message
 case class Parameter(name:String, device:String, value:Float) extends Message
 
 object Message {
-  implicit val handshake = derived.oformat[ClientHandshake]()
+  implicit val handshake: JsonValueCodec[ClientHandshake] = JsonCodecMaker.makeWithoutDiscriminator
   
-  implicit val ioportFormat = derived.oformat[IOPort]()
-  implicit val ioconfigFormat = derived.oformat[IOConfig]()
+  implicit val ioportFormat: JsonValueCodec[IOPort] = JsonCodecMaker.makeWithoutDiscriminator
+  implicit val ioconfigFormat: JsonValueCodec[IOConfig] = JsonCodecMaker.makeWithoutDiscriminator
 
-  implicit val deviceFormat = derived.oformat[Device]()
-  implicit val deviceListFormat = derived.oformat[DeviceList]()
+  implicit val deviceFormat: JsonValueCodec[Device] = JsonCodecMaker.makeWithoutDiscriminator
+  implicit val deviceListFormat: JsonValueCodec[DeviceList] = JsonCodecMaker.makeWithoutDiscriminator
   
-  implicit val mappingErrorFormat = derived.oformat[MappingError]()
-  implicit val mappingFormat = derived.oformat[Mapping]()
-  implicit val mappingListFormat = derived.oformat[MappingList]()
-  // implicit val mappingTreeFormat = derived.oformat[MappingTree]()
-  // implicit val oscConfigFormat = derived.oformat[OSCConfig]()
-  implicit val appConfigFormat = derived.oformat[AppConfig]()
-  implicit val appListFormat = derived.oformat[AppList]()
-  implicit val format = derived.oformat[Message]()
+  implicit val mappingErrorFormat: JsonValueCodec[MappingError] = JsonCodecMaker.makeWithoutDiscriminator
+  implicit val mappingFormat: JsonValueCodec[Mapping] = JsonCodecMaker.makeWithoutDiscriminator
+  implicit val mappingListFormat: JsonValueCodec[MappingList] = JsonCodecMaker.makeWithoutDiscriminator
+  // implicit val mappingTreeFormat: JsonValueCodec[MappingTree] = JsonCodecMaker.makeWithoutDiscriminator
+  // implicit val oscConfigFormat: JsonValueCodec[OSCConfig] = JsonCodecMaker.makeWithoutDiscriminator
+  implicit val appConfigFormat: JsonValueCodec[AppConfig] = JsonCodecMaker.makeWithoutDiscriminator
+  implicit val appListFormat: JsonValueCodec[AppList] = JsonCodecMaker.makeWithoutDiscriminator
+  implicit val format: JsonValueCodec[Message] = JsonCodecMaker.makeWithoutDiscriminator
 }

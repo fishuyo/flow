@@ -6,9 +6,10 @@ import org.scalajs.dom.document
 import org.scalajs.dom.console
 import org.scalajs.dom.raw._
 
-import julienrf.json.derived._
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import com.github.plokhotnyuk.jsoniter_scala.core._
+// import julienrf.json.derived._
+// import play.api.libs.json._
+// import play.api.libs.functional.syntax._
 
 import protocol._
 import protocol.Message.format
@@ -23,7 +24,7 @@ object Socket {
   def send(data:String){ ws.send(data) }
   
   def send(msg:Message){
-    val json = Json.toJson(msg).toString()
+    val json = writeToString(msg)
     ws.send(json)
   }
 
@@ -32,7 +33,7 @@ object Socket {
     ws = new WebSocket(getWebsocketUri())
     
     ws.onopen = { (event: Event) =>
-      val json = Json.toJson(ClientHandshake()).toString()
+      val json = writeToString(ClientHandshake())
       ws.send(json)
       event
     }
@@ -41,7 +42,7 @@ object Socket {
 
     ws.onmessage = { (event: MessageEvent) =>
       println(event.data.toString)
-      val wsMsg = Json.parse(event.data.toString).as[Message]
+      val wsMsg = readFromString[Message](event.data.toString)
 
       wsMsg match {
         // case DeviceList(ds) => Devices.set(ds)

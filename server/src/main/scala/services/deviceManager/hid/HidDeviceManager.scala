@@ -178,7 +178,7 @@ object DeviceManager {
       added.foreach(attach(_))
 
       if(removed.length + added.length > 0) 
-        controllers.WebsocketActor.sendDeviceList
+        WebsocketActor.sendDeviceList
     }
   }
 
