@@ -10,7 +10,8 @@ import org.scalajs.dom.raw._
 import com.thoughtworks.binding.Binding
 import com.thoughtworks.binding.Binding.{Var, Vars}
 // import com.thoughtworks.binding.dom
-import org.lrng.binding.html, html.NodeBinding
+// import org.lrng.binding.html, html.NodeBinding
+import com.yang_bo.html._
 import org.scalajs.dom.raw._
 
 object ConsoleWindow {
@@ -19,9 +20,7 @@ object ConsoleWindow {
 
   object views {
 
-
-    @html
-    def main = {
+    def main = html"""
       <ul class="collapsible" data:data-collapsible="accordion">
         <li>
           <div class="collapsible-header"><i class="material-icons">filter_drama</i>Console</div>
@@ -33,7 +32,7 @@ object ConsoleWindow {
         </li>
       </ul>
            
-    }
+    """
 
   }
 

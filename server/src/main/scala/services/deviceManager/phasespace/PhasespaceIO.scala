@@ -2,9 +2,9 @@
 
 // package flow
 
-// import akka.actor._
-// import akka.stream._
-// import akka.stream.scaladsl._
+// import org.apache.pekko.actor._
+// import org.apache.pekko.stream._
+// import org.apache.pekko.stream.scaladsl._
 
 // import seer.math.Vec3
 // import seer.math.Ray
@@ -21,7 +21,7 @@
 //   def rightGlove = state.map(_.rightGlove)
 //   def headPosition = state.map(_.headPosition)
 
-//   override def sources:Map[String,Source[Any,akka.NotUsed]] = Map(
+//   override def sources:Map[String,Source[Any,NotUsed]] = Map(
 //     "state" -> state,
 //     "markers" -> markers,
 //     "leftGlove" ->  leftGlove,
@@ -49,10 +49,10 @@
 //                                     .mapMaterializedValue( (a:ActorRef) => streamActor = Some(a) )
   
 //   // materialize BroadcastHub for dynamic usage as source, which drops previous frame
-//   val source:Source[PhasespaceState,akka.NotUsed] = streamSource.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
+//   val source:Source[PhasespaceState,NotUsed] = streamSource.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
 //   .watchTermination()((_, f) => {f.onComplete {  // for debugging
 //     case t => println(s"Phasespace source terminated: $t")
-//   }; akka.NotUsed })
+//   }; NotUsed })
 
   
 //   val state = new PhasespaceState

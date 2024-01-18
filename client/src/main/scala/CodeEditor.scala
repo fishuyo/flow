@@ -14,7 +14,9 @@ import org.scalajs.dom.raw._
 import com.thoughtworks.binding.Binding
 import com.thoughtworks.binding.Binding.{Var, Vars}
 // import com.thoughtworks.binding.dom
-import org.lrng.binding.html, html.NodeBinding
+// import org.lrng.binding.html, html.NodeBinding
+import com.yang_bo.html._
+
 import org.scalajs.dom.raw._
 
 // import org.denigma.codemirror.extensions.EditorConfig
@@ -80,7 +82,7 @@ object CodeEditor {
     }
   }
 
-  def run(){
+  def run() = {
     println("Run Code!")
     getCode()
     if(!mapping.running){
@@ -90,7 +92,7 @@ object CodeEditor {
     Socket.send(Run(mapping))
   }
 
-  def stop(){
+  def stop() = {
     println("Stop!")
     if(mapping.running){
       mapping = mapping.copy(running = false)
@@ -99,14 +101,14 @@ object CodeEditor {
     Socket.send(Stop(mapping))
   }
 
-  def load(m:Mapping){
+  def load(m:Mapping) = {
     println("Load!")
     mapping = m
     editor.getDoc().setValue(m.code)
     setErrorMarkers(m)
   }
 
-  def save(){
+  def save() = {
     println("Save!")
     getCode()
     if(mapping.modified){
@@ -116,21 +118,21 @@ object CodeEditor {
     }
   }
 
-  def newMapping(name:String){
+  def newMapping(name:String) = {
     getCode()
     val m = Mapping(name,"",true)
     Mappings(name) = m
     load(m)
   }
 
-  def stopAll(){
+  def stopAll() = {
     Socket.send(StopAll)
     Mappings.mappings_.foreach{ case (s,m) => 
       Mappings.update(s, m.copy(running = false))
     }
   }
 
-  def setErrorMarkers(m:Mapping){
+  def setErrorMarkers(m:Mapping) = {
     editor.clearGutter("errors")
     m.errors.foreach { case MappingError(line,msg) =>
       var info = editor.lineInfo(line)
@@ -142,38 +144,36 @@ object CodeEditor {
 
   object views {
 
-    @html
-    def textarea = {
+    def textarea = html"""
       <textarea id="code" name="scala"></textarea>
-    }
+    """
 
-    @html
-    def main = {
+    def main = html"""
       <div>
       <nav>
         <div class="nav-wrapper">
           <!-- <a href="#!" class="brand-logo">Logo</a> -->
           <ul class="left hide-on-small">
             <li>
-              <a href="#" onclick={ event:Event => event.preventDefault(); run() }>
+              <a href="#" onclick=${ (event:Event) => event.preventDefault(); run() }>
                 <i class="material-icons left">play_arrow</i>
                 Run
               </a>
             </li>
             <li>
-              <a href="#" onclick={ event:Event => event.preventDefault(); stop() }>
+              <a href="#" onclick=${ (event:Event) => event.preventDefault(); stop() }>
                 <i class="material-icons left">stop</i>
                 Stop
               </a>
             </li>
             <li>
-              <a href="#" onclick={ event:Event => event.preventDefault(); save() }>
+              <a href="#" onclick=${ (event:Event) => event.preventDefault(); save() }>
                 <i class="material-icons left">save</i>
                 Save
               </a>
             </li>
             <li>
-              <a class="waves-effect waves-light modal-trigger" href="#newModal" onclick={ event:Event => 
+              <a class="waves-effect waves-light modal-trigger" href="#newModal" onclick=${ (event:Event) => 
                 event.preventDefault() 
                 val input = document.getElementById("mappingName").asInstanceOf[HTMLInputElement]
                 input.value = ""
@@ -183,7 +183,7 @@ object CodeEditor {
               </a>
             </li>
             <li>
-              <a href="#" onclick={ event:Event => event.preventDefault(); stopAll() }>
+              <a href="#" onclick=${ (event:Event) => event.preventDefault(); stopAll() }>
                 <i class="material-icons left">cancel</i>
                 Stop All
               </a>
@@ -205,7 +205,7 @@ object CodeEditor {
         </div>
         <div class="modal-footer">
           <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Cancel</a>
-          <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat" onclick={ event:Event => 
+          <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat" onclick=${ (event:Event) => 
                 event.preventDefault() 
                 val input = document.getElementById("mappingName").asInstanceOf[HTMLInputElement]
                 if(input.value != "") newMapping(input.value)
@@ -216,11 +216,11 @@ object CodeEditor {
 
       <div class="row">
         <div class="col s12"> 
-          { textarea.bind }          
+          ${ textarea }          
         </div>
       </div>
       </div>
-    }
+    """
 
   }
 

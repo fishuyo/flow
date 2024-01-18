@@ -21,10 +21,12 @@ object Socket {
   var ws:WebSocket = _
 
   @JSExport
-  def send(data:String){ ws.send(data) }
+  def send(data:String) = { println(data); ws.send(data) }
   
-  def send(msg:Message){
+  def send(msg:Message) = {
     val json = writeToString(msg)
+    // val json = """{"hi":"hello"}"""
+    println(json)
     ws.send(json)
   }
 

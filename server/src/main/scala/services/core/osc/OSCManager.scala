@@ -2,7 +2,7 @@ package flow
 
 // import javax.inject._
 // import play.api.Logger
-import akka.actor._
+import org.apache.pekko.actor._
 
 import de.sciss.osc.Message
 
@@ -20,7 +20,7 @@ object OSCManagerActor {
   case class Bind(port:Int, handler:OSC.OSCHandler)
   case class Unbind(port:Int, handler:OSC.OSCHandler)
 
-  def props = Props[OSCManagerActor]
+  def props = Props[OSCManagerActor]()
 }
 
 class OSCManagerActor extends Actor with ActorLogging {
@@ -33,7 +33,7 @@ class OSCManagerActor extends Actor with ActorLogging {
       var oscRecv = receivers.getOrElseUpdate(port, {
         val r = new OSCRecv
         r.listen(port)
-        println(s"Listening on port ${port}")
+        println(s"OSCManager listening on port ${port}")
         r
       })
       oscRecv.bind(handler)
@@ -42,7 +42,7 @@ class OSCManagerActor extends Actor with ActorLogging {
       r.unbind(handler)
       if(r.handlers.length == 0){
         println(s"disconnecting socket at port $port")
-        r.disconnect
+        r.disconnect()
         receivers -= port
       }
     }
@@ -51,7 +51,7 @@ class OSCManagerActor extends Actor with ActorLogging {
   override def postStop() = {
     // on stop disconnect any receivers, ignore exceptions
     try { 
-      receivers.values.foreach( _.disconnect ) 
+      receivers.values.foreach( _.disconnect() ) 
     } catch { case e:Exception => println(e) }
     super.postStop()
   }

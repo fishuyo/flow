@@ -20,7 +20,9 @@ import org.scalajs.dom
 
 
 import com.thoughtworks.binding.Binding, Binding._
-import org.lrng.binding.html, html.NodeBinding, html.NodeBindingSeq
+// import org.lrng.binding.html, html.Binding, html.NodeBindingSeq
+import com.yang_bo.html._
+
 import org.scalajs.dom.raw._
 
 
@@ -45,7 +47,7 @@ object Main {
     //   elem
     // }
 
-    html.render(dom.document.body, render)
+    com.yang_bo.html.render(dom.document.body, render)
 
     CodeEditor.init("code")
     Socket.init()
@@ -55,7 +57,7 @@ object Main {
   }
 
 
-  // @html def root: NodeBinding[HTMLDivElement] = {
+  // @html def root: Binding[HTMLDivElement] = {
   //   val tags = Vars("initial-tag-1", "initial-tag-2")
   //   // render.value
   //   <div>
@@ -66,7 +68,7 @@ object Main {
   // }
 
   // @html
-  // def renderHeader: NodeBinding[HTMLDivElement] = {
+  // def renderHeader: Binding[HTMLDivElement] = {
   //   <div class="blue-grey lighten-5">
   //     <ul id="slide-out" class="side-nav fixed blue-grey lighten-5">
   //       <li class="no-padding">
@@ -85,35 +87,33 @@ object Main {
   // }
 
 
-  @html def render: NodeBinding[HTMLDivElement] = {
+  def render = html"""
     <div>
-    <header>{ renderHeader.bind }</header>
-    <main>{ renderMain.bind }</main>
-    <footer>{ renderFooter.bind }</footer>
+    <header>${ renderHeader }</header>
+    <main>${ renderMain }</main>
+    <footer>${ renderFooter }</footer>
     </div>
-  }
+  """
 
-  @html
-  def renderHeader: NodeBinding[HTMLDivElement] = {
+  def renderHeader = html"""
     <div class="blue-grey lighten-5">
       <ul id="slide-out" class="sidenav sidenav-fixed blue-grey lighten-5">
         <li class="no-padding">
-          { Devices.views.collapsibleList.bind }
+          ${ Devices.views.collapsibleList }
         </li>
         <li class="no-padding">
-          { Apps.views.collapsibleList.bind }
+          ${ Apps.views.collapsibleList }
         </li> 
         <li class="no-padding">
-          { Mappings.views.collapsibleList.bind }
+          ${ Mappings.views.collapsibleList }
         </li>
       </ul>
 
       <a id="menu-button-left" href="#" data:data-target="slide-out" class="sidenav-trigger show-on-large"><i class="material-icons">menu</i></a>
     </div>
-  }
+  """
 
-  @html
-  def renderMain = {
+  def renderMain = html"""
     <div class="blue-grey darken-4">
       <!-- <div class="fixed-action-btn click-to-toggle">
         <a class="btn-floating btn-large red">
@@ -127,12 +127,12 @@ object Main {
         </ul>
       </div> -->
 
-      { CodeEditor.views.main.bind }
+      ${ CodeEditor.views.main }
       // <!--{ ConsoleWindow.views.main.bind }-->
     </div>
-  }
+  """
 
-  @html def renderFooter = {
+  def renderFooter = html"""
     <div class="page-footer">
       <div class="container">
         <div class="row">
@@ -150,7 +150,7 @@ object Main {
         </div>
       </div>
     </div> 
-  }
+  """
   
 }
 

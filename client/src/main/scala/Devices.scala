@@ -6,7 +6,9 @@ import flow.protocol.IOPort
 import com.thoughtworks.binding.Binding
 import com.thoughtworks.binding.Binding._
 // import com.thoughtworks.binding.dom
-import org.lrng.binding.html, html.NodeBinding
+// import org.lrng.binding.html, html.NodeBinding
+import com.yang_bo.html._
+
 import org.scalajs.dom.raw._
 
 /* Devices Views */
@@ -33,65 +35,61 @@ object Devices {
 
   object views {
 
-    @html
-    def collapsibleList = {
+    def collapsibleList = html"""
       <ul class="collapsible expandable">
         <li>
           <a class="collapsible-header">
             Devices
             <i class="material-icons">arrow_drop_down</i>
-            <span class="badge right"> { deviceCount.toString } </span>
+            <span class="badge right"> ${ deviceCount.bind.toString } </span>
           </a>
           <div class="collapsible-body">
             <ul class="collapsible expandable">
-              { deviceList }
+              ${ deviceList }
             </ul>
           </div>
         </li>
       </ul>
-    }
+    """
     
-    @html
-    def deviceList = {
+    def deviceList = 
       for(ds <- devices) yield ds match {
           // case Nil => <!-- empty -->
           // case d :: Nil =>
           case Device(io, 1) =>
-            <li>
+            html"""<li>
               <a class="collapsible-header">
                 <i class="material-icons">arrow_drop_down</i>
-                <span class="truncate">{io.name}</span>
+                <span class="truncate">${io.name}</span>
               </a>
               <div class="collapsible-body">
-                <ul>{ device(ds) }</ul>
+                <ul>${ device(ds) }</ul>
               </div>
-            </li>
+            </li>"""
           case Device(io, count) =>
           // case d :: xs =>
-            <li>
+            html"""<li>
               <a class="collapsible-header">
                 <i class="material-icons">arrow_drop_down</i>
-                <span class="badge">{count.toString}</span>
-                <span class="truncate">{io.name}</span>
+                <span class="badge">${count.toString}</span>
+                <span class="truncate">${io.name}</span>
               </a>
               <div class="collapsible-body">
-                <ul>{ device(ds) }</ul>
+                <ul>${ device(ds) }</ul>
               </div>
-            </li>
+            </li>"""
       }
-    }
 
-    @html
-    def device(d:Device) = {
+    def device(d:Device) =
       for(src <- Constants(d.io.sources: _*)) yield src match {
         case IOPort(name,types) =>
-          <li>
+          html"""<li>
             <a href="#!">
               <i class="material-icons blue-text tiny">gamepad</i>
-              { name }
+              ${ name }
               <div class="secondary-content"><i class="material-icons red-text text-lighten-2 tiny">remove_red_eye</i></div>
             </a>
-          </li>
+          </li>"""
 
         // case Button(name, pin, value) => 
         //   <li><a href="#!"><i class="material-icons blue-text tiny">gamepad</i>@name<div class="secondary-content"><i class="material-icons red-text text-lighten-2 tiny">remove_red_eye</i></div></a></li>
@@ -105,7 +103,6 @@ object Devices {
         // case AnalogSigned(name, pin) => 
         //   <li><a href="#!"><i class="material-icons blue-text tiny">radio_button_checked</i>@name</a></li>
       }
-    }
     
   }
 }

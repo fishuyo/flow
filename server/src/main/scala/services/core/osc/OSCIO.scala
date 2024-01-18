@@ -1,9 +1,10 @@
 
 package flow
 
-import akka.actor._
-import akka.stream._
-import akka.stream.scaladsl._
+import org.apache.pekko._
+import org.apache.pekko.actor._
+import org.apache.pekko.stream._
+import org.apache.pekko.stream.scaladsl._
 
 import de.sciss.osc.Message
 
@@ -11,7 +12,7 @@ import collection.mutable.HashMap
 
 class OSCSink extends OSCSend with IO {
   var prefix = ""
-  override def sink(name:String) = Some(Sink.foreach(send(prefix + "/" + name, _:Any)).mapMaterializedValue(x => akka.NotUsed))
+  override def sink(name:String) = Some(Sink.foreach(send(prefix + "/" + name, _:Any)).mapMaterializedValue(x => NotUsed))
   def sink = Sink.foreach(send(_:Message))
 }
 
@@ -21,7 +22,7 @@ class OSCSource extends IO {
   val sourceActors = HashMap[String,ActorRef]()
   override def source(name:String) = Some(
     Source.actorRef[Any](bufferSize = 0, OverflowStrategy.fail)
-      .mapMaterializedValue( (a:ActorRef) => { sourceActors("/"+name) = a; akka.NotUsed } )
+      .mapMaterializedValue( (a:ActorRef) => { sourceActors("/"+name) = a; NotUsed } )
   )
   
   val handler:OSC.OSCHandler = {

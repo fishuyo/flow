@@ -7,17 +7,17 @@
 // package flow
 
 // //import io.circe.generic.auto._
-// import akka.actor.ActorSystem
-// import akka.http.scaladsl.Http
-// import akka.http.scaladsl.marshalling.Marshal
-// import akka.http.scaladsl.model.HttpMethods._
-// import akka.http.scaladsl.model.{HttpRequest, RequestEntity, ResponseEntity}
-// import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
-// import akka.stream.{ActorMaterializer, Materializer}
+// import org.apache.pekko.actor.ActorSystem
+// import org.apache.pekko.http.scaladsl.Http
+// import org.apache.pekko.http.scaladsl.marshalling.Marshal
+// import org.apache.pekko.http.scaladsl.model.HttpMethods._
+// import org.apache.pekko.http.scaladsl.model.{HttpRequest, RequestEntity, ResponseEntity}
+// import org.apache.pekko.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
+// import org.apache.pekko.stream.{ActorMaterializer, Materializer}
 
 // import scala.concurrent.{ExecutionContext, Future}
 
-// // import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+// // import de.heikoseeberger.pekkohttpcirce.FailFastCirceSupport._
 
 // case class IPAddress(address: String)
 

@@ -1,9 +1,10 @@
 
 package flow
 
-import akka.actor._
-import akka.stream._
-import akka.stream.scaladsl._
+import org.apache.pekko._
+import org.apache.pekko.actor._
+import org.apache.pekko.stream._
+import org.apache.pekko.stream.scaladsl._
 
 
 class TrackpadIO extends IO {
@@ -21,7 +22,7 @@ class TrackpadIO extends IO {
   def size(i:Int) = finger(i).map(_.size)
   def angle(i:Int) = finger(i).map(_.angle)
 
-  override def sources:Map[String,Source[Any,akka.NotUsed]] = Map(
+  override def sources:Map[String,Source[Any,NotUsed]] = Map(
     "state" -> state,
     "pos" -> pos,
     "vel" -> vel,

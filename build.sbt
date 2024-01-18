@@ -5,10 +5,12 @@ import scala.sys.process.Process
 
 name := "flow"
 
-ThisBuild / organization := "com.fishuyo"
-ThisBuild / scalaVersion := "2.13.10"
+ThisBuild / organization := "flow"
+ThisBuild / scalaVersion := "3.3.1" //"2.13.10"
 ThisBuild / version      := "0.1.0-SNAPSHOT"
 
+lazy val pekkoV = "1.0.2"
+lazy val pekkoHttpV = "1.0.0"
 
 lazy val flow = project.in(file("."))
   .aggregate(server, client, shared.jvm, shared.js)
@@ -22,21 +24,24 @@ lazy val server = project.in(file("server"))
     Compile / compile := ((Compile / compile) dependsOn scalaJSPipeline).value,
     
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-http" % "10.2.10",
-      "com.typesafe.akka" %% "akka-stream" % "2.6.20",
-      "com.typesafe.akka" %% "akka-pki" % "2.6.20",
-      "com.typesafe.akka" %% "akka-remote" % "2.6.20",
+      "org.apache.pekko" %% "pekko-http" % pekkoHttpV,
+      "org.apache.pekko" %% "pekko-stream" % pekkoV,
+      // "org.apache.pekko" %% "pekko-pki" % "2.6.20",
+      // "org.apache.pekko" %% "pekko-remote" % "2.6.20",
       // "com.vmunier" %% "scalajs-scripts" % "1.2.0",
 
       "org.typelevel" %% "spire" % "0.18.0",
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-      "org.scala-lang" % "scala-library" % scalaVersion.value,
+      "com.eed3si9n.eval" %% "eval" % "0.3.0" cross CrossVersion.full,
+      // "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      // "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+      // "org.scala-lang" % "scala-library" % scalaVersion.value,
 
       "de.sciss" %% "scalaosc" % "1.3.1",
       "de.sciss" %% "audiofile" % "2.4.2",
-      "seer" %% "math" % "0.1-SNAPSHOT",
-      "seer" %% "actor" % "0.1-SNAPSHOT",
+      "seer" %% "math" % "0.2.0-SNAPSHOT",
+      // "seer" %% "actor" % "0.1-SNAPSHOT",
+      "net.java.dev.jna" % "jna" % "5.7.0"
+
     ),
 
     Assets / WebKeys.packagePrefix := "public/",
@@ -53,7 +58,8 @@ lazy val client = project.in(file("client"))
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= Seq(
       // "org.scala-js" %%% "scalajs-dom" % "2.1.0",
-      "com.yang-bo" %%% "html" % "2.0.2",
+      "com.yang-bo" %%% "html" % "3.0.3",
+      "com.thoughtworks.binding" %%% "latestevent" % "2.0.0",
       "org.querki" %%% "querki-jsext" % "0.12",
 
       // "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-core"   % "2.21.2",
@@ -107,6 +113,7 @@ lazy val client = project.in(file("client"))
     // startWebpackDevServer / version := "3.11.2",
     webpackCliVersion := "4.10.0",
 
+
     // webpackResources := baseDirectory.value / "webpack" * "*",
 
     webpackConfigFile := Some((baseDirectory).value / "webpack" / "custom.webpack.config.js"),
@@ -136,8 +143,8 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
   .settings(
     libraryDependencies ++= Seq(
       // "org.julienrf" %%% "play-json-derived-codecs" % "8.0.0",
-      "com.github.plokhotnyuk.jsoniter-scala" %%% "jsoniter-scala-core"   % "2.21.2",
-      "com.github.plokhotnyuk.jsoniter-scala" %%% "jsoniter-scala-macros" % "2.21.2",
+      "com.github.plokhotnyuk.jsoniter-scala" %%% "jsoniter-scala-core"   % "2.27.3",
+      "com.github.plokhotnyuk.jsoniter-scala" %%% "jsoniter-scala-macros" % "2.27.3",
     )
   )
   .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))

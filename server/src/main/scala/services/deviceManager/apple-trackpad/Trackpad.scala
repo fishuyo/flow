@@ -12,9 +12,10 @@ import com.alderstone.multitouch.mac.touchpad.TouchpadObservable
 import com.alderstone.multitouch.mac.touchpad.{Finger => TFinger}
 import com.alderstone.multitouch.mac.touchpad.FingerState
 
-import akka.actor._
-import akka.stream._
-import akka.stream.scaladsl._
+import org.apache.pekko._
+import org.apache.pekko.actor._
+import org.apache.pekko.stream._
+import org.apache.pekko.stream.scaladsl._
 
 import concurrent.ExecutionContext.Implicits.global
 
@@ -32,18 +33,18 @@ class TrackpadState {
 
 object Trackpad extends Observer {
 
-  implicit val system = System()
-  implicit val materializer = ActorMaterializer()
+  implicit val system:ActorSystem = System()
+  implicit val materializer:ActorMaterializer = ActorMaterializer()
 
   var streamActor:Option[ActorRef] = None
   private val streamSource = Source.actorRef[TrackpadState](bufferSize = 0, OverflowStrategy.fail)
                                     .mapMaterializedValue( (a:ActorRef) => streamActor = Some(a) )
   
   // materialize BroadcastHub for dynamic usage as source, which drops previous frame
-  val source:Source[TrackpadState,akka.NotUsed] = streamSource.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
+  val source:Source[TrackpadState,NotUsed] = streamSource.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
   .watchTermination()((_, f) => {f.onComplete {  // for debugging
     case t => println(s"Trackpad source terminated: $t")
-  }; akka.NotUsed })
+  }; NotUsed })
 
   
   // val callbacks = new ListBuffer[(TrackpadState)=>Unit]()
@@ -52,14 +53,14 @@ object Trackpad extends Observer {
 
   connect()
   
-  def connect(){
+  def connect():Unit = {
     if( connected ) return
     val tpo = TouchpadObservable.getInstance()
     tpo.addObserver(this)
     connected = true
   }
 
-  def disconnect(){
+  def disconnect():Unit = {
     if(!connected) return
     val tpo = TouchpadObservable.getInstance()
     tpo.deleteObserver(this)
@@ -68,7 +69,7 @@ object Trackpad extends Observer {
 
   // Touchpad Multitouch update event handler, 
   // called on single MT Finger event
-  def update(obj:Observable, arg:Object){
+  def update(obj:Observable, arg:Object) = {
     
     val f = arg.asInstanceOf[TFinger]
     

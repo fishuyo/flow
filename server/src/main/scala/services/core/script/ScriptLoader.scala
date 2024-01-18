@@ -6,16 +6,19 @@ import scala.io.Source
 
 import scala.language.dynamics
 
-import reflect.runtime.universe._
-import reflect.runtime.currentMirror
-import tools.reflect.ToolBox
+// import reflect.runtime.universe._
+// import reflect.runtime.currentMirror
+// import tools.reflect.ToolBox
 
 // import com.twitter.util.Eval
 
-import akka.actor._
-import akka.event.Logging
-import akka.pattern.ask
-import akka.util.Timeout
+import com.eed3si9n.eval._
+
+
+import org.apache.pekko.actor._
+import org.apache.pekko.event.Logging
+import org.apache.pekko.pattern.ask
+import org.apache.pekko.util.Timeout
 
 import concurrent.Await
 import concurrent.duration._
@@ -37,7 +40,7 @@ object ScriptLoaderActor {
   // def props = propsEval
   def props = propsToolbox
   // def propsEval = Props(new ScriptLoaderActor(new EvalScriptLoader()))
-  def propsToolbox = Props(new ScriptLoaderActor(new ToolboxScriptLoader()))
+  def propsToolbox = Props(new ScriptLoaderActor(new EvalScriptLoader()))
 }
 /**
  * ScriptLoaderActor, each responsible for compiling and running
@@ -61,7 +64,7 @@ class ScriptLoaderActor(val loader:ScriptLoader) extends Actor with ActorLogging
     case Unload | "unload" => loader.unload()
     case Status => 
       if(loader.errors.isEmpty) loader.checkErrors()
-      sender ! loader.errors
+      sender() ! loader.errors
 
     case x => log.warning("Received unknown message: {}", x)
   }
@@ -75,7 +78,7 @@ trait ScriptLoader {
   var loaded = false
   var code=""
   var path:Option[String] = None
-  var obj:AnyRef = null
+  var obj:Any = null
   var errors:Seq[(Int,String)] = Seq()
 
   def setPath(s:String) = path = Some(s)
@@ -85,18 +88,20 @@ trait ScriptLoader {
     code
   }
 
-  def reload(){
+  def reload() = {
     try{
       errors = Seq()
-      val ret = compile()
+      val code = getCode()
+      // println(code)
+      val ret = Eval[Any](code) //compile()
       ret match{
         case s:Script =>
-          unload
+          unload()
           obj = ret
           s.load()
           loaded = true
         case a:ActorRef =>
-          unload
+          unload()
           obj = ret
           a ! "load"
           loaded = true
@@ -114,11 +119,11 @@ trait ScriptLoader {
         // println(s"$cause at line ${frame.getLineNumber}")
         // errors = Seq((frame.getLineNumber, "RuntimeError: " + cause.toString))
       // } else println("Exception in script: " + e); 
-      unload
+      unload()
     }
   }
 
-  def unload(){
+  def unload() = {
     obj match {
       case s:Script => 
         s.unload()
@@ -126,53 +131,69 @@ trait ScriptLoader {
         loaded = false
       case a:ActorRef =>
         a ! "unload"
-        a ! akka.actor.PoisonPill
+        a ! PoisonPill
         obj = null
         loaded = false
       case _ => ()
     }
   }
 
-  def checkErrors(){}
+  def checkErrors() =  {}
 
-  def compile():AnyRef
+  def eval[T]():T
+}
+
+
+// Eval Script Loader scala3
+class EvalScriptLoader extends ScriptLoader {
+
+  def eval[T]() : T = {
+    val source = getCode()
+    // Eval[T](source)
+    Eval[T](source)
+
+  }
+  
+  // override def checkErrors() = {
+  // }
+
 }
 
 /**
   * Toolbox implementation of a ScriptLoader
   */
-object ToolboxScriptLoader {
-  val toolbox = currentMirror.mkToolBox() 
+// object ToolboxScriptLoader {
+//   val toolbox = currentMirror.mkToolBox() 
 
-  def logToolboxErrorLocation(){
-  }
-}
-class ToolboxScriptLoader extends ScriptLoader {
-  val toolbox = ToolboxScriptLoader.toolbox //currentMirror.mkToolBox() 
+//   def logToolboxErrorLocation() = {
+//   }
+// }
+// class ToolboxScriptLoader extends ScriptLoader {
+//   val toolbox = ToolboxScriptLoader.toolbox //currentMirror.mkToolBox() 
 
-  def compile() = {
-    val source = getCode()
-    val tree = toolbox.parse(source)
-    // checkErrors()
-    val script = toolbox.eval(tree).asInstanceOf[AnyRef]
-    script
-  } 
+//   def compile() = {
+//     val source = getCode()
+//     val tree = toolbox.parse(source)
+//     // checkErrors()
+//     val script = toolbox.eval(tree).asInstanceOf[AnyRef]
+//     script
+//   } 
 
-  override def checkErrors() = {
-    if(toolbox.frontEnd.hasErrors){
-      val errs = toolbox.frontEnd.infos.map { case info =>
-        val line = info.pos.line
-        val msg = s"""
-          ${info.msg}
-          ${info.pos.lineContent}
-          ${info.pos.lineCaret} 
-        """
-        (line,msg)
-      }.toSeq
-      errors = errs
-    } else errors = Seq()
-  }
-}
+//   override def checkErrors() = {
+//     if(toolbox.frontEnd.hasErrors){
+//       val errs = toolbox.frontEnd.infos.map { case info =>
+//         val line = info.pos.line
+//         val msg = s"""
+//           ${info.msg}
+//           ${info.pos.lineContent}
+//           ${info.pos.lineCaret} 
+//         """
+//         (line,msg)
+//       }.toSeq
+//       errors = errs
+//     } else errors = Seq()
+//   }
+// }
 
 /**
   * Twitter Eval implementation of a ScriptLoader

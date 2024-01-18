@@ -5,9 +5,10 @@ package hid
 
 import spire.math.UByte
 
-import akka.actor._
-import akka.stream._
-import akka.stream.scaladsl._
+import org.apache.pekko._
+import org.apache.pekko.actor._
+import org.apache.pekko.stream._
+import org.apache.pekko.stream.scaladsl._
 
 import collection.mutable.HashMap
 
@@ -55,7 +56,7 @@ abstract class HidDeviceIO(val index:Int) extends IO {
   val device:HidDeviceConnection = DeviceManager.getDeviceConnection(name, deviceType, index)
 
 
-  override def sources:Map[String,Source[Any,akka.NotUsed]] = {
+  override def sources:Map[String,Source[Any,NotUsed]] = {
     sourceElements.map { 
       case Button(name,i,mask) =>
         name -> device.source.map { case bytes => 
@@ -76,7 +77,7 @@ abstract class HidDeviceIO(val index:Int) extends IO {
     }.toMap
   }
 
-  override def sinks:Map[String,Sink[Any,akka.NotUsed]] = {
+  override def sinks:Map[String,Sink[Any,NotUsed]] = {
     sinkElements.map { case e =>
       e.name -> Flow[Any].map((a:Any) => { //(e,_)).to(outputStream)
         a match {

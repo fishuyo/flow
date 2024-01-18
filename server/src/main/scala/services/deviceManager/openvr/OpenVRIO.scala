@@ -2,9 +2,9 @@
 
 // package flow
 
-// import akka.actor._
-// import akka.stream._
-// import akka.stream.scaladsl._
+// import org.apache.pekko.actor._
+// import org.apache.pekko.stream._
+// import org.apache.pekko.stream.scaladsl._
 
 // import seer.math._
 
@@ -25,7 +25,7 @@
 //   def trackers = state.map(_.devices.filter(_.isValid == true).filter(_.deviceType == VRDeviceType.Generic))
 
 
-//   override def sources:Map[String,Source[Any,akka.NotUsed]] = Map(
+//   override def sources:Map[String,Source[Any,NotUsed]] = Map(
 //     "state" -> state
 //   )
 // }
@@ -70,10 +70,10 @@
 //                                     .mapMaterializedValue( (a:ActorRef) => streamActor = Some(a) )
   
 //   // materialize BroadcastHub for dynamic usage as source, which drops previous frame
-//   val source:Source[OpenVRState,akka.NotUsed] = streamSource.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
+//   val source:Source[OpenVRState,NotUsed] = streamSource.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
 //   .watchTermination()((_, f) => {f.onComplete {  // for debugging
 //     case t => println(s"OpenVR source terminated: $t")
-//   }; akka.NotUsed })
+//   }; NotUsed })
 
   
 //   val state = new OpenVRState

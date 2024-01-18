@@ -1,8 +1,8 @@
 package flow
 
-import akka.actor._
-import akka.stream.scaladsl.{Keep, Sink, Source, Flow}
-import akka.stream.{Materializer, OverflowStrategy}
+import org.apache.pekko.actor._
+import org.apache.pekko.stream.scaladsl.{Keep, Sink, Source, Flow}
+import org.apache.pekko.stream.{Materializer, OverflowStrategy}
 
 object NamedActorFlow {
 

@@ -1,8 +1,8 @@
 package flow
 package server
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.Http
 import com.typesafe.config.ConfigFactory
 
 object WebServer {

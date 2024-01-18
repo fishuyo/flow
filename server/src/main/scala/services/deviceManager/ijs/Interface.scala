@@ -8,9 +8,10 @@ import java.io.File
 import java.io.PrintWriter
 import java.io.FileOutputStream
 
-import akka.actor._
-import akka.stream._
-import akka.stream.scaladsl._
+import org.apache.pekko._
+import org.apache.pekko.actor._
+import org.apache.pekko.stream._
+import org.apache.pekko.stream.scaladsl._
 import concurrent.ExecutionContext.Implicits.global
 
 import collection.mutable.ListBuffer
@@ -72,32 +73,32 @@ class InterfaceBuilder(val name:String) extends IO {
   var sourceActor:Option[ActorRef] = None
   val _src = Source.actorRef[(String,Any)](bufferSize = 0, OverflowStrategy.fail)
                                     .mapMaterializedValue( (a:ActorRef) => sourceActor = Some(a) )
-  val broadcastSource: Source[(String,Any),akka.NotUsed] = _src.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
+  val broadcastSource: Source[(String,Any),NotUsed] = _src.toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
     .watchTermination()((_, f) => {f.onComplete {  // for debugging
       case t => println(s"Interface source terminated: $name: $t")
-    }; akka.NotUsed })
+    }; NotUsed })
   // val sourceActors = HashMap[String,ActorRef]()
   var sinkActors = ListBuffer[ActorRef]()
   
-  override def sources:Map[String,Source[Any,akka.NotUsed]] = widgets.map { case w =>
+  override def sources:Map[String,Source[Any,NotUsed]] = widgets.map { case w =>
     val src = broadcastSource.collect{ case (name,value) if name == w.name => value }
       // Source.actorRef[Float](bufferSize = 0, OverflowStrategy.fail)
-      // .mapMaterializedValue( (a:ActorRef) => { sourceActors(w.name) = a; akka.NotUsed } )
+      // .mapMaterializedValue( (a:ActorRef) => { sourceActors(w.name) = a; NotUsed } )
     w.name -> src
   }.toMap
 
-  override def sinks:Map[String,Sink[Any,akka.NotUsed]] = widgets.map { case w =>
+  override def sinks:Map[String,Sink[Any,NotUsed]] = widgets.map { case w =>
     val sink = Sink.foreach( (f:Any) => {
       sinkActors.foreach( _ ! (w.name,f))
       // try{ oscSend.send(s"/$name", f) }
       // catch{ case e:Exception => AppManager.close(config.io.name) }
-    }).mapMaterializedValue{ case _ => akka.NotUsed}
+    }).mapMaterializedValue{ case _ => NotUsed}
     w.name -> sink
   }.toMap
 
   override def sink(name:String) = Some(Sink.foreach( (f:Any) => {
     sinkActors.foreach( _ ! (name,f))
-  }).mapMaterializedValue{ case _ => akka.NotUsed})
+  }).mapMaterializedValue{ case _ => NotUsed})
 
   def addWidgetsFromLayouts() = {
     layouts.foreach { case l =>
@@ -136,7 +137,7 @@ class InterfaceBuilder(val name:String) extends IO {
   def save() = {
     val path = "server/public/interfaces/"
     val pw = new PrintWriter(new FileOutputStream(path + name + ".html", false));
-    pw.write(toHtml)
+    pw.write(toHtml())
     pw.close
   }
 

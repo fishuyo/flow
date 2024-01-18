@@ -2,15 +2,16 @@
 package flow
 package hid
 
-import seer.actor._
+// import seer.actor._
 
 import spire.math.UByte
 
 import purejavahidapi._
 
-import akka.actor._
-import akka.stream._
-import akka.stream.scaladsl._
+import org.apache.pekko._
+import org.apache.pekko.actor._
+import org.apache.pekko.stream._
+import org.apache.pekko.stream.scaladsl._
 import concurrent.ExecutionContext.Implicits.global
 
 import collection.mutable.HashMap
@@ -21,8 +22,8 @@ import collection.mutable.HashMap
   */
 class HidDeviceConnection(val name:Option[String], val deviceType:DeviceType, val index:Int){
   
-  implicit val system = System()
-  implicit val materializer = ActorMaterializer()
+  implicit val system:ActorSystem = System()
+  implicit val materializer:ActorMaterializer = ActorMaterializer()
 
   var openDevice:Option[HidDevice] = None
 
@@ -35,18 +36,18 @@ class HidDeviceConnection(val name:Option[String], val deviceType:DeviceType, va
                                     .mapMaterializedValue( (a:ActorRef) => byteStreamActor = Some(a) )
   
   // materialize BroadcastHub for dynamic usage as source, which drops previous frame
-  val source:Source[Array[Byte],akka.NotUsed] = byteStreamSource.via(kill.flow).toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
+  val source:Source[Array[Byte],NotUsed] = byteStreamSource.via(kill.flow).toMat(BroadcastHub.sink)(Keep.right).run().buffer(1,OverflowStrategy.dropHead) 
   .watchTermination()((_, f) => {f.onComplete {  // for debugging
     case t => println(s"Device source terminated: $name $index: $t")
-  }; akka.NotUsed })
+  }; NotUsed })
 
   // sink sends bytes to open HidDevice
-  private val byteStreamSink:Sink[Array[Byte],akka.NotUsed] = Sink.foreach( (bytes:Array[Byte]) => {
+  private val byteStreamSink:Sink[Array[Byte],NotUsed] = Sink.foreach( (bytes:Array[Byte]) => {
     openDevice.foreach(_.setOutputReport(0, bytes, bytes.length))
-  }).mapMaterializedValue{ case _ => akka.NotUsed}
+  }).mapMaterializedValue{ case _ => NotUsed}
 
   // materialize MergeHub for dynamic usage as sink
-  val sink:Sink[Array[Byte],akka.NotUsed] = MergeHub.source[Array[Byte]].via(kill.flow).to(byteStreamSink).run()
+  val sink:Sink[Array[Byte],NotUsed] = MergeHub.source[Array[Byte]].via(kill.flow).to(byteStreamSink).run()
 
   // Materialize stream to handle connection events for device with matching name and index
   // TODO only listen when requested???

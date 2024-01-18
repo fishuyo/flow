@@ -11,39 +11,46 @@ import com.github.plokhotnyuk.jsoniter_scala.core._
 // import play.api.libs.json._
 // import play.api.libs.functional.syntax._
 
-import akka.actor._
+import org.apache.pekko._
+import org.apache.pekko.actor._
+import org.apache.pekko.http.scaladsl.model.ws._
 
 
 object WebsocketActor {
   def props(out: ActorRef) = Props(new WebsocketActor(out))
 
-  def sendAppList() = System().actorSelection("akka://application/user/client.*/flowActor") ! "sendAppList"
-  def sendDeviceList() = System().actorSelection("akka://application/user/client.*/flowActor") ! "sendDeviceList"
-  def sendMapping(m:Mapping) = System().actorSelection("akka://application/user/client.*/flowActor") ! m
+  def sendAppList() = System().actorSelection("pekko://application/user/client.*/flowActor") ! "sendAppList"
+  def sendDeviceList() = System().actorSelection("pekko://application/user/client.*/flowActor") ! "sendDeviceList"
+  def sendMapping(m:Mapping) = System().actorSelection("pekko://application/user/client.*/flowActor") ! m
 }
 
 class WebsocketActor(out: ActorRef) extends Actor {
 
   def receive = {
-    case msg:String if msg == "keepalive" => ()
-    case msg:String if msg == "sendDeviceList" => sendDeviceList()
-    case msg:String if msg == "sendAppList" => sendAppList()
-    case msg:String => 
+    // case x => println(s"WebsocketActor got message: $x")
+    case TextMessage.Strict(msg) if msg == "keepalive" => ()
+    case TextMessage.Strict(msg) if msg == "sendDeviceList" => sendDeviceList()
+    case TextMessage.Strict(msg) if msg == "sendAppList" => sendAppList()
+    case TextMessage.Strict(msg) => 
       println(msg)
-      val message = readFromString[Message](msg)
-      message match {
-        case ClientHandshake(msg) => 
-          sendDeviceList()
-          sendAppList()
-          sendMappingList()
+      try {
+        val message = readFromString[protocol.Message](msg)
+        message match {
+          case ClientHandshake(msg) => 
+            sendDeviceList()
+            sendAppList()
+            sendMappingList()
 
-        case Run(mapping) => MappingManager.run(mapping)
-        case Stop(mapping) => MappingManager.stop(mapping)
-        case Save(mapping) => MappingManager.save(mapping)
-        case StopAll => 
-          MappingManager.stopAll()
-          AppManager.closeAll()
-        case m => println(m)
+          case Run(mapping) => MappingManager.run(mapping)
+          case Stop(mapping) => MappingManager.stop(mapping)
+          case Save(mapping) => MappingManager.save(mapping)
+          case StopAll => 
+            MappingManager.stopAll()
+            AppManager.closeAll()
+          case m => println(m)
+        }
+      } catch {
+        case e:Exception => println(e)
       }
 
     case m:Mapping => sendMapping(m)

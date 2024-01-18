@@ -2,6 +2,6 @@ package flow
 package script
 
 class Script {
-  def load(){}
-  def unload(){}
+  def load() = {}
+  def unload() = {}
 }

@@ -10,9 +10,10 @@ import protocol.Message.appConfigFormat
 // import play.api.libs.json._
 import com.github.plokhotnyuk.jsoniter_scala.core._
 
-import akka.actor._
-import akka.stream._
-import akka.stream.scaladsl._
+import org.apache.pekko._
+import org.apache.pekko.actor._
+import org.apache.pekko.stream._
+import org.apache.pekko.stream.scaladsl._
 
 import de.sciss.osc.Message
 
@@ -21,9 +22,9 @@ import collection.mutable.HashMap
 
 
 object AppIO{
-	def apply(name:String) = {
+  def apply(name:String) = {
     new AppIO(AppConfig(IOConfig(name,Seq(),Seq()),Seq()))
-	}
+  }
 
   def fromConfig(conf:String):AppIO = {
     // val config = Json.parse(conf).as[AppConfig]
@@ -31,20 +32,20 @@ object AppIO{
     new AppIO(config)
   }
   
-	def fromConfigFile(file:java.io.File):AppIO = {
+  def fromConfigFile(file:java.io.File):AppIO = {
     val stream = new java.io.FileInputStream(file)
     val config = try {  readFromStream[AppConfig](stream) } finally { stream.close() }
     println(config)
     new AppIO(config)
-	}
+  }
 }
 
 class AppIO(val config:AppConfig) extends IO {
 
   // var oscConfig = OSCConfig()
 
-	// sources as actor refs sent messages from OSCRecv handler
-	// sinks as OSCSend to app port and address
+  // sources as actor refs sent messages from OSCRecv handler
+  // sinks as OSCSend to app port and address
 
   // val sourceNames = Set[String]()
   // val sinkNames = Set[String]()
@@ -57,18 +58,18 @@ class AppIO(val config:AppConfig) extends IO {
   // sourcePorts ++= config.io.sources
   // sinkPorts ++= config.io.sinks
 
-	
-  override def sources:Map[String,Source[Any,akka.NotUsed]] = config.io.sources.map { case IOPort(name,types) =>
+  
+  override def sources:Map[String,Source[Any,NotUsed]] = config.io.sources.map { case IOPort(name,types) =>
     val src = Source.actorRef[Any](bufferSize = 0, OverflowStrategy.fail)
-      .mapMaterializedValue( (a:ActorRef) => { sourceActors(name) = a; akka.NotUsed } )
+      .mapMaterializedValue( (a:ActorRef) => { sourceActors(name) = a; NotUsed } )
     name -> src
   }.toMap
 
-  override def sinks:Map[String,Sink[Any,akka.NotUsed]] = config.io.sinks.map { case IOPort(name,types) =>
+  override def sinks:Map[String,Sink[Any,NotUsed]] = config.io.sinks.map { case IOPort(name,types) =>
     val sink = Sink.foreach( (f:Any) => {
       try{ oscSend.send(s"/$name", f) }
       catch{ case e:Exception => AppManager.close(config.io.name) }
-    }).mapMaterializedValue{ case _ => akka.NotUsed}
+    }).mapMaterializedValue{ case _ => NotUsed}
     name -> sink
   }.toMap
 
@@ -92,7 +93,7 @@ class AppIO(val config:AppConfig) extends IO {
   def close() = {
     stopDefaultMappings()
     OSCManager() ! OSCManagerActor.Unbind(12000, handler)
-    try { oscSend.disconnect }
+    try { oscSend.disconnect() }
     catch { case e:Exception => () }
   }
 
@@ -112,6 +113,6 @@ class AppIO(val config:AppConfig) extends IO {
           // writer.close()
 
 
-	      //   val bos = new BufferedOutputStream(new FileOutputStream(path, false))
-			    // bos.write(byteArray)
-			    // bos.close()
+        //   val bos = new BufferedOutputStream(new FileOutputStream(path, false))
+          // bos.write(byteArray)
+          // bos.close()

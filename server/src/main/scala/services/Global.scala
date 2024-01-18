@@ -1,13 +1,13 @@
 package flow
 
-import akka.actor._
+import org.apache.pekko.actor._
 
 object System {
   var system:ActorSystem = _
   def apply() = system
   def update(s:ActorSystem) = system = s
 
-  def address = System().asInstanceOf[akka.actor.ExtendedActorSystem].provider.getDefaultAddress
+  def address = System().asInstanceOf[ExtendedActorSystem].provider.getDefaultAddress
 
   def broadcast(msg:Any) = apply().actorSelection("/user/live.*") ! msg
   def send(name:String, msg:Any) = apply().actorSelection(s"/user/live.$name.*") ! msg

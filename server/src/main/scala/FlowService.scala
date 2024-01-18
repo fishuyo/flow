@@ -1,8 +1,8 @@
 package flow
 package server
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.server.Directives
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.server.Directives
 // import $package$.shared.SharedMessages
 // import $package$.twirl.Implicits._
 

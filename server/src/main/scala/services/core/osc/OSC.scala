@@ -34,7 +34,7 @@ trait OSCReceiver {
   def unbind(f:OSCHandler) = handlers -= f
 
   /** Start listening for OSC message on given port */
-  def listen(port:Int=8000){
+  def listen(port:Int=8000) = {
 
     cfg = UDP.Config()
     cfg.localPort = port  // 0x53 0x4F or 'SO'
@@ -47,10 +47,10 @@ trait OSCReceiver {
        
       case (p, addr) => println( "Ignoring: " + p + " from " + addr )
     }
-    rcv.connect
+    rcv.connect()
   }
 
-  def handleBundle(bundle:Bundle, addr:SocketAddress){
+  def handleBundle(bundle:Bundle, addr:SocketAddress):Unit = {
     bundle match {
       case Bundle(t, msgs @ _*) =>
         msgs.foreach{
@@ -62,13 +62,13 @@ trait OSCReceiver {
     }
   }
 
-  def handleMessage(msg:Message, addr:SocketAddress){
+  def handleMessage(msg:Message, addr:SocketAddress) = {
     client = addr
     handlers.foreach(_((msg,addr)))
   }
 
   /** close receiver and sender ports */
-  def disconnect(){
+  def disconnect() = {
     rcv.close
   }
 }
@@ -86,8 +86,8 @@ trait OSCSender {
   var out = UDP.Client( localhost -> 8001, ccfg )
 
   /** close receiver and sender ports */
-  def disconnect(){
-    out.close
+  def disconnect() = {
+    out.close()
   }
 
   /** Set send ip and port */
@@ -95,11 +95,11 @@ trait OSCSender {
     out.close
     out = UDP.Client( ip -> port, ccfg )
     out.channel.socket.setBroadcast(true)
-    out.connect                         
+    out.connect()                         
   }
 
   /** Send OSC message to prviously connected ip */
-  def send(msg:Message){
+  def send(msg:Message):Unit = {
     if( bundle ){ 
       messageBuffer += msg
       if( messageBuffer.length > maxBundleLength){ 
@@ -112,7 +112,7 @@ trait OSCSender {
     }
   }
 
-  def send(address:String, value:Any){
+  def send(address:String, value:Any):Unit = {
     val msg = value match{
       case v:Float => Message(address,v)
       case v:Seq[Float] => Message(address,v:_*)
@@ -125,20 +125,20 @@ trait OSCSender {
     send(msg)
   }
 
-  def send(address:String, fs:Float*){ send(Message(address,fs:_*)) }
+  def send(address:String, fs:Float*):Unit = { send(Message(address,fs:_*)) }
   // def send(address:String, f1:Float, f2:Float){ send(Message(address,f1,f2)) }
   // def send(address:String, f1:Float, f2:Float, f3:Float){ send(Message(address,f1,f2,f3)) }
   // def send(address:String, f1:Float, f2:Float, f3:Float, f4:Float){ send(Message(address,f1,f2,f3,f4)) }
-  def send(address:String, s1:String, s2:String){ send(Message(address,s1,s2)) }
+  def send(address:String, s1:String, s2:String):Unit = { send(Message(address,s1,s2)) }
 
   /** Connect and send message */
-  def send(ip:String, port:Int, address:String, value:Any){
+  def send(ip:String, port:Int, address:String, value:Any):Unit = {
     connect(ip,port)
     send(address,value)                        
   }
 
-  def startBundle(count:Int=30){ maxBundleLength = count; bundle = true }
-  def endBundle(){
+  def startBundle(count:Int=30) = { maxBundleLength = count; bundle = true }
+  def endBundle() = {
     bundle = false
     if( messageBuffer.length > 0){
       // println("sending bundle size " + messageBuffer.length)

@@ -5,9 +5,9 @@ package script
 object FlowScriptWrapper {
 
   val header = """
-import akka.actor._
-import akka.stream._
-import akka.stream.scaladsl._
+import org.apache.pekko.actor._
+import org.apache.pekko.stream._
+import org.apache.pekko.stream.scaladsl._
 
 import scala.concurrent.duration._
 import scala.math._
@@ -21,23 +21,23 @@ import flow.script._
 
 class FlowScript extends Script {
 
-  implicit val system = System()
-  implicit val materializer = ActorMaterializer()
+  implicit val system:ActorSystem = System()
+  implicit val materializer:ActorMaterializer = ActorMaterializer()
 
-  implicit def source2io[T,M](src:Source[T,M]) = IOSource(src)
-  implicit val kill = KillSwitches.shared("script")
+  implicit def source2io[T,M](src:Source[T,M]):IOSource[T,M] = IOSource(src)
+  implicit val kill:SharedKillSwitch = KillSwitches.shared("script")
 
-  implicit def d2f(d:Double) = d.toFloat
+  implicit def d2f(d:Double):Float = d.toFloat
 
   val Print = Sink.foreach(println(_:Any))
 
-  override def load(){
+  override def load() = {
 """
 
   val footer = """
   }
-  override def unload(){
-    kill.shutdown
+  override def unload() = {
+    kill.shutdown()
   }
 }
 new FlowScript

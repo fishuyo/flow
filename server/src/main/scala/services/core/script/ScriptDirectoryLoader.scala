@@ -4,10 +4,10 @@ package script
 import scala.language.dynamics
 import java.io.File
 
-import akka.actor._
-import akka.event.Logging
-import akka.pattern.ask
-import akka.util.Timeout
+import org.apache.pekko.actor._
+import org.apache.pekko.event.Logging
+import org.apache.pekko.pattern.ask
+import org.apache.pekko.util.Timeout
 
 import concurrent.Await
 import concurrent.duration._

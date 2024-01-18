@@ -7,13 +7,13 @@ import scala.io.Source
 import scala.language.dynamics
 
 // import reflect.runtime.universe._
-import reflect.runtime.currentMirror
-import tools.reflect.ToolBox
+// import reflect.runtime.currentMirror
+// import tools.reflect.ToolBox
 
-import akka.actor._
-import akka.event.Logging
-import akka.pattern.ask
-import akka.util.Timeout
+import org.apache.pekko.actor._
+import org.apache.pekko.event.Logging
+import org.apache.pekko.pattern.ask
+import org.apache.pekko.util.Timeout
 
 import concurrent._
 import concurrent.duration._
@@ -31,9 +31,9 @@ object ScriptManager {
 
   case class Create(name:String="")
 
-  val manager = System().actorOf( Props[ScriptManagerActor], name="ScriptManager" )
+  val manager = System().actorOf( Props[ScriptManagerActor](), name="ScriptManager" )
   
-  implicit val timeout = Timeout(4 seconds)
+  implicit val timeout:Timeout = Timeout(4 seconds)
 
   def apply() = Await.result(manager ? Create(), 3 seconds).asInstanceOf[ActorRef]
 
@@ -51,8 +51,8 @@ object ScriptManager {
     actor
   }
 
-  def remote(address:Address)(path:String, reloadOnChange:Boolean=true){
-    val remoteManager = System().actorSelection(address + "/user/ScriptManager")
+  def remote(address:Address)(path:String, reloadOnChange:Boolean=true) = {
+    val remoteManager = System().actorSelection(address.toString() + "/user/ScriptManager")
 
     val file = new File(path)
     if(file.isDirectory){
@@ -96,7 +96,7 @@ object ScriptManager {
 class ScriptManagerActor extends Actor with ActorLogging {
   import ScriptManager._
   import ScriptLoaderActor._
-  import akka.actor.SupervisorStrategy._
+  import org.apache.pekko.actor.SupervisorStrategy._
   import scala.concurrent.duration._
 
   val scripts = HashMap[String,ActorRef]()
@@ -104,7 +104,7 @@ class ScriptManagerActor extends Actor with ActorLogging {
 
   override val supervisorStrategy =
     OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute, loggingEnabled=false) {
-      case _:scala.tools.reflect.ToolBoxError => Resume
+      // case _:scala.tools.reflect.ToolBoxError => Resume
       case t => super.supervisorStrategy.decider.applyOrElse(t, (_: Any) => Escalate)
     }
 
@@ -112,32 +112,32 @@ class ScriptManagerActor extends Actor with ActorLogging {
     case Create(n) => 
       var name = n
       if(n.isEmpty) name += "script"+scripts.size
-      if(scripts.isDefinedAt(name)) sender ! scripts(name)
+      if(scripts.isDefinedAt(name)) sender() ! scripts(name)
       else {
         val loader = context.actorOf( ScriptLoaderActor.props, name)
         scripts(name) = loader
-        sender ! loader
+        sender() ! loader
       }
     case Path(path,reload) =>
       val file = new File(path)
       val name = file.getName
       if(file.isDirectory){
         // log.info(s"create ScriptDirectoryLoaderActor for $path")
-        if(dirs.isDefinedAt(name)) sender ! scripts(name)
+        if(dirs.isDefinedAt(name)) sender() ! scripts(name)
         else {
-          val loader = context.actorOf( Props[ScriptDirectoryLoaderActor], name)
+          val loader = context.actorOf( Props[ScriptDirectoryLoaderActor](), name)
           dirs(name) = loader
           loader ! Path(path,reload)
-          sender ! loader
+          sender() ! loader
         }
       }else if(file.isFile){
-        if(scripts.isDefinedAt(name)) sender ! scripts(name)
+        if(scripts.isDefinedAt(name)) sender() ! scripts(name)
         else{
           val loader = context.actorOf( ScriptLoaderActor.props, name)
           scripts(name) = loader
           loader ! Path(path,reload)
           // loader ! Load
-          sender ! loader
+          sender() ! loader
         }
       } else {
         log.error("Invalid path..")

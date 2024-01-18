@@ -11,7 +11,9 @@ import org.scalajs.dom.raw._
 import com.thoughtworks.binding.Binding
 import com.thoughtworks.binding.Binding._
 // import com.thoughtworks.binding.dom
-import org.lrng.binding.html, html.NodeBinding
+// import org.lrng.binding.html, html.NodeBinding
+import com.yang_bo.html._
+
 import org.scalajs.dom.raw._
 import collection.mutable.HashMap
 
@@ -41,36 +43,34 @@ object Mappings {
 
   object views {
 
-    @html
-    def collapsibleList = {
+    def collapsibleList = html"""
       <ul class="collapsible expandable">
         <li>
           <a class="collapsible-header">
             Mappings
             <i class="material-icons">arrow_drop_down</i>
-            <span class="badge right"> { mappingCount.toString } </span>
+            <span class="badge right"> ${ mappingCount.bind.toString } </span>
           </a>
           <div class="collapsible-body">
             <ul class="collapsible expandable">
-              { mappingList }
+              ${ mappingList }
             </ul>
           </div>
         </li>
       </ul>
-    }
+    """
 
-    @html
-    def mappingList = {
+    def mappingList =
       for(m <- mappings) yield m match {
           case Mapping(name, code, modified, running, errors) =>
-            <li> 
-              <!-- <a href="#" onclick={ event:Event => event.preventDefault(); CodeEditor.load(m) }> -->
-              <a href="#" onclick={ event:Event => event.preventDefault(); }>
-                { name }  
-                { if(errors.length > 0) <i class="material-icons">error</i>
-                  else if(modified) <i class="material-icons">edit</i>
-                  else if(running) <i class="material-icons">directions_run</i>
-                  else <i></i> }
+            html"""<li> 
+              <a href="#" onclick=${ (event:Event) => {event.preventDefault(); CodeEditor.load(m)} }>
+                ${ name }  
+                ${ if(errors.length > 0) html"""<i class="material-icons">error</i>"""
+                  else if(modified) html"""<i class="material-icons">edit</i>"""
+                  else if(running) html"""<i class="material-icons">directions_run</i>"""
+                  else html"""<i></i>""" 
+                }
               </a>
  <!--              <a class="collapsible-header">
                 <i class="material-icons">arrow_drop_down</i>
@@ -79,10 +79,9 @@ object Mappings {
               <div class="collapsible-body">
                 <ul>{ mapping(m).bind }</ul>
               </div> -->
-            </li>
+            </li>"""
 
       }
-    }
 
     // @html
     // def mapping(m:Mapping) = {

@@ -8,9 +8,9 @@ import collection.JavaConverters._
 import collection.mutable.ListBuffer
 import collection.mutable.HashMap
 
-import akka.actor._
-import akka.stream._
-import akka.stream.scaladsl._
+import org.apache.pekko.actor._
+import org.apache.pekko.stream._
+import org.apache.pekko.stream.scaladsl._
 
 /** DeviceConnectionEvent case classes **/
 sealed trait DeviceConnectionEvent { def device:HidDeviceInfoW; def index:Int }
@@ -37,8 +37,8 @@ class HidDeviceInfoW(val info:HidDeviceInfo) {
   */
 object DeviceManager {
 
-  implicit val system = System()
-  implicit val materializer = ActorMaterializer()
+  implicit val system:ActorSystem = System()
+  implicit val materializer:ActorMaterializer = ActorMaterializer()
 
   // map of connected devices keyed on product string
   private val infoLock = new Object
@@ -134,7 +134,7 @@ object DeviceManager {
       println(s"Opening device connection: ${dc.name} ${dc.deviceType} ${dc.index}")
       val dev = PureJavaHidApi.openDevice(di)
       dev.setInputReportListener( new InputReportListener(){
-        override def onInputReport(source:HidDevice, id:Byte, data:Array[Byte], len:Int){
+        override def onInputReport(source:HidDevice, id:Byte, data:Array[Byte], len:Int) = {
           dc.byteStreamActor.foreach(_ ! data)
         }
       })
@@ -143,7 +143,7 @@ object DeviceManager {
   }
 
   def closeDeviceConnection(dc:HidDeviceConnection) = {
-    dc.kill.shutdown
+    dc.kill.shutdown()
     // println(s"TODO close device connection: ${dc.name} ${dc.index}")
   }
 
@@ -152,19 +152,19 @@ object DeviceManager {
   private var lastDeviceList = List[HidDeviceInfoW]()
   
   // start polling for devices at 1 second interval
-  def startPolling(){
+  def startPolling():Unit = {
     import concurrent.duration._
     import concurrent.ExecutionContext.Implicits.global
     if(poller.isDefined) return
-    poller = Some( system.scheduler.schedule(0.seconds, 1000.millis)(poll) )
+    poller = Some( system.scheduler.schedule(0.seconds, 1000.millis)(poll()) )
   }
 
-  def stopPolling(){
-    poller.foreach(_.cancel)
+  def stopPolling() = {
+    poller.foreach(_.cancel())
     poller = None
   }
 
-  private def poll(){
+  private def poll() = {
     infoLock.synchronized {
       val devs = PureJavaHidApi.enumerateDevices.asScala.toList
       val deviceList = devs.map(new HidDeviceInfoW(_))
@@ -178,23 +178,23 @@ object DeviceManager {
       added.foreach(attach(_))
 
       if(removed.length + added.length > 0) 
-        WebsocketActor.sendDeviceList
+        WebsocketActor.sendDeviceList()
     }
   }
 
-  private def attach(d:HidDeviceInfoW){
+  private def attach(d:HidDeviceInfoW) = {
     println(s"Attached: ${d.info.getProductString}")
     val index = availableDevices.filter( _.info.getProductString == d.info.getProductString).length
     availableDevices += d
     eventStreamActor.foreach( _ ! DeviceAttached(d, index)) // Maybe don't pass deviceinfo in events, as they could potentially be stale, require call back into DM to get current info
   }
 
-  private def update(d:HidDeviceInfoW){
+  private def update(d:HidDeviceInfoW) = {
     val index = availableDevices.indexOf(d) // will match old info
     availableDevices(index) = d               // replace with new info
   }
 
-  private def detach(d:HidDeviceInfoW){
+  private def detach(d:HidDeviceInfoW) = {
     println(s"Detached: ${d.info.getProductString}")
     val index = availableDevices.indexOf(d)
     val di = availableDevices.remove(index)

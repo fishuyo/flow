@@ -33,12 +33,12 @@ object AppManager {
 	}
 
 	def close(name:String) = {
-		apps.remove(name).foreach(_.close)
+		apps.remove(name).foreach(_.close())
 		WebsocketActor.sendAppList()
 	}
 
 	def closeAll() = {
-		apps.values.foreach(_.close)
+		apps.values.foreach(_.close())
 		apps.clear
 		WebsocketActor.sendAppList()
 	}
@@ -48,7 +48,7 @@ object AppManager {
 			if(a.hostname == addr && a.sinkPort == port) true
 			else false
 		}
-		close.foreach { case (n,app) => apps.remove(n); app.close }
+		close.foreach { case (n,app) => apps.remove(n); app.close() }
 	}
 
 	def handshakeConfig(config:String, addr:String, port:Int) = {
@@ -57,7 +57,7 @@ object AppManager {
 		
 		// closeApps(name, addr, port)
 
-		apps.remove(name).foreach(_.close)
+		apps.remove(name).foreach(_.close())
 		apps(name) = app
 
 		closeApps(name, addr, port)

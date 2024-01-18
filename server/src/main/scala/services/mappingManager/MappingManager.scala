@@ -13,9 +13,9 @@ import java.net.InetSocketAddress
 
 import collection.mutable.HashMap
 
-import akka.actor.ActorRef
-import akka.pattern.ask
-import akka.util.Timeout
+import org.apache.pekko.actor.ActorRef
+import org.apache.pekko.pattern.ask
+import org.apache.pekko.util.Timeout
 import scala.concurrent.duration._
 import concurrent.ExecutionContext.Implicits.global
 
@@ -29,7 +29,7 @@ object MappingManager {
   val scripts = HashMap[String, ActorRef]()
 
   /** loads stored mappings from disk */
-  def readMappingsDir(){
+  def readMappingsDir() = {
     val d = new File(mappingPath)
     
     val files = {
@@ -60,7 +60,7 @@ object MappingManager {
       script ! Reload
       val future = script ? Status
       future.onComplete {
-        case scala.util.Success(status:Seq[(Int,String)]) =>
+        case scala.util.Success(status:Seq[(Int,String)]) => // XXX
           var mapping = m
           if(status.length > 0 || mapping.errors.length > 0){
             val off = FlowScriptWrapper.headerLength 

@@ -5,9 +5,10 @@ import scala.language.dynamics
 
 import com.typesafe.config._
 
-import akka.actor._
-import akka.stream._
-import akka.stream.scaladsl._
+import org.apache.pekko._
+import org.apache.pekko.actor._
+import org.apache.pekko.stream._
+import org.apache.pekko.stream.scaladsl._
 import scala.concurrent._
 
 import collection.mutable.HashMap
@@ -35,18 +36,18 @@ trait IO extends Dynamic {
     implicit def fallback[T, D]: DefaultsTo[T, D] = null  
   }
 
-  implicit val system = System()
-  implicit val materializer = ActorMaterializer()
+  implicit val system:ActorSystem = System()
+  implicit val materializer:ActorMaterializer = ActorMaterializer()
 
-  def sources:Map[String,Source[Any,akka.NotUsed]] = Map[String,Source[Any,akka.NotUsed]]()
-  def sinks:Map[String,Sink[Any,akka.NotUsed]] = Map[String,Sink[Any,akka.NotUsed]]()
+  def sources:Map[String,Source[Any,NotUsed]] = Map[String,Source[Any,NotUsed]]()
+  def sinks:Map[String,Sink[Any,NotUsed]] = Map[String,Sink[Any,NotUsed]]()
 
-  // def typedSources = Map[String, Map[String, Source[Any,akka.NotUsed]]]()
+  // def typedSources = Map[String, Map[String, Source[Any,NotUsed]]]()
   
   def source(name:String) = sources.get(name)
   def sink(name:String) = sinks.get(name)
 
-  def selectDynamic[T](name:String)(implicit default:DefaultsTo[T,Float]) = source(name).get.asInstanceOf[Source[T,akka.NotUsed]]
+  def selectDynamic[T](name:String)(implicit default:DefaultsTo[T,Float]) = source(name).get.asInstanceOf[Source[T,NotUsed]]
 
   def destutter = Flow[Float].statefulMapConcat(() => {
     var last:Float = 0f
@@ -74,8 +75,8 @@ trait IO extends Dynamic {
 }
 
 case class IOSource[T,M](src:Source[T,M]){
-  implicit val system = System()
-  implicit val materializer = ActorMaterializer()
+  implicit val system:ActorSystem = System()
+  implicit val materializer:ActorMaterializer = ActorMaterializer()
 
   // def orLast = src.via(Flow[T].expand(Iterator.continually(_)))
   def orLast(initial:T) = src.via(Flow[T].extrapolate(Iterator.continually(_),Some(initial)))
