@@ -1,1 +1,8 @@
 target/
+.bsp/
+.metals/
+.vscode/
+lib/
+
+
+yarn.lock
