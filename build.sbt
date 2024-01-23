@@ -40,7 +40,12 @@ lazy val server = project.in(file("server"))
       "de.sciss" %% "audiofile" % "2.4.2",
       "seer" %% "math" % "0.2.0-SNAPSHOT",
       // "seer" %% "actor" % "0.1-SNAPSHOT",
-      "net.java.dev.jna" % "jna" % "5.7.0"
+      "net.java.dev.jna" % "jna" % "5.7.0",
+
+      "org.lwjgl" % "lwjgl-openvr" % "3.2.0",
+      "org.lwjgl" % "lwjgl-openvr" % "3.2.0" classifier "natives-macos",
+      "org.lwjgl" % "lwjgl-openvr" % "3.2.0" classifier "natives-windows",
+
 
     ),
 
@@ -143,8 +148,9 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
   .settings(
     libraryDependencies ++= Seq(
       // "org.julienrf" %%% "play-json-derived-codecs" % "8.0.0",
-      "com.github.plokhotnyuk.jsoniter-scala" %%% "jsoniter-scala-core"   % "2.27.3",
-      "com.github.plokhotnyuk.jsoniter-scala" %%% "jsoniter-scala-macros" % "2.27.3",
+      "com.github.plokhotnyuk.jsoniter-scala" %%% "jsoniter-scala-core"   % "2.27.4",
+      "com.github.plokhotnyuk.jsoniter-scala" %%% "jsoniter-scala-macros" % "2.27.4",
+      "com.lihaoyi" %%% "upickle" % "3.1.4"
     )
   )
   .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))

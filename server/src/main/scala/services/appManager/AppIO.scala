@@ -4,11 +4,11 @@ package flow
 import protocol.AppConfig
 import protocol.IOConfig
 import protocol.IOPort
-import protocol.Message.appConfigFormat
+// import protocol.Message.appConfigFormat
 
 // import julienrf.json.derived._
 // import play.api.libs.json._
-import com.github.plokhotnyuk.jsoniter_scala.core._
+// import com.github.plokhotnyuk.jsoniter_scala.core._
 
 import org.apache.pekko._
 import org.apache.pekko.actor._
@@ -28,13 +28,14 @@ object AppIO{
 
   def fromConfig(conf:String):AppIO = {
     // val config = Json.parse(conf).as[AppConfig]
-    val config = readFromString[AppConfig](conf)
+    // val config = readFromString[AppConfig](conf)
+    val config = upickle.default.read[AppConfig](conf)
     new AppIO(config)
   }
   
   def fromConfigFile(file:java.io.File):AppIO = {
     val stream = new java.io.FileInputStream(file)
-    val config = try {  readFromStream[AppConfig](stream) } finally { stream.close() }
+    val config = try { upickle.default.read[AppConfig](stream) } finally { stream.close() }
     println(config)
     new AppIO(config)
   }
@@ -101,7 +102,8 @@ class AppIO(val config:AppConfig) extends IO {
   def stopDefaultMappings() = config.defaultMappings.foreach(MappingManager.stop(_))
 
   // def toJson() = Json.toJson(config).toString
-  def toJson() = writeToString(config)
+  // def toJson() = writeToString(config)
+  def toJson() = upickle.default.write(config)
 }
 
 // case class AppConfig(name:String, sources:IOInfo, sinks:IOInfo, osc:OSCConfig)

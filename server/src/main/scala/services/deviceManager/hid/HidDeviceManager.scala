@@ -135,6 +135,7 @@ object DeviceManager {
       val dev = PureJavaHidApi.openDevice(di)
       dev.setInputReportListener( new InputReportListener(){
         override def onInputReport(source:HidDevice, id:Byte, data:Array[Byte], len:Int) = {
+          // println(data)
           dc.byteStreamActor.foreach(_ ! data)
         }
       })

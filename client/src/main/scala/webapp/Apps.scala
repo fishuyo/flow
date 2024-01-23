@@ -5,8 +5,6 @@ import flow.protocol.IOPort
 
 import com.thoughtworks.binding.Binding
 import com.thoughtworks.binding.Binding._
-// import com.thoughtworks.binding.dom
-// import org.lrng.binding.html, html.NodeBinding
 import com.yang_bo.html._
 
 import org.scalajs.dom.raw._

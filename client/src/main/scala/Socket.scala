@@ -6,13 +6,13 @@ import org.scalajs.dom.document
 import org.scalajs.dom.console
 import org.scalajs.dom.raw._
 
-import com.github.plokhotnyuk.jsoniter_scala.core._
+// import com.github.plokhotnyuk.jsoniter_scala.core._
 // import julienrf.json.derived._
 // import play.api.libs.json._
 // import play.api.libs.functional.syntax._
 
 import protocol._
-import protocol.Message.format
+// import protocol.Message._
 
 
 @JSExportTopLevel("Socket")
@@ -24,9 +24,10 @@ object Socket {
   def send(data:String) = { println(data); ws.send(data) }
   
   def send(msg:Message) = {
-    val json = writeToString(msg)
-    // val json = """{"hi":"hello"}"""
-    println(json)
+    val json = upickle.default.write(msg)
+
+    // val json = writeToString(msg)
+    // println(json)
     ws.send(json)
   }
 
@@ -35,7 +36,10 @@ object Socket {
     ws = new WebSocket(getWebsocketUri())
     
     ws.onopen = { (event: Event) =>
-      val json = writeToString(ClientHandshake())
+      val json = upickle.default.write(ClientHandshake())
+      // val json = writeToString(ClientHandshake())
+      // val json = "handshake"
+      // println(json)
       ws.send(json)
       event
     }
@@ -43,26 +47,23 @@ object Socket {
     ws.onerror = { (event: Event) => () }
 
     ws.onmessage = { (event: MessageEvent) =>
-      println(event.data.toString)
-      val wsMsg = readFromString[Message](event.data.toString)
+      // println(event.data.toString)
+      val wsMsg = upickle.default.read[Message](event.data.toString)
+      // val wsMsg = readFromString[Message](event.data.toString)
 
       wsMsg match {
-        // case DeviceList(ds) => Devices.set(ds)
-        // case AppList(as) => Apps.set(as)
-        // case MappingList(ms) => Mappings ++= ms
-        // case m:Mapping => Mappings(m.name) = m
-        case _ => 0
+        case DeviceList(ds) => Devices.set(ds)
+        case AppList(as) => Apps.set(as)
+        case MappingList(ms) => Mappings ++= ms
+        case m:Mapping => Mappings(m.name) = m
+        case x => println(s"Websocket Match failed, got: $x")
       }
     }
 
     ws.onclose = { (event: Event) =>
       println("ws close")
-      // playground.insertBefore(p("Connection to ws lost. You can try to rejoin manually."), playground.firstChild)
-      // joinButton.disabled = false
-      // sendButton.disabled = true
     }
 
-    // def writeToArea(text: String): Unit = playground.insertBefore(p(text), playground.firstChild)
   }
 
   def getWebsocketUri(): String = {
