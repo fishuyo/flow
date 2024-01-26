@@ -30,6 +30,9 @@ class FlowScript extends Script {
   implicit def d2f(d:Double):Float = d.toFloat
 
   val Print = Sink.foreach(println(_:Any))
+  val Null = Sink.foreach(nop(_:Any))
+
+  def nop(v:Any):Unit = {}
 
   override def load() = {
 """

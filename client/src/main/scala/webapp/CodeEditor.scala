@@ -75,7 +75,7 @@ object CodeEditor {
   }
 
   def getCode() = {
-    val code_ = editor.getDoc().getValue()
+    val code_ = editor.getDoc().getValue().replaceAll("\t", "  ")
     if(mapping.code != code_){
       mapping = mapping.copy(code = code_, modified = true)
       Mappings(mapping.name) = mapping          

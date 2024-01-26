@@ -89,7 +89,7 @@ class WebsocketActor(out: ActorRef) extends Actor {
 
   def sendAppList() = {
     val apps = AppManager.getAppList() 
-    println(apps)
+    // println(apps)
     val json = upickle.default.write(AppList(apps))
     // val json = writeToString(AppList(apps))
     out ! TextMessage(json)

@@ -29,10 +29,6 @@ object Devices {
     devices.value ++= ds
   }
 
-  def deviceCount = Binding {
-    devices.value.length //map(_.count)
-  }
-
   object views {
 
     def collapsibleList = html"""
@@ -41,7 +37,7 @@ object Devices {
           <a class="collapsible-header">
             Devices
             <i class="material-icons">arrow_drop_down</i>
-            <span class="badge right"> ${ deviceCount.bind.toString } </span>
+            <span class="badge right"> ${ devices.length.bind.toString } </span>
           </a>
           <div class="collapsible-body">
             <ul class="collapsible expandable">

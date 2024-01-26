@@ -20,11 +20,6 @@ object Apps {
     apps.value ++= ds
   }
 
-
-  def appCount = Binding {
-    apps.value.length
-  }
-
   object views {
 
     def collapsibleList = html"""
@@ -33,7 +28,7 @@ object Apps {
           <a class="collapsible-header">
             Apps
             <i class="material-icons">arrow_drop_down</i>
-            <span class="badge right"> ${ appCount.bind.toString } </span>
+            <span class="badge right"> ${ apps.length.bind.toString } </span>
           </a>
           <div class="collapsible-body">
             <ul class="collapsible expandable">

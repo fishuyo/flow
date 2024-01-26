@@ -9,6 +9,8 @@ object WebServer {
 
   def main(args: Array[String]): Unit = {
 
+    java.lang.System.setProperty("jna.nosys", "true")
+
     implicit val system = ActorSystem("server-system")
 
     val config = ConfigFactory.load()

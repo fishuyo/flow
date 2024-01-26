@@ -21,6 +21,7 @@ object Mappings {
 
   val mappings_ = HashMap[String,Mapping]()
   val mappings = Vars.empty[Mapping]
+  // val count = Var[Int](0)
 
   def apply(name:String) = mappings_(name)
   def update(name:String,m:Mapping) = {
@@ -34,10 +35,7 @@ object Mappings {
     seq.foreach { case m => mappings_(m.name) = m }
     mappings.value.clear 
     mappings.value ++= mappings_.values.toSeq.sortBy(_.name)
-  }
-
-  def mappingCount = Binding {
-    mappings.value.length
+    // count.value = seq.length
   }
 
 
@@ -49,7 +47,7 @@ object Mappings {
           <a class="collapsible-header">
             Mappings
             <i class="material-icons">arrow_drop_down</i>
-            <span class="badge right"> ${ mappingCount.bind.toString } </span>
+            <span class="badge right">${ mappings.length.bind.toString } </span>
           </a>
           <div class="collapsible-body">
             <ul class="collapsible expandable">

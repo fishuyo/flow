@@ -14,16 +14,18 @@ import concurrent.ExecutionContext.Implicits.global
 import java.nio.ByteBuffer
 import java.nio.IntBuffer
 
+// import spire.math.ULong
+
 import org.lwjgl.openvr._
 
 class OpenVRIO extends IO {
 
   OpenVR.connect()
   def state = OpenVR.source
-  def active = state.map(_.devices.filter(_.isValid == true))
-  def hmd = state.map(_.devices.filter(_.isValid == true).filter(_.deviceType == VRDeviceType.HMD))
-  def controllers = state.map(_.devices.filter(_.isValid == true).filter(_.deviceType == VRDeviceType.Controller))
-  def trackers = state.map(_.devices.filter(_.isValid == true).filter(_.deviceType == VRDeviceType.Generic))
+  def active = state.map(_.devices.filter(_.isPoseValid == true))
+  def hmd = state.map(_.devices.filter(_.isPoseValid == true).filter(_.deviceType == VRDeviceType.HMD))
+  def controllers = state.map(_.devices.filter(_.isPoseValid == true).filter(_.deviceType == VRDeviceType.Controller))
+  def trackers = state.map(_.devices.filter(_.isPoseValid == true).filter(_.deviceType == VRDeviceType.Generic))
 
 
   override def sources:Map[String,Source[Any,NotUsed]] = Map(
@@ -32,7 +34,7 @@ class OpenVRIO extends IO {
 }
 
 object VRDeviceType extends Enumeration {
-  val HMD, Controller, BaseStation, Generic, Unknown = Value
+  val HMD, Controller, BaseStation, Generic, Invalid, Unknown = Value
 }
 object VRDeviceRole extends Enumeration {
   val Head, LeftHand, RightHand, Unknown = Value
@@ -44,10 +46,14 @@ class VRDevice(val index:Int) {
   val vel = Vec3()
   val angVel = Vec3()
   var isConnected = false
-  var isValid = false
+  var isPoseValid = false
   var deviceType = VRDeviceType.Unknown
   var deviceRole = VRDeviceRole.Unknown
   var buttons:Long = 0
+  var buttonsPressed:Long = 0
+  var buttonsTouched:Long = 0
+
+  val analogData = Array(Vec2(),Vec2(),Vec2(),Vec2(),Vec2())
 
   def getButton(b:Int) = (buttons & (1l << b)) != 0
   
@@ -84,6 +90,7 @@ object OpenVR {
 
   private val devicePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount)
   private val deviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount)
+  private val controllerState = VRControllerState.create()
   private val event = VREvent.create()
 
   // connect()
@@ -129,17 +136,34 @@ object OpenVR {
     VRSystem.VRSystem_GetDeviceToAbsoluteTrackingPose(VR.ETrackingUniverseOrigin_TrackingUniverseStanding, 0f, devicePoses)
 
     for(id <- 0 until VR.k_unMaxTrackedDeviceCount){
+
       val pose = devicePoses.get(id)
       val device = state.devices(id)
-      hmdMat34ToMatrix4(pose.mDeviceToAbsoluteTracking(), device.mat)
-      device.pose.pos.set(device.mat(12),device.mat(13),device.mat(14))
-      device.pose.quat.fromMatrix(device.mat)
-      device.vel.set(pose.vVelocity().v(0), pose.vVelocity().v(1), pose.vVelocity().v(2))
-      device.angVel.set(pose.vAngularVelocity().v(0), pose.vAngularVelocity().v(1), pose.vAngularVelocity().v(2))
       device.isConnected = pose.bDeviceIsConnected()
-      device.isValid = pose.bPoseIsValid()
-      if(device.isConnected && device.deviceType == VRDeviceType.Unknown) updateDevice(id)
-      // if(device.isValid) println(device.vel)
+      device.isPoseValid = pose.bPoseIsValid()
+      if(device.isConnected){
+        updateDeviceClass(id)
+        val role = VRSystem.VRSystem_GetControllerRoleForTrackedDeviceIndex(id)
+        role match {
+          case VR.ETrackedControllerRole_TrackedControllerRole_LeftHand =>
+            updateControllerState(id, VRDeviceRole.LeftHand)
+          case VR.ETrackedControllerRole_TrackedControllerRole_RightHand =>
+            updateControllerState(id, VRDeviceRole.RightHand)
+          case _ => ()
+        }
+      }
+
+      if(device.isPoseValid){
+        hmdMat34ToMatrix4(pose.mDeviceToAbsoluteTracking(), device.mat)
+        device.pose.pos.set(device.mat(12),device.mat(13),device.mat(14))
+        device.pose.quat.fromMatrix(device.mat)
+        device.vel.set(pose.vVelocity().v(0), pose.vVelocity().v(1), pose.vVelocity().v(2))
+        device.angVel.set(pose.vAngularVelocity().v(0), pose.vAngularVelocity().v(1), pose.vAngularVelocity().v(2))
+      }
+
+
+      // if(device.isConnected && device.deviceType == VRDeviceType.Unknown) updateDevice(id)
+      // if(device.isPoseValid) println(device.vel)
     }
 
     while (VRSystem.VRSystem_PollNextEvent(event)) {
@@ -149,7 +173,7 @@ object OpenVR {
         
         event.eventType() match {
           case VR.EVREventType_VREvent_TrackedDeviceActivated =>            
-            updateDevice(index)            
+            updateDeviceClass(index)            
           case VR.EVREventType_VREvent_TrackedDeviceDeactivated =>
             state.devices(index).isConnected = false
           case VR.EVREventType_VREvent_ButtonPress =>
@@ -166,7 +190,22 @@ object OpenVR {
     streamActor.foreach(_ ! state)
   }
 
-  def updateDevice(index:Int) = {
+  def updateControllerState(index:Int, role:VRDeviceRole.Value) = {
+    val ret = VRSystem.VRSystem_GetControllerState(index, controllerState)
+    val d = state.devices(index)
+    d.deviceRole = role
+    if(ret){
+      d.buttonsPressed = controllerState.ulButtonPressed()
+      d.buttonsTouched = controllerState.ulButtonTouched()
+      for(id <- 0 until 5){
+        val axis = controllerState.rAxis(id)
+        d.analogData(id) = Vec2(axis.x(), axis.y())
+      }
+      d.buttonsTouched = controllerState.ulButtonTouched()
+    }
+  }
+
+  def updateDeviceClass(index:Int) = {
     val dc = VRSystem.VRSystem_GetTrackedDeviceClass(index)
     val d = state.devices(index)
     dc match {
@@ -174,6 +213,7 @@ object OpenVR {
       case VR.ETrackedDeviceClass_TrackedDeviceClass_Controller => d.deviceType = VRDeviceType.Controller
       case VR.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference => d.deviceType = VRDeviceType.BaseStation
       case VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker => d.deviceType = VRDeviceType.Generic
+      case VR.ETrackedDeviceClass_TrackedDeviceClass_Invalid => d.deviceType = VRDeviceType.Invalid
       case _ => d.deviceType = VRDeviceType.Unknown
     }
   }
