@@ -40,12 +40,15 @@ lazy val server = project.in(file("server"))
       "de.sciss" %% "audiofile" % "2.4.2",
       "seer" %% "math" % "0.2.0-SNAPSHOT",
       // "seer" %% "actor" % "0.1-SNAPSHOT",
-      "net.java.dev.jna" % "jna" % "5.7.0",
+      "net.java.dev.jna" % "jna" % "5.5.0",
+      "net.java.dev.jna" % "jna-platform" % "5.5.0",
 
       "org.lwjgl" % "lwjgl-openvr" % "3.2.0",
-      "org.lwjgl" % "lwjgl-openvr" % "3.2.0" classifier "natives-macos",
+      // "org.lwjgl" % "lwjgl-openvr" % "3.2.0" classifier "natives-macos",
       "org.lwjgl" % "lwjgl-openvr" % "3.2.0" classifier "natives-windows",
-
+      "org.lwjgl" % "lwjgl" % "3.2.0",
+      // "org.lwjgl" % "lwjgl" % "3.2.0" classifier "natives-macos",
+      "org.lwjgl" % "lwjgl" % "3.2.0" classifier "natives-windows",
 
     ),
 

@@ -24,7 +24,9 @@ class OpenVRIO extends IO {
   def state = OpenVR.source
   def active = state.map(_.devices.filter(_.isPoseValid == true))
   def hmd = state.map(_.devices.filter(_.isPoseValid == true).filter(_.deviceType == VRDeviceType.HMD))
-  def controllers = state.map(_.devices.filter(_.isPoseValid == true).filter(_.deviceType == VRDeviceType.Controller))
+  def controllers = state.map(_.devices.filter(_.isConnected == true).filter(_.deviceType == VRDeviceType.Controller))
+  def left = state.map(_.devices.filter(_.isConnected == true).filter(_.deviceRole == VRDeviceRole.LeftHand).head)
+  def right = state.map(_.devices.filter(_.isConnected == true).filter(_.deviceRole == VRDeviceRole.RightHand).head)
   def trackers = state.map(_.devices.filter(_.isPoseValid == true).filter(_.deviceType == VRDeviceType.Generic))
 
 
@@ -122,7 +124,8 @@ object OpenVR {
     import concurrent.duration._
     import concurrent.ExecutionContext.Implicits.global
     if(scheduled.isDefined) return
-    scheduled = Some(system.scheduler.schedule(0.seconds, 15.millis)(pollEvents()))
+    scheduled = Some(system.scheduler.schedule(0.seconds, 30.millis)(pollEvents()))
+    // scheduled = Some(system.scheduler.schedule(0.seconds, 15.millis)(pollEvents()))
   }
 
   def stopUpdate() = {
@@ -155,7 +158,7 @@ object OpenVR {
 
       if(device.isPoseValid){
         hmdMat34ToMatrix4(pose.mDeviceToAbsoluteTracking(), device.mat)
-        device.pose.pos.set(device.mat(12),device.mat(13),device.mat(14))
+        device.pose.pos.set(device.mat(3),device.mat(7),device.mat(11))
         device.pose.quat.fromMatrix(device.mat)
         device.vel.set(pose.vVelocity().v(0), pose.vVelocity().v(1), pose.vVelocity().v(2))
         device.angVel.set(pose.vAngularVelocity().v(0), pose.vAngularVelocity().v(1), pose.vAngularVelocity().v(2))
@@ -224,25 +227,48 @@ object OpenVR {
     val m = hmd.m();
     
     mat(0) = m.get(0);
-    mat(1) = m.get(4);
-    mat(2) = m.get(8);
-    mat(3) = 0;
+    mat(1) = m.get(1);
+    mat(2) = m.get(2);
+    mat(3) = m.get(3);
     
-    mat(4) = m.get(1);
+    mat(4) = m.get(4);
     mat(5) = m.get(5);
-    mat(6) = m.get(9);
-    mat(7) = 0;
+    mat(6) = m.get(6);
+    mat(7) = m.get(7);
     
-    mat(8) = m.get(2);
-    mat(9) = m.get(6);
+    mat(8) = m.get(8);
+    mat(9) = m.get(9);
     mat(10) = m.get(10);
-    mat(11) = 0;
+    mat(11) = m.get(11);
     
-    mat(12) = m.get(3);
-    mat(13) = m.get(7);
-    mat(14) = m.get(11);
+    mat(12) = 0;
+    mat(13) = 0;//m.get(7);
+    mat(14) = 0;//m.get(11);
     mat(15) = 1;
   }
+  // def hmdMat34ToMatrix4(hmd:HmdMatrix34, mat:Mat4) = {
+  //   val m = hmd.m();
+    
+  //   mat(0) = m.get(0);
+  //   mat(1) = m.get(4);
+  //   mat(2) = m.get(8);
+  //   mat(3) = 0;
+    
+  //   mat(4) = m.get(1);
+  //   mat(5) = m.get(5);
+  //   mat(6) = m.get(9);
+  //   mat(7) = 0;
+    
+  //   mat(8) = m.get(2);
+  //   mat(9) = m.get(6);
+  //   mat(10) = m.get(10);
+  //   mat(11) = 0;
+    
+  //   mat(12) = m.get(3);
+  //   mat(13) = m.get(7);
+  //   mat(14) = m.get(11);
+  //   mat(15) = 1;
+  // }
 
   def checkInitError(errorBuffer:IntBuffer) = {
     if (errorBuffer.get(0) != VR.EVRInitError_VRInitError_None) {
