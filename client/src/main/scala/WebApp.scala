@@ -3,75 +3,89 @@ package flow
 package client
 
 import com.thoughtworks.binding.Binding, Binding._
-import com.yang_bo.html._
+import com.thoughtworks.binding.LatestEvent
+import com.yang_bo.html.*
+
+import org.scalajs.dom.*
 
 import flow.client.components._
 
+import collection.mutable.HashMap
+
+
+trait Page {
+  val name = "page"
+  def route = s"#$name"
+  def render:BindingSeq[Node]
+  def onLoad() = {}
+  def onUnload() = {}
+}
+
+object page404 extends Page {
+  override val name = "404"
+  def render = html"""
+    <div>Page not found</div>
+  """
+}
+
 object WebApp {
+
+  val pages = HashMap[String, Page]()
+  var lastPage:Page = page404
+
+
+  val route = Binding {
+    LatestEvent.hashchange(window).bind
+    // println(window.location.hash)
+    window.location.hash
+  }
+
+  val currentPage = Binding {
+
+    val path = route.bind
+    val page = pages.getOrElse(path, MainPage)
+
+    if(page != lastPage){
+      lastPage.onUnload()
+      lastPage = page 
+      page.onLoad()
+    }
+    page
+  }
+
+
+  def addPage(p:Page) = {
+
+    // pages(s"#${p.name}") = p
+    pages(p.route) = p
+  }
+
 
 
   def render = html"""
-    <header>${ renderHeader }</header>
-    <main>${ renderMain }</main>
-    <footer>${ renderFooter }</footer>
+    ${renderHeader}
+    ${renderMain}
+    ${renderFooter}
   """
+
 
   def renderHeader = html"""
-    <div class="blue-grey lighten-5">
-      <ul id="slide-out" class="sidenav sidenav-fixed blue-grey lighten-5">
-        <li class="no-padding">
-          ${ Devices.views.collapsibleList }
-        </li>
-        <li class="no-padding">
-          ${ Apps.views.collapsibleList }
-        </li> 
-        <li class="no-padding">
-          ${ Mappings.views.collapsibleList }
-        </li>
-      </ul>
+    <header>
 
-      <a id="menu-button-left" href="#" data-target="slide-out" class="sidenav-trigger hide-on-large-only"><i class="material-icons">menu</i></a>
-    </div>
+    </header>
   """
 
-  def renderMain = html"""
-    <div class="blue-grey darken-4">
-      <!-- <div class="fixed-action-btn click-to-toggle">
-        <a class="btn-floating btn-large red">
-          <i class="material-icons">menu</i>
-        </a>
-        <ul>
-          <li><a class="btn-floating red"><i class="material-icons">insert_chart</i></a></li>
-          <li><a class="btn-floating yellow darken-1"><i class="material-icons">format_quote</i></a></li>
-          <li><a class="btn-floating green"><i class="material-icons">publish</i></a></li>
-          <li><a class="btn-floating blue"><i class="material-icons">attach_file</i></a></li>
-        </ul>
-      </div> -->
 
-      ${ CodeEditor.views.main }
-      // <!--{ ConsoleWindow.views.main.bind }-->
-    </div>
+  def renderMain = html"""
+    <main>
+    ${currentPage.bind.render}
+    </main>
   """
 
   def renderFooter = html"""
-    <div class="page-footer">
-      <div class="container">
-        <div class="row">
-          <div class="col l6 s12">
-          </div>
-          <div class="col l4 offset-l2 s12">
-
-          </div>
-        </div>
-      </div>
-      <div class="footer-copyright">
-        <div class="container">
-        AlloSphere Device Server
-        <a class="grey-text text-lighten-4 right" href="#!">More Services</a>
-        </div>
-      </div>
-    </div> 
+    <footer>
+    </footer>
   """
-  
-
 }
+
+

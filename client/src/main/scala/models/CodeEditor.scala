@@ -1,31 +1,23 @@
 
 package flow
 
-import protocol._
+import flow.protocol._
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation._
 import scala.scalajs.js.Dynamic.global
+
 import org.scalajs.dom.document
 import org.scalajs.dom.window
 import org.scalajs.dom.console
+import org.scalajs.dom.MutationObserver
+import org.scalajs.dom.MutationObserverInit
 import org.scalajs.dom.raw._
 
 import com.thoughtworks.binding.Binding
 import com.thoughtworks.binding.Binding.{Var, Vars}
-// import com.thoughtworks.binding.dom
-// import org.lrng.binding.html, html.NodeBinding
 import com.yang_bo.html._
 
-import org.scalajs.dom.raw._
-
-// import org.denigma.codemirror.extensions.EditorConfig
-// import org.denigma.codemirror._
-
-// import org.querki.jquery._
-// import com.definitelyscala.materializecss.{JQuery => JQ}
-
-// import typings.codemirror.mod.EditorConfig
 import typings.codemirror.global._
 import typings.codemirror.mod._
 
@@ -35,8 +27,7 @@ object CodeEditor {
   var editor:Editor = _
   var mapping:Mapping = _
 
-  def init(id:String) = {
-    val config: EditorConfiguration = EditorConfig.
+  val config: EditorConfiguration = EditorConfig.
       mode("text/x-scala").
       lineNumbers(true).
       theme("material").
@@ -50,13 +41,18 @@ object CodeEditor {
         "Cmd-Enter" -> ((cm:Editor) => run())
       ))
 
+  def init(id:String):Unit = {
     document.getElementById(id) match {
       case elem:HTMLTextAreaElement =>
-        editor = CodeMirror.fromTextArea(elem, config)
-        editor.setSize("100%","80vh")
+        init(elem)
 
       case _ => console.error("cannot find text area for CodeMirror")
     }
+  }
+
+  def init(elem:HTMLTextAreaElement):Unit = {
+    editor = CodeMirror.fromTextArea(elem, config)
+    editor.setSize("100%","80vh")
 
     // editor.on("gutterClick", (cm:Editor, n:Int) => {
     //   var info = cm.lineInfo(n);
@@ -102,14 +98,14 @@ object CodeEditor {
   }
 
   def load(m:Mapping) = {
-    println("Load!")
+    // println("Load!")
     mapping = m
     editor.getDoc().setValue(m.code)
     setErrorMarkers(m)
   }
 
   def save() = {
-    println("Save!")
+    // println("Save!")
     getCode()
     if(mapping.modified){
       Socket.send(Save(mapping))
@@ -143,9 +139,18 @@ object CodeEditor {
 
 
   object views {
+    val observer = new MutationObserver((ms, obs)=>{
+      CodeEditor.init("code")
+      obs.disconnect()
+    })
 
     def textarea = html"""
-      <textarea id="code" name="scala"></textarea>
+      ${
+        val text = html"""<textarea id="code" name="scala"></textarea>"""
+        val div = html"""<div>${text}</div>"""
+        observer.observe(div.value, MutationObserverInit(childList=true, attributes=true, characterData=true, subtree=true))
+        div
+      }
     """
 
     def main = html"""

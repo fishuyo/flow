@@ -13,39 +13,23 @@ import com.thoughtworks.binding.Binding, Binding._
 import com.yang_bo.html._
 
 
-import flow.client.WebApp
-
-
+import flow.client._
 
 @JSExportTopLevel("Main")
 object Main {
   
-  // var ws:dom.WebSocket = _
-
   @JSExport
   def main(args: Array[String]): Unit = {
-    // println("Hello from scalajs Main function.")
 
-    // if (LinkingInfo.developmentMode) {
-    //   hot.initialize()
-    // }
-
-    // val container = Option(dom.document.getElementById("root")).getOrElse {
-    //   val elem = dom.document.createElement("div")
-    //   elem.id = "root"
-    //   dom.document.body.appendChild(elem)
-    //   elem
-    // }
+    // WebApp.addPage(MainPage)
+    WebApp.addPage(OldPage)
 
     com.yang_bo.html.render(dom.document.body, WebApp.render)
 
-    CodeEditor.init("code")
     Socket.init()
     setInterval(1000){ Socket.send("keepalive") }
 
   }
-
-
 
 }
 

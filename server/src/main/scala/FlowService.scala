@@ -19,6 +19,9 @@ class FlowService(implicit val system:ActorSystem) extends Directives {
     path("ws"){
       handleWebSocketMessages(wsFlow)
     } ~
+    path("ijs"){
+      handleWebSocketMessages(wdIjs)
+    } ~
     pathPrefix(Remaining) { file =>
       encodeResponse {
         getFromResource("public/" + file)
@@ -26,7 +29,14 @@ class FlowService(implicit val system:ActorSystem) extends Directives {
     }
   }
 
-   def wsFlow = {
+  def wsFlow = {
+    NamedActorFlow.actorRef(out =>
+      WebsocketActor.props(out),
+      maybeName = Some(s"client.${seer.math.Random.int()}")
+    )
+  }
+  
+  def wsIjs = {
     NamedActorFlow.actorRef(out =>
       WebsocketActor.props(out),
       maybeName = Some(s"client.${seer.math.Random.int()}")
