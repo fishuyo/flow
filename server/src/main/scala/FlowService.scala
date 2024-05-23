@@ -16,8 +16,11 @@ class FlowService(implicit val system:ActorSystem) extends Directives {
     pathSingleSlash {
       getFromResource("public/index.html")
     } ~
-    path("ws"){
-      handleWebSocketMessages(wsFlow)
+    path("wsProtocol"){
+      handleWebSocketMessages(wsProtocolFlow)
+    } ~
+    path("wsIJS"){
+      handleWebSocketMessages(wsIJSFlow)
     } ~
     pathPrefix(Remaining) { file =>
       encodeResponse {
@@ -26,10 +29,16 @@ class FlowService(implicit val system:ActorSystem) extends Directives {
     }
   }
 
-   def wsFlow = {
+  def wsProtocolFlow = {
     NamedActorFlow.actorRef(out =>
       WebsocketActor.props(out),
       maybeName = Some(s"client.${seer.math.Random.int()}")
+    )
+  }
+  def wsIJSFlow = {
+    NamedActorFlow.actorRef(out =>
+      flow.ijs.InterfaceWSActor.props(out),
+      maybeName = Some(s"client.ijs.${seer.math.Random.int()}")
     )
   }
 

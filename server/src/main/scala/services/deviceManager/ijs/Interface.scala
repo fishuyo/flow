@@ -125,17 +125,23 @@ class InterfaceBuilder(val name:String) extends IO {
   }
 
   def widget2String(w:Widget) = w match {
-    case Slider(name,x,y,w,h,min,max) => s"""$name = new Interface.Slider({ name:"$name", label:"$name", bounds: [$x,$y,$w,$h], min:$min, max:$max ${if(w>h) ",isVertical:false" else ""} })"""
-    case Button(name,x,y,w,h,mode) => s"""$name = new Interface.Button({ name:"$name", label:"$name", mode:"$mode", bounds: [$x,$y,$w,$h] })"""
-    case XY(name,x,y,w,h) => s"""$name = new Interface.XY({ name:"$name", label:"$name", childWidth:15, numChildren:1, usePhysics:false, bounds: [$x,$y,$w,$h] })"""
-    case Label(name,x,y,w,h,value) => s"""$name = new Interface.Label({ name:"$name", value:"$value", bounds: [$x,$y,$w,$h], vAlign:"middle", hAlign:"center" })"""
-    case RangeSlider(name,x,y,w,h,min,max) => s"""$name = new Interface.Range({ name:"$name", bounds: [$x,$y,$w,$h], min:$min, max:$max })"""
-    case Menu(name,x,y,w,h,opts) => s"""$name = new Interface.Menu({ name:"$name", bounds: [$x,$y,$w,$h], options:[${opts.map{case s:String => s"'$s'"; case a => a}.mkString(",")}] })"""
+    case Slider(name,x,y,w,h,min,max) => 
+      s"""$name = new Interface.Slider({ name:"$name", label:"$name", bounds: [$x,$y,$w,$h], min:$min, max:$max ${if(w>h) ",isVertical:false" else ""} })"""
+    case Button(name,x,y,w,h,mode) => 
+      s"""$name = new Interface.Button({ name:"$name", label:"$name", mode:"$mode", bounds: [$x,$y,$w,$h] })"""
+    case XY(name,x,y,w,h) => 
+      s"""$name = new Interface.XY({ name:"$name", label:"$name", childWidth:15, numChildren:1, usePhysics:false, bounds: [$x,$y,$w,$h] })"""
+    case Label(name,x,y,w,h,value) => 
+      s"""$name = new Interface.Label({ name:"$name", value:"$value", bounds: [$x,$y,$w,$h], vAlign:"middle", hAlign:"center" })"""
+    case RangeSlider(name,x,y,w,h,min,max) => 
+      s"""$name = new Interface.Range({ name:"$name", bounds: [$x,$y,$w,$h], min:$min, max:$max })"""
+    case Menu(name,x,y,w,h,opts) => 
+      s"""$name = new Interface.Menu({ name:"$name", bounds: [$x,$y,$w,$h], options:[${opts.map{case s:String => s"'$s'"; case a => s"'$a'"}.mkString(",")}] })"""
   }
 
 
   def save() = {
-    val path = "server/public/interfaces/"
+    val path = "/Users/fishuyo/_work/ARG/flow/server/src/main/resources/public/interfaces/"
     val pw = new PrintWriter(new FileOutputStream(path + name + ".html", false));
     pw.write(toHtml())
     pw.close
@@ -153,8 +159,8 @@ class InterfaceBuilder(val name:String) extends IO {
     def htmlHeader() = """
 <html>
 <head>
-  <script src="/assets/js/interface.js"></script>
-  <script src="/assets/js/interface.client.js"></script>
+  <script src="/js/interface.js"></script>
+  <script src="/js/interface.client.js"></script>
 </head>
 <body>
   <script>
