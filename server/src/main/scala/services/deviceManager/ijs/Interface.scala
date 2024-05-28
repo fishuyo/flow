@@ -18,6 +18,9 @@ import collection.mutable.ListBuffer
 import collection.mutable.HashMap
 import collection.mutable.Set
 
+import com.typesafe.config.ConfigFactory
+
+
 sealed trait Widget{ 
   def name:String
   def x:Float
@@ -141,7 +144,7 @@ class InterfaceBuilder(val name:String) extends IO {
 
 
   def save() = {
-    val path = "/Users/fishuyo/_work/ARG/flow/server/src/main/resources/public/interfaces/"
+    val path = Config("publicPath") + "/ui/"
     val pw = new PrintWriter(new FileOutputStream(path + name + ".html", false));
     pw.write(toHtml())
     pw.close

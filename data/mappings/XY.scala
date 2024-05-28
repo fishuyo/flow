@@ -2,7 +2,7 @@
 import ijs._
 
 // Create an interface.js io named test
-val io = Interface.create("test")
+val io = Interface.create("xy")
 
 //io += Slider(s"s$i", i*(0.5/ns), 0, 0.5/ns, 0.5)
 //io += Slider("h1", x=0, y=0.5, w=0.5, h=0.25, min=0.0, max=10.0)

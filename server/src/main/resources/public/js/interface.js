@@ -2440,6 +2440,7 @@ Interface.XY = function() {
     values            : [], // objects containing x and y values
     _values           : [], // serialized floats alternating between x and y
     numChildren       : 1,
+		drawCross					: true,
     usePhysics        : true,
     friction          : .9,
     activeTouch       : null,
@@ -2639,18 +2640,31 @@ Interface.XY = function() {
         
         this.ctx.beginPath();
 
-        this.ctx.arc(x + child.x, y + child.y, this.childWidth, 0, Math.PI*2, true); 
+        this.ctx.arc(x + child.x, y + child.y, this.childWidth * 2, 0, Math.PI*2, true); 
 
         this.ctx.closePath();
         
         this.ctx.fill();
         this.ctx.stroke();
-        //this.ctx.fillRect( this.x + child.x, this.y + child.y, this.childWidth, this.childHeight);
+        // this.ctx.fillRect( this.x + child.x, this.y + child.y, this.childWidth, this.childHeight);
         this.ctx.textBaseline = 'middle';
         this.ctx.textAlign = 'center';
         this.ctx.fillStyle = this._stroke();
         this.ctx.font = this._font();
-        this.ctx.fillText(child.id, x + child.x, y + child.y);
+        
+				if(!this.drawCross) this.ctx.fillText(child.id, x + child.x + 10, y + child.y - 10);
+				else {
+					this.ctx.fillText(child.id, x + child.x + 10, y + child.y - 10);
+
+					// draw cross hairs for child cursor
+					this.ctx.beginPath();
+					this.ctx.moveTo(x + child.x, y);
+					this.ctx.lineTo(x + child.x, y + height);
+					this.ctx.moveTo(x, y + child.y);
+					this.ctx.lineTo(x + width, y + child.y);
+					this.ctx.fill();
+					this.ctx.stroke();
+				}				
       }
       
       this.ctx.closePath();
@@ -2730,6 +2744,7 @@ Interface.XY = function() {
       var isHit = this.hitTest(touch);
       var touchMouseName = convertTouchEvent(touch.type);
       
+			// console.log(touch)
       if(isHit) {
         if(touch.type === 'touchstart') {
           this.hasFocus = true;
@@ -2737,7 +2752,7 @@ Interface.XY = function() {
           this.trackTouch(touch.x - this._x(), touch.y - this._y(), touch);
         }else{
           if(this[touch.type])
-            this[touch.type](touch, isHit, touch.childID);  // normal event
+           this[touch.type](touch, isHit, touch.childID);  // normal event
         }
         
         if(this['on'+touch.type]) this['on'+touch.type](touch, isHit, touch.childId); // user defined event
@@ -2753,7 +2768,10 @@ Interface.XY = function() {
         this.touchend(touch)
         if(this['on'+touch.type]) this['on'+touch.type](touch, isHit, touch.childId); // user defined event
         if(this['on'+touchMouseName]) this['on'+touchMouseName](touch, isHit);  // user defined event
-      }
+      }else {
+				if(this[touch.type])
+					this[touch.type](touch, isHit, touch.childID);  // edge event outside of hitbox
+			}
     },
     
     trackMouse : function(xPos, yPos, id) {
@@ -2794,7 +2812,8 @@ Interface.XY = function() {
       }
     },
     mousemove : function(e) { 
-      if(this.hitTest(e) && this.activeTouch !== null) {
+      // if(this.hitTest(e) && this.activeTouch !== null) {
+      if(this.activeTouch !== null) {
         if(this.activeTouch.lastTouch === null) {
           this.activeTouch.lastTouch = {x:e.x - this._x(), y:e.y - this._y()};
         }else{

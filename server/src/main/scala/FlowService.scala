@@ -12,6 +12,8 @@ class FlowService(implicit val system:ActorSystem) extends Directives {
   OSCApi.listen(12000) 
   hid.DeviceManager.startPolling()
 
+  val publicPath = Config("publicPath")
+
   val route = {
     pathSingleSlash {
       getFromResource("public/index.html")
@@ -19,12 +21,17 @@ class FlowService(implicit val system:ActorSystem) extends Directives {
     path("wsProtocol"){
       handleWebSocketMessages(wsProtocolFlow)
     } ~
-    path("wsIJS"){
-      handleWebSocketMessages(wsIJSFlow)
+    path("ui" / Segment / "ws"){ (name:String) =>
+      handleWebSocketMessages(wsIJSFlow(name))
     } ~
+    // pathPrefix(Remaining) { file =>
+    //   encodeResponse {
+    //     getFromResource("public/" + file)
+    //   }
+    // } ~
     pathPrefix(Remaining) { file =>
       encodeResponse {
-        getFromResource("public/" + file)
+        getFromFile(publicPath + "/" + file)
       }
     }
   }
@@ -35,10 +42,10 @@ class FlowService(implicit val system:ActorSystem) extends Directives {
       maybeName = Some(s"client.${seer.math.Random.int()}")
     )
   }
-  def wsIJSFlow = {
+  def wsIJSFlow(name:String) = {
     NamedActorFlow.actorRef(out =>
-      flow.ijs.InterfaceWSActor.props(out),
-      maybeName = Some(s"client.ijs.${seer.math.Random.int()}")
+      flow.ijs.InterfaceWSActor.props(out, name),
+      maybeName = Some(s"client.ijs.$name.${seer.math.Random.int()}")
     )
   }
 

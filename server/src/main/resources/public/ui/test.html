@@ -1,0 +1,41 @@
+
+<html>
+<head>
+  <script src="/js/interface.js"></script>
+  <script src="/js/interface.client.js"></script>
+</head>
+<body>
+  <script>
+  panel = new Interface.Panel({ useRelativeSizesAndPositions:true })
+panel.background = 'black'
+s0 = new Interface.Slider({ name:"s0", label:"s0", bounds: [0.0,0.0,0.05,0.5], min:0.0, max:1.0  })
+s1 = new Interface.Slider({ name:"s1", label:"s1", bounds: [0.05,0.0,0.05,0.5], min:0.0, max:1.0  })
+s2 = new Interface.Slider({ name:"s2", label:"s2", bounds: [0.1,0.0,0.05,0.5], min:0.0, max:1.0  })
+s3 = new Interface.Slider({ name:"s3", label:"s3", bounds: [0.15,0.0,0.05,0.5], min:0.0, max:1.0  })
+s4 = new Interface.Slider({ name:"s4", label:"s4", bounds: [0.2,0.0,0.05,0.5], min:0.0, max:1.0  })
+s5 = new Interface.Slider({ name:"s5", label:"s5", bounds: [0.25,0.0,0.05,0.5], min:0.0, max:1.0  })
+s6 = new Interface.Slider({ name:"s6", label:"s6", bounds: [0.3,0.0,0.05,0.5], min:0.0, max:1.0  })
+s7 = new Interface.Slider({ name:"s7", label:"s7", bounds: [0.35,0.0,0.05,0.5], min:0.0, max:1.0  })
+s8 = new Interface.Slider({ name:"s8", label:"s8", bounds: [0.4,0.0,0.05,0.5], min:0.0, max:1.0  })
+s9 = new Interface.Slider({ name:"s9", label:"s9", bounds: [0.45,0.0,0.05,0.5], min:0.0, max:1.0  })
+h1 = new Interface.Slider({ name:"h1", label:"h1", bounds: [0.0,0.5,0.5,0.25], min:0.0, max:10.0 ,isVertical:false })
+h2 = new Interface.Range({ name:"h2", bounds: [0.0,0.75,0.5,0.25], min:0.0, max:1.0 })
+menu = new Interface.Menu({ name:"menu", bounds: [0.6,0.2,0.3,0.1], options:['option1','option2','0.0','1.0','2.0'] })
+b00 = new Interface.Button({ name:"b00", label:"b00", mode:"momentary", bounds: [0.5,0.5,0.16666667,0.16666667] })
+b01 = new Interface.Button({ name:"b01", label:"b01", mode:"momentary", bounds: [0.5,0.6666667,0.16666667,0.16666667] })
+b02 = new Interface.Button({ name:"b02", label:"b02", mode:"momentary", bounds: [0.5,0.8333333,0.16666667,0.16666667] })
+b10 = new Interface.Button({ name:"b10", label:"b10", mode:"momentary", bounds: [0.6666667,0.5,0.16666667,0.16666667] })
+b11 = new Interface.Button({ name:"b11", label:"b11", mode:"momentary", bounds: [0.6666667,0.6666667,0.16666667,0.16666667] })
+b12 = new Interface.Button({ name:"b12", label:"b12", mode:"momentary", bounds: [0.6666667,0.8333333,0.16666667,0.16666667] })
+b20 = new Interface.Button({ name:"b20", label:"b20", mode:"momentary", bounds: [0.8333333,0.5,0.16666667,0.16666667] })
+b21 = new Interface.Button({ name:"b21", label:"b21", mode:"momentary", bounds: [0.8333333,0.6666667,0.16666667,0.16666667] })
+b22 = new Interface.Button({ name:"b22", label:"b22", mode:"momentary", bounds: [0.8333333,0.8333333,0.16666667,0.16666667] })
+panel.add( s0,s1,s2,s3,s4,s5,s6,s7,s8,s9,h1,h2,menu,b00,b01,b02,b10,b11,b12,b20,b21,b22 )
+
+  Interface.OSC.receive = function( address, typetags, parameters ) {
+    console.log( address, typetags, parameters );
+  }
+  </script>
+</body>
+</html>
+  
