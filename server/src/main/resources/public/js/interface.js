@@ -2702,6 +2702,7 @@ Interface.XY = function() {
     },
     
     changeValue : function( touch, xOffset, yOffset ) {
+			console.log("changeValue ", touch, xOffset, yOffset)
       if(this.hasFocus || !this.requiresFocus) {
         touch.x = xOffset;
         if(touch.x < 0 ) touch.x = 0;
@@ -2710,8 +2711,8 @@ Interface.XY = function() {
         touch.y = yOffset;// - this.half;
         if(touch.y < 0) touch.y = 0;
         if(touch.y > this._height()) touch.y = this._height();        
-        this.values[touch.id].x = xOffset / this._width();
-        this.values[touch.id].y = yOffset / this._height();
+        this.values[touch.id].x = touch.x / this._width();
+        this.values[touch.id].y = touch.y / this._height();
                 
         if(this.onvaluechange) this.onvaluechange();
         
