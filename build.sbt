@@ -17,7 +17,7 @@ lazy val pekkoHttpV = "1.0.1"
 // 
 lazy val server = project.in(file("modules/server"))
   .settings(
-    // scalaJSProjects := Seq(client),
+    scalaJSProjects := Seq(client),
     Assets / pipelineStages := Seq(scalaJSPipeline),
     // triggers scalaJSPipeline when using compile or continuous compilation
     Compile / compile := ((Compile / compile) dependsOn scalaJSPipeline).value,
@@ -34,38 +34,38 @@ lazy val server = project.in(file("modules/server"))
   .dependsOn(flow_service)
 
 
-// lazy val client = project.in(file("modules/client"))
-//   .settings(
-//     scalaJSUseMainModuleInitializer := true,
-//     libraryDependencies ++= Seq(
-//       "com.yang-bo" %%% "html" % "3.0.3",
-//       "com.thoughtworks.binding" %%% "latestevent" % "2.0.0",
-//       "org.querki" %%% "querki-jsext" % "0.12",
-//     ),
-//     // Compile / npmDependencies ++= Seq(),
-//     Compile / npmDevDependencies ++= Seq(
-//       "file-loader" -> "6.2.0",
-//       "style-loader" -> "2.0.0",
-//       "css-loader" -> "5.2.6",
-//       "html-webpack-plugin" -> "4.5.1",
-//       "copy-webpack-plugin" -> "6.4.0",
-//       "windicss-webpack-plugin" -> "1.7.3",
-//       "webpack-merge" -> "5.8.0",
-//     ),
-//     Compile / unmanagedResources / inputFileStamper := sbt.nio.FileStamper.LastModified,
+lazy val client = project.in(file("modules/client"))
+  .settings(
+    scalaJSUseMainModuleInitializer := true,
+    libraryDependencies ++= Seq(
+      "com.yang-bo" %%% "html" % "3.0.3",
+      "com.thoughtworks.binding" %%% "latestevent" % "2.0.0",
+      "org.querki" %%% "querki-jsext" % "0.12",
+    ),
+    // Compile / npmDependencies ++= Seq(),
+    Compile / npmDevDependencies ++= Seq(
+      "file-loader" -> "6.2.0",
+      "style-loader" -> "2.0.0",
+      "css-loader" -> "5.2.6",
+      "html-webpack-plugin" -> "4.5.1",
+      "copy-webpack-plugin" -> "6.4.0",
+      "windicss-webpack-plugin" -> "1.7.3",
+      "webpack-merge" -> "5.8.0",
+    ),
+    Compile / unmanagedResources / inputFileStamper := sbt.nio.FileStamper.LastModified,
   
-//     scalacOptions ++= Seq("-Ymacro-annotations"),
-//     useYarn := true,
-//     stFlavour := Flavour.Slinky,
-//     stReactEnableTreeShaking := Selection.All,
-//     stIgnore ++= List("react-proxy", "react-dom", "semantic-ui-css"),
+    scalacOptions ++= Seq("-Ymacro-annotations"),
+    useYarn := true,
+    stFlavour := Flavour.Slinky,
+    stReactEnableTreeShaking := Selection.All,
+    stIgnore ++= List("react-proxy", "react-dom", "semantic-ui-css"),
 
-//     webpackCliVersion := "4.10.0",
-//     webpackConfigFile := Some((baseDirectory).value / "webpack" / "custom.webpack.config.js"),
+    webpackCliVersion := "4.10.0",
+    webpackConfigFile := Some((baseDirectory).value / "webpack" / "custom.webpack.config.js"),
 
-//     fastOptJS / webpackBundlingMode := BundlingMode.LibraryAndApplication(),
-//   )
-//   .enablePlugins(ScalaJSPlugin, ScalablyTypedConverterPlugin, ScalaJSBundlerPlugin)
+    fastOptJS / webpackBundlingMode := BundlingMode.LibraryAndApplication(),
+  )
+  .enablePlugins(ScalaJSPlugin, ScalablyTypedConverterPlugin, ScalaJSBundlerPlugin)
 
 lazy val util = project.in(file("modules/util"))
   .settings(

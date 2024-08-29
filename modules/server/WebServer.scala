@@ -18,9 +18,8 @@ object WebServer {
     val interface = config.getString("http.interface")
     val port = config.getInt("http.port")
 
-    val service = new flow.service.FlowService()
-
-    Http().newServerAt(interface, port).bind(service.route)
+    val services = new Services()
+    Http().newServerAt(interface, port).bind(services.routes)
 
     println(s"Server online at http://$interface:$port")
   }

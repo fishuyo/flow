@@ -39,9 +39,10 @@ object Main {
 
     com.yang_bo.html.render(dom.document.body, WebApp.render)
 
-    CodeEditor.init("code")
-    Socket.init()
-    setInterval(1000){ Socket.send("keepalive") }
+    WebApp.init()
+    // CodeEditor.init("code")
+    // Socket.init()
+    // setInterval(1000){ Socket.send("keepalive") }
 
   }
 

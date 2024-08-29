@@ -5,10 +5,17 @@ package client
 import com.thoughtworks.binding.Binding, Binding._
 import com.yang_bo.html._
 
+import scala.scalajs.js.timers.setInterval
+
 import flow.client.components._
 
 object WebApp {
 
+  def init() = {
+    CodeEditor.init("code")
+    Socket.init()
+    setInterval(1000){ Socket.send("keepalive") }
+  }
 
   def render = html"""
     <header>${ renderHeader }</header>

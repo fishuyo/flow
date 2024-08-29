@@ -1,4 +1,5 @@
 package flow
+package main
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation._
@@ -13,7 +14,7 @@ import com.thoughtworks.binding.Binding, Binding._
 import com.yang_bo.html._
 
 
-import flow.client.WebApp
+import flow.main.WebApp
 
 
 
@@ -37,11 +38,11 @@ object Main {
     //   elem
     // }
 
-    com.yang_bo.html.render(dom.document.body, WebApp.render)
+    com.yang_bo.html.render(dom.document.body, WebApp.html)
 
-    CodeEditor.init("code")
-    Socket.init()
-    setInterval(1000){ Socket.send("keepalive") }
+    // CodeEditor.init("code")
+    // Socket.init()
+    // setInterval(1000){ Socket.send("keepalive") }
 
   }
 
