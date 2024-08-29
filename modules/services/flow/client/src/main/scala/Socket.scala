@@ -68,6 +68,6 @@ object Socket {
 
   def getWebsocketUri(): String = {
     val wsProtocol = if (document.location.protocol == "https:") "wss" else "ws"
-    s"$wsProtocol://${document.location.host}/wsProtocol"
+    s"$wsProtocol://${document.location.host}/flow/wsProtocol"
   }
 }

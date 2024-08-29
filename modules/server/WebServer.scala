@@ -9,6 +9,7 @@ object WebServer {
 
   def main(args: Array[String]): Unit = {
 
+    // avoid system jna 
     java.lang.System.setProperty("jna.nosys", "true")
 
     implicit val system = ActorSystem("server-system")
@@ -17,7 +18,7 @@ object WebServer {
     val interface = config.getString("http.interface")
     val port = config.getInt("http.port")
 
-    val service = new FlowService()
+    val service = new flow.service.FlowService()
 
     Http().newServerAt(interface, port).bind(service.route)
 

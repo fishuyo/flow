@@ -1,10 +1,14 @@
 package flow
-package server
+package service
 
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.server.Directives
 // import $package$.shared.SharedMessages
 // import $package$.twirl.Implicits._
+
+import org.webjars.WebJarAssetLocator
+import util.DirectivesWebJars._
+
 
 class FlowService(implicit val system:ActorSystem) extends Directives {
 
@@ -12,26 +16,23 @@ class FlowService(implicit val system:ActorSystem) extends Directives {
   OSCApi.listen(12000) 
   hid.DeviceManager.startPolling()
 
-  val publicPath = Config("publicPath")
+  private val webJarAssets = new WebJarAssetLocator()
 
   val route = {
-    pathSingleSlash {
-      getFromResource("public/index.html")
-    } ~
-    path("wsProtocol"){
-      handleWebSocketMessages(wsProtocolFlow)
-    } ~
-    path("ui" / Segment / "ws"){ (name:String) =>
-      handleWebSocketMessages(wsIJSFlow(name))
-    } ~
-    // pathPrefix(Remaining) { file =>
-    //   encodeResponse {
-    //     getFromResource("public/" + file)
-    //   }
-    // } ~
-    pathPrefix(Remaining) { file =>
-      encodeResponse {
-        getFromFile(publicPath + "/" + file)
+    pathPrefix("flow"){
+      pathSingleSlash {
+        getDirectoryFromWebjar(webJarAssets, "flow_service")
+      } ~
+      path("wsProtocol"){
+        handleWebSocketMessages(wsProtocolFlow)
+      } ~
+      path("ui" / Segment / "ws"){ (name:String) =>
+        handleWebSocketMessages(wsIJSFlow(name))
+      } ~
+      pathPrefix(Remaining) { file =>
+        encodeResponse {
+          getFromWebjar(webJarAssets, "flow_service", file)
+        }
       }
     }
   }
@@ -51,3 +52,5 @@ class FlowService(implicit val system:ActorSystem) extends Directives {
 
 
 }
+
+
