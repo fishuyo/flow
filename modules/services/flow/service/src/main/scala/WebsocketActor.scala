@@ -6,7 +6,7 @@ import protocol.Message._
 
 import hid.DeviceManager
 
-import com.github.plokhotnyuk.jsoniter_scala.core._
+// import com.github.plokhotnyuk.jsoniter_scala.core._
 // import julienrf.json.derived._
 // import play.api.libs.json._
 // import play.api.libs.functional.syntax._
