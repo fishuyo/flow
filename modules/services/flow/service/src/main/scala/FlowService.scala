@@ -8,6 +8,7 @@ import org.apache.pekko.http.scaladsl.server.Directives
 
 import org.webjars.WebJarAssetLocator
 import util.DirectivesWebJars._
+import util.NamedActorFlow
 
 
 class FlowService(implicit val system:ActorSystem) extends Directives {

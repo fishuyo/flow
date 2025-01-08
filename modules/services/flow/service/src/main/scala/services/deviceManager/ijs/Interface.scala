@@ -113,33 +113,33 @@ class InterfaceBuilder(val name:String) extends IO {
   def sync() = {
     addWidgetsFromLayouts()
     sinkActors.foreach { case a =>
-      a ! ("_eval","panel.clear()")
-      a ! ("_eval","$('select').remove()")
+      // a ! ("_eval","panel.clear()")
+      //a ! ("_eval","$('select').remove()")
       widgets.foreach{ case w => a ! ("_eval", widget2String(w) + s"\npanel.add(${w.name})")}
     }
   }
   def sync(index:Int) = {
     if(sinkActors.isDefinedAt(index)){
       val a = sinkActors(index)
-      a ! ("_eval","panel.clear()")
-      a ! ("_eval","$('select').remove()")
+      // a ! ("_eval","panel.clear()")
+      //a ! ("_eval","$('select').remove()")
       widgets.foreach{ case w => a ! ("_eval", widget2String(w) + s"\npanel.add(${w.name})")}
     }
   }
 
   def widget2String(w:Widget) = w match {
     case Slider(name,x,y,w,h,min,max) => 
-      s"""$name = new Interface.Slider({ name:"$name", label:"$name", bounds: [$x,$y,$w,$h], min:$min, max:$max ${if(w>h) ",isVertical:false" else ""} })"""
+      s"""${name.replace("/","_")} = new Interface.Slider({ name:"$name", label:"$name", bounds: [$x,$y,$w,$h], min:$min, max:$max ${if(w>h) ",isVertical:false" else ""} })"""
     case Button(name,x,y,w,h,mode) => 
-      s"""$name = new Interface.Button({ name:"$name", label:"$name", mode:"$mode", bounds: [$x,$y,$w,$h] })"""
+      s"""${name.replace("/","_")} = new Interface.Button({ name:"$name", label:"$name", mode:"$mode", bounds: [$x,$y,$w,$h] })"""
     case XY(name,x,y,w,h) => 
-      s"""$name = new Interface.XY({ name:"$name", label:"$name", childWidth:15, numChildren:1, usePhysics:false, bounds: [$x,$y,$w,$h] })"""
+      s"""${name.replace("/","_")} = new Interface.XY({ name:"$name", label:"$name", childWidth:15, numChildren:1, usePhysics:false, bounds: [$x,$y,$w,$h] })"""
     case Label(name,x,y,w,h,value) => 
-      s"""$name = new Interface.Label({ name:"$name", value:"$value", bounds: [$x,$y,$w,$h], vAlign:"middle", hAlign:"center" })"""
+      s"""${name.replace("/","_")} = new Interface.Label({ name:"$name", value:"$value", bounds: [$x,$y,$w,$h], vAlign:"middle", hAlign:"center" })"""
     case RangeSlider(name,x,y,w,h,min,max) => 
-      s"""$name = new Interface.Range({ name:"$name", bounds: [$x,$y,$w,$h], min:$min, max:$max })"""
+      s"""${name.replace("/","_")} = new Interface.Range({ name:"$name", bounds: [$x,$y,$w,$h], min:$min, max:$max })"""
     case Menu(name,x,y,w,h,opts) => 
-      s"""$name = new Interface.Menu({ name:"$name", bounds: [$x,$y,$w,$h], options:[${opts.map{case s:String => s"'$s'"; case a => s"'$a'"}.mkString(",")}] })"""
+      s"""${name.replace("/","_")} = new Interface.Menu({ name:"$name", bounds: [$x,$y,$w,$h], options:[${opts.map{case s:String => s"'$s'"; case a => s"'$a'"}.mkString(",")}] })"""
   }
 
 
@@ -155,15 +155,15 @@ class InterfaceBuilder(val name:String) extends IO {
     "panel = new Interface.Panel({ useRelativeSizesAndPositions:true })\n" +
     "panel.background = 'black'\n" +
     widgets.map(widget2String(_)).mkString("\n") + "\n" +
-    s"panel.add( ${widgets.map(_.name).mkString(",")} )" +
+    s"panel.add( ${widgets.map(_.name.replace("/","_")).mkString(",")} )" +
     htmlFooter()
   }
 
     def htmlHeader() = """
 <html>
 <head>
-  <script src="/js/interface.js"></script>
-  <script src="/js/interface.client.js"></script>
+  <script src="/flow/js/interface.js"></script>
+  <script src="/flow/js/interface.client.js"></script>
 </head>
 <body>
   <script>

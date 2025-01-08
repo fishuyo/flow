@@ -5,8 +5,12 @@ var socketAndIPPort, socketString;
 // socketIPAndPort = expr.exec( window.location.toString() )[0];
 // socketIPAndPort = socketIPAndPort.split(":");
 
+var uipath = window.location.pathname.split("/");
+var uiname = uipath.pop();
+socketString = 'ws://' + window.location.host + uipath.join("/") + '/' + uiname.split(".")[0] + '/ws';
+
 // socketString = 'ws://' + socketIPAndPort[0] + ':' + (parseInt(socketIPAndPort[1])) + '/socket';
-socketString = 'ws://' + window.location.host + '/' + window.location.pathname.split("/")[1] + '/' + window.location.pathname.split("/")[2].split(".")[0] + '/ws';
+// socketString = 'ws://' + window.location.host + '/' + window.location.pathname.split("/")[1] + '/' + window.location.pathname.split("/")[2].split(".")[0] + '/ws';
 // socketString = 'ws://' + window.location.host + '/wsIJS';
 
 

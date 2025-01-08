@@ -1,5 +1,7 @@
 var merge = require('webpack-merge').merge;
 var generated = require('./scalajs.webpack.config');
+// const UnoCSS = require('@unocss/webpack').default //
+
 
 var local = {
     output: {hashFunction : "sha512"},
@@ -27,7 +29,15 @@ var local = {
                 }
             }
         ]
-    }
+    },
+    // plugins: [ //
+    //     UnoCSS()
+    // ],
+    // css: {
+    //     extract: {
+    //         filename: '[name].[hash:9].css'
+    //     }
+    // }
 };
 
 module.exports = merge(generated, local);

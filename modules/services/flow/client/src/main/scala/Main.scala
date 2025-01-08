@@ -38,12 +38,7 @@ object Main {
     // }
 
     com.yang_bo.html.render(dom.document.body, WebApp.render)
-
     WebApp.init()
-    // CodeEditor.init("code")
-    // Socket.init()
-    // setInterval(1000){ Socket.send("keepalive") }
-
   }
 
 

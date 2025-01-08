@@ -11,6 +11,7 @@ import util.DirectivesWebJars._
 class Services(implicit val system:ActorSystem) extends Directives {
 
   val flowService = new flow.service.FlowService()
+  val launcherService = new flow.service.LauncherService()
 
   private val webJarAssets = new WebJarAssetLocator()
 
@@ -27,7 +28,8 @@ class Services(implicit val system:ActorSystem) extends Directives {
 
   val routes = {
     server ~
-    flowService.route
+    flowService.route ~
+    launcherService.route
   }
 
 

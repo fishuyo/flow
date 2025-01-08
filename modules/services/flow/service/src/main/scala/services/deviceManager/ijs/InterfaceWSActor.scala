@@ -17,9 +17,11 @@ case class Value(val f: Option[Float]=None, val s: Option[String]=None)
 object Value {
   implicit val rw: ReadWriter[Value] = upickle.default.readwriter[String].bimap[Value](
     x => 
-      if(x.f.isDefined) s"${x.f}"
+      if(x.f.isDefined) s"${x.f.get}"
       // else if(x.i.isDefined) s"${x.i}"
-      else s"${x.s}",
+      else if (x.s.isDefined) s"${x.s.get}"
+      else ""
+      ,
     str => {
       var v:Option[Value] = None
       if(!v.isDefined){
@@ -84,18 +86,41 @@ class InterfaceWSActor(out:ActorRef, name:String="test", request:String="") exte
       }
       
 
-    // case (name:String, value:Float) => 
-    //   out ! Json.toJson(Msg("osc", "/"+name, "f", Seq(JsNumber(value)))).toString
-    // case (name:String, value:Double) => 
-    //   out ! Json.toJson(Msg("osc", "/"+name, "f", Seq(JsNumber(value)))).toString
-    // case (name:String, value:Int) => 
-    //   out ! Json.toJson(Msg("osc", "/"+name, "f", Seq(JsNumber(value)))).toString
-    // case (name:String, value:Seq[Float]) => 
-    //   out ! Json.toJson(Msg("osc", "/"+name, "f"*value.length, value.map(JsNumber(_)))).toString
-    // case (name:String, value:(Float,Float)) =>
-    //   out ! Json.toJson(Msg("osc", "/"+name, "ff", Seq(JsNumber(value._1), JsNumber(value._2)))).toString
-    // case (name:String, value:String) =>
-    //   out ! Json.toJson(Msg("osc", "/"+name, "s", Seq(JsString(value)))).toString
+    case (name:String, value:Float) => 
+      val msg = IjsOscMessage("osc", "/"+name, "f", Seq(Value(f=Some(value))))
+      val json = upickle.default.write(msg)
+      out ! TextMessage(json)
+        
+    case (name:String, value:Double) => 
+      val msg = IjsOscMessage("osc", "/"+name, "f", Seq(Value(f=Some(value.toFloat))))
+      val json = upickle.default.write(msg)
+      out ! TextMessage(json)
+        
+    case (name:String, value:Int) => 
+      val msg = IjsOscMessage("osc", "/"+name, "f", Seq(Value(f=Some(value.toFloat))))
+      val json = upickle.default.write(msg)
+      out ! TextMessage(json)
+        
+    case (name:String, value:Seq[Float]) => 
+      val msg = IjsOscMessage("osc", "/"+name, "f"*value.length, value.map{ case v => Value(f=Some(v)) })
+      val json = upickle.default.write(msg)
+      out ! TextMessage(json)
+        
+    case (name:String, value:(Float,Float)) =>
+      val msg = IjsOscMessage("osc", "/"+name, "ff", Seq(Value(f=Some(value._1)), Value(f=Some(value._2))))
+      val json = upickle.default.write(msg)
+      out ! TextMessage(json)
+        
+    case (name:String, value:String) =>
+      val msg = IjsOscMessage("osc", "/"+name, "s", Seq(Value(s=Some(value))))
+      val json = upickle.default.write(msg)
+      out ! TextMessage(json)
+        
+
+    case ("_eval", s:String) => 
+      val msg = IjsOscMessage("osc", "/interface/runScript", "", Seq(Value(s=Some(s))))
+      val json = upickle.default.write(msg)
+      out ! TextMessage(json)
 
     case m => println(s"InterfaceWebsocketActor unhandled msg: $m")
   }

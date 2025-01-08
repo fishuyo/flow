@@ -4,13 +4,14 @@ package ijs
 import collection.mutable.ListBuffer
 
 object Layout {
-  var padding = (0f,0f)
-  def V(_x:Float=0f, _y:Float=0f, _w:Float=1f, _h:Float=1f) = new VerticalLayout{x=_x; y=_y; w=_w; h=_h}
-  def H(_x:Float=0f, _y:Float=0f, _w:Float=1f, _h:Float=1f) = new HorizontalLayout{x=_x; y=_y; w=_w; h=_h}
-  def G(_x:Float=0f, _y:Float=0f, _w:Float=1f, _h:Float=1f, nx:Int=0, ny:Int=0) = new GridLayout(nx,ny){x=_x; y=_y; w=_w; h=_h}
+  def V(x:Float=0f, y:Float=0f, w:Float=1f, h:Float=1f, mw:Float=1f, mh:Float=1f) = new VerticalLayout{lx=x; ly=y; lw=w; lh=h; maxw=mw; maxh=mh}
+  def H(x:Float=0f, y:Float=0f, w:Float=1f, h:Float=1f, mw:Float=1f, mh:Float=1f) = new HorizontalLayout{lx=x; ly=y; lw=w; lh=h; maxw=mw; maxh=mh}
+  def G(x:Float=0f, y:Float=0f, w:Float=1f, h:Float=1f, nx:Int=0, ny:Int=0, mw:Float=1f, mh:Float=1f) = new GridLayout(nx,ny){lx=x; ly=y; lw=w; lh=h; maxw=mw; maxh=mh}
 }
 sealed trait Layout {
-  var (x,y,w,h) = (0f,0f,1f,1f)
+  var (pl,pr,pt,pb) = (0f,0f,0f,0f)
+  var (lx,ly,lw,lh) = (0f,0f,1f,1f)
+  var (maxw, maxh) = (1f,1f)
   val layouts = ListBuffer[Layout]()
 
   def +=(w:Widget) = layouts += new SingleLayout(w)
@@ -32,35 +33,37 @@ sealed trait Layout {
 
 class SingleLayout(var widget:Widget) extends Layout {
   override def resizeChildren() = widget match {
-    case w:Slider => widget = w.copy(x=this.x,y=this.y,w=this.w,h=this.h)
-    case w:Button => widget = w.copy(x=this.x,y=this.y,w=this.w,h=this.h)
-    case w:XY => widget = w.copy(x=this.x,y=this.y,w=this.w,h=this.h)
-    case w:Label => widget = w.copy(x=this.x,y=this.y,w=this.w,h=this.h)
-    case w:RangeSlider => widget = w.copy(x=this.x,y=this.y,w=this.w,h=this.h)
-    case w:Menu => widget = w.copy(x=this.x,y=this.y,w=this.w,h=this.h)
+    case w:Slider => widget = w.copy(x=this.lx,y=this.ly,w=this.lw,h=this.lh)
+    case w:Button => widget = w.copy(x=this.lx,y=this.ly,w=this.lw,h=this.lh)
+    case w:XY => widget = w.copy(x=this.lx,y=this.ly,w=this.lw,h=this.lh)
+    case w:Label => widget = w.copy(x=this.lx,y=this.ly,w=this.lw,h=this.lh)
+    case w:RangeSlider => widget = w.copy(x=this.lx,y=this.ly,w=this.lw,h=this.lh)
+    case w:Menu => widget = w.copy(x=this.lx,y=this.ly,w=this.lw,h=this.lh)
     case _ => ()
   }
 }
 class HorizontalLayout extends Layout {
   override def resizeChildren() = {
-    val nw = w / layouts.size
+    var dw = lw / layouts.size
+    if(dw > maxw) dw = maxw
     layouts.zipWithIndex.foreach { case (l,i) =>
-      l.x = x + nw*i
-      l.y = y
-      l.w = nw
-      l.h = h
+      l.lx = lx + dw*i
+      l.ly = ly
+      l.lw = dw
+      l.lh = lh
       l.resizeChildren()
     }
   }
 }
 class VerticalLayout extends Layout {
   override def resizeChildren() = {
-    val nh = h / layouts.size
+    var dh = lh / layouts.size
+    if(dh > maxh) dh = maxh
     layouts.zipWithIndex.foreach { case (l,i) =>
-      l.x = x
-      l.y = y + nh*i
-      l.w = w
-      l.h = nh
+      l.lx = lx
+      l.ly = ly + dh*i
+      l.lw = lw
+      l.lh = dh
       l.resizeChildren()
     }
   }
@@ -72,15 +75,15 @@ class GridLayout(var nx:Int=0, var ny:Int=0) extends Layout {
       ny = math.round(math.sqrt(n)).toInt
       nx = math.ceil(n*1f/ny).toInt
     }
-    val nw = w / nx
-    val nh = h / ny
+    val nw = lw / nx
+    val nh = lh / ny
     layouts.zipWithIndex.foreach { case (l,i) =>
       val ix = i % nx
       val iy = i / nx
-      l.x = x + nw*ix
-      l.y = y + nh*iy
-      l.w = nw
-      l.h = nh
+      l.lx = lx + nw*ix
+      l.ly = ly + nh*iy
+      l.lw = nw
+      l.lh = nh
       l.resizeChildren()
     }
   }
