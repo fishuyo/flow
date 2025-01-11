@@ -31,7 +31,7 @@ io.save()
 
 // stream interface.js io to itself
 // effectively synchronizing multiple instances of the interface
-// io >> io
+io >> io
 
 // also make an OSCSink and stream io over osc
 val osc = new OSCSink

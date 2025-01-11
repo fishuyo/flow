@@ -50,7 +50,7 @@ Interface.OSC = {
   },
   _receive : function( data ) {
     var msg = JSON.parse( data );
-    console.log(msg)
+    // console.log(msg)
     if( msg.address in this.callbacks ) {
       this.callbacks[ msg.address ]( msg.parameters );
     }else{
@@ -60,8 +60,8 @@ Interface.OSC = {
           
           //console.log( "CHECK", child.key, msg.address )
           if( child.key === msg.address ) {
-            //console.log( child.key, msg.parameters )
-            child.setValue.apply( child, msg.parameters );
+            // console.log( child.key, msg.parameters )
+            child.setValue.apply( child, msg.parameters);
             return;
           }
         }

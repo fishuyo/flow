@@ -1181,7 +1181,11 @@ Interface.Slider = function() {
         this.ctx.textAlign = 'center';
         this.ctx.font = this._font();
         this.ctx.fillText(this.label, x + width / 2, y + height / 2);
-				this.ctx.fillText(this.value.toFixed(2), x + width / 2, y + height*3 / 4);
+				// console.log(this.value)
+				if( typeof this.value === "number")
+					this.ctx.fillText(this.value.toFixed(2), x + width / 2, y + height*3 / 4);
+				else if(typeof this.value === "string")
+					this.ctx.fillText(parseFloat(this.value).toFixed(2), x + width / 2, y + height*3 / 4);
       }
       
       this.ctx.strokeStyle = this._stroke();
