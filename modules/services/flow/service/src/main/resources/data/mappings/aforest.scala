@@ -8,27 +8,36 @@ case class P(path:String, min:Float=0f, max:Float=1f, kind:String="slider", var 
 }
 
 val params = Seq(
-  P("compositor/indexMask", 0, 10),
-  //P("compositor/indexA", 0, 10),
-  //P("compositor/indexB", 0, 10),
-  P("compositor/brainFade"),
+  P("compositor/maskCenter"),
+  P("compositor/maskTitan1"),
+  //P("compositor/maskClean"),
+  P("compositor/maskMoon"),
+  P("compositor/maskNoise1"),
+  P("compositor/maskNoise2"),
+  P("compositor/maskPortals"),
+  P("compositor/brainFade"), 
+  P("compositor/rockFade"),  
   
-  P("video360/path", 0, 10, group="video"),
+  P("video360/path", 0, 14, group="video"),
   P("compositor/vid360/A", group="video"),
   P("compositor/vid360/B", group="video"),
   P("compositor/edg360/A", group="video"),
   P("compositor/edg360/B", group="video"),
 
-  P("compositor/vidtile/A", group="video"),
-  P("compositor/vidtile/B", group="video"),
-  P("compositor/edgtile/A", group="video"),
-  P("compositor/edgtile/B", group="video"),
+  //P("compositor/vidtile/A", group="video"),
+  //P("compositor/vidtile/B", group="video"),
+  //P("compositor/edgtile/A", group="video"),
+  //P("compositor/edgtile/B", group="video"),
   P("compositor/vidportals/A", group="video"),
-  P("compositor/vidportals/B", group="video"), 
-  //P("video/path1"),
-  //P("video/path2"),
-  //P("video/path3"),
-  //P("video/path4"),
+  P("compositor/vidportals/B", group="video"),
+  P("compositor/vidportals2/A", group="video"),
+  P("compositor/vidportals2/B", group="video"), 
+  //P("video/pathGroup1", 0, 10),
+  //P("video/pathGroup2", 0, 10),
+  //P("video/path1", 0, 61),
+  //P("video/path2", 0, 61),
+  //P("video/path3", 0, 61),
+  //P("video/path4", 0, 61),
 
   P("streamDiffusion/promptIndex", 0, 14),
   P("streamDiffusion/source", 0, 3),
@@ -45,8 +54,10 @@ val params = Seq(
   P("compositor/particles/B", group="particles"),
   P("field/edge", 0 , 2, group="particles"),
   P("field/ripple", 0, 2, group="particles"),
+  P("field/rippleSrc", 0, 1, group="particles"),
+  P("field/wind", 0, 2, group="particles"),
   P("particles/numAttractors", 0, 40),
-  P("particles/attractorStrength", 0, 1),
+  P("particles/attractorStrength", 0, 0.5),
   P("fireflies/fade", group="particles"),
   
   P("compositor/moon/A", group="moon"),
@@ -55,6 +66,7 @@ val params = Seq(
   P("moon/noiseGlowR"),
   P("moon/noiseGlowG"),
   P("moon/noiseGlowB"),
+  P("moon/noiseGlowC"),
   P("moon/moonY", -2.1f, 2.1f),
   P("moon/moonFade"),
 
@@ -63,6 +75,10 @@ val params = Seq(
   P("noiseGen/bgFade"),
   P("noiseGen/fgNoise", 0, 3),
   P("noiseGen/fgColor", 0, 4),
+  P("noiseGen/fgNoise1", 0, 3),
+  P("noiseGen/fgColor1", 0, 4),
+  P("noiseGen/fgNoise2", 0, 3),
+  P("noiseGen/fgColor2", 0, 4),
 )
 
 val paramCols = Layout.H(0.01f,0f,0.98f,0.755f)
@@ -82,33 +98,37 @@ params.groupBy(_.group).map {
 
 io += paramCols
 io += Slider("param/time", 0.01, 0.76, 0.98, 0.07, 0, 2400)
-io += Label("timecode", 0.4, 0.835, 0.2, 0.04, "00:00:00")
+io += Label("timecode", 0.4, 0.835, 0.2, 0.03, "00:00:00")
 io += Label("keyframes", 0.01, 0.82, 0.98, 0.05, "")
 
 
-val editGrid = Layout.G(0,0.9,0.3,0.1,3,2)
-editGrid += Button("param/playmode", mode="toggle")
-editGrid += Button("param/editmode", mode="toggle")
-editGrid += Button("param/addKey")
+val editGrid = Layout.G(0.65,0.88,0.3,0.1,3,2)
+editGrid += Button("param/syncAudio", mode="toggle")
 editGrid += Button("param/rmKey")
 editGrid += Button("param/snap")
+
+editGrid += Button("param/editmode", mode="toggle")
+editGrid += Button("param/addKey")
 editGrid += Button("param/snapInsert")
 io += editGrid
 
-val playControls1 = Layout.H(0.35,0.89,0.3,0.05)
-val playControls2 = Layout.H(0.35,0.94,0.3,0.05)
-playControls2 += Button("param/prevKeyframe")
-playControls1 += Button("param/minus10")
-//playControls1 += Button("param/play", mode="toggle")
-playControls1 += Button("param/add10")
-playControls2 += Button("param/nextKeyframe")
-io += playControls1
-io += playControls2
+val playControls = Layout.G(0.05, 0.88, 0.3, 0.1, 2, 2)
+playControls += Button("param/minus10")
+playControls += Button("param/add10")
+playControls += Button("param/prevKeyframe")
+playControls += Button("param/nextKeyframe")
+io += playControls
 
-val presetGrid = Layout.G(0.7,0.9,0.3,0.1,5,2)
-for(i <- 1 to 10){
-  presetGrid += Button(s"p$i")
-}
+
+
+val presetGrid = Layout.G(0.35,0.89,0.3,0.05,3,1)
+presetGrid += Button("param/rockSetup")
+presetGrid += Button("param/intromode")
+presetGrid += Button("param/playmode", mode="toggle")
+
+//for(i <- 1 to 10){
+//  presetGrid += Button(s"p$i")
+//}
 io += presetGrid
 
 
