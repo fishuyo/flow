@@ -1,0 +1,20 @@
+{
+  "name": "flow-client-main",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@scala-js/vite-plugin-scalajs": "^1.0.0",
+    "@unocss/preset-wind3": "^66.0.0",
+    "unocss": "^66.0.0",
+    "typescript": "^5.0.0",
+    "vite": "latest"
+  }
+} 
