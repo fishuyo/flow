@@ -18,13 +18,16 @@ lazy val pekkoHttpV = "1.0.1"
 // Backend Core Module
 lazy val server = project
   .in(file("backend/server"))
+  .enablePlugins(RevolverPlugin)
   .settings(
+    mainClass := Some("flow.Server"),
     libraryDependencies ++= Seq(
       "org.apache.pekko" %% "pekko-http" % pekkoHttpV,
       "org.apache.pekko" %% "pekko-stream" % pekkoV,
       "org.apache.pekko" %% "pekko-actor-typed" % pekkoV,
       "org.apache.pekko" %% "pekko-slf4j" % pekkoV,
-      "ch.qos.logback" % "logback-classic" % "1.4.11"
+      "ch.qos.logback" % "logback-classic" % "1.4.11",
+      "com.typesafe" % "config" % "1.4.2"
     )
   )
 

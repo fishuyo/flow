@@ -13,6 +13,7 @@ import scala.io.StdIn
 import java.io.File
 import org.slf4j.LoggerFactory
 import scala.util.{Success, Failure}
+import com.typesafe.config.ConfigFactory
 
 object Server {
   private val logger = LoggerFactory.getLogger(getClass)
@@ -30,19 +31,33 @@ object Server {
       `Access-Control-Max-Age`(1800)
     )
 
+    // Get the project root directory (more reliable than relative paths)
+    val config = ConfigFactory.load()
+    val projectRoot = config.getString("project.root")
+    val distPath = s"$projectRoot/frontend/client/dist"
+    
+    // logger.info(s"Project root: $projectRoot")
+    // logger.info(s"Dist path: $distPath")
+    
+    // Check if dist directory exists
+    val distDir = new File(distPath)
+    if (!distDir.exists()) {
+      logger.warn(s"Dist directory does not exist: $distPath")
+    }
+    
     // Serve static files from the client/dist directory (Vite build output)
     val staticFiles =
       pathPrefix("assets") {
-        getFromDirectory("frontend/client/dist/assets")
+        getFromDirectory(s"$distPath/assets")
       } ~
       path("favicon.ico") {
-        getFromFile("frontend/client/dist/favicon.ico")
+        getFromFile(s"$distPath/favicon.ico")
       }
 
     // Serve files from the root of client/dist (for Vite public dir files)
     val publicFiles =
       path(Remaining) { file =>
-        val f = new File("frontend/client/dist", file)
+        val f = new File(distPath, file)
         if (f.exists && f.isFile) getFromFile(f)
         else reject
       }
@@ -56,13 +71,18 @@ object Server {
           }
         } ~
         complete("API endpoint")
+      } ~
+      path("health") {
+        get {
+          complete(s"Server is running. Project root: $projectRoot, Dist path: $distPath")
+        }
       }
 
     // SPA fallback: serve index.html for all other GET requests
     val spaFallback =
       get {
         extractUnmatchedPath { _ =>
-          getFromFile("frontend/client/dist/index.html")
+          getFromFile(s"$distPath/index.html")
         }
       }
 
@@ -72,8 +92,8 @@ object Server {
       }
 
     // Start the server
-    val address = "0.0.0.0"
-    val port = 8080
+    val address = config.getString("http.interface")
+    val port = config.getInt("http.port")
     val bindingFuture = Http().newServerAt(address, port).bind(route)
     
     bindingFuture.onComplete {
