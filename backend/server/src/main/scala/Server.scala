@@ -1,7 +1,6 @@
 package flow
 
-import org.apache.pekko.actor.typed.ActorSystem
-import org.apache.pekko.actor.typed.scaladsl.Behaviors
+import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.http.scaladsl.Http
 import org.apache.pekko.http.scaladsl.model._
 import org.apache.pekko.http.scaladsl.server.Directives._
@@ -14,13 +13,14 @@ import java.io.File
 import org.slf4j.LoggerFactory
 import scala.util.{Success, Failure}
 import com.typesafe.config.ConfigFactory
+import multishell.service.MultishellService
 
 object Server {
   private val logger = LoggerFactory.getLogger(getClass)
 
   def main(args: Array[String]): Unit = {
-    implicit val system: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, "flow-server")
-    implicit val executionContext: ExecutionContext = system.executionContext
+    implicit val system: ActorSystem = ActorSystem("flow-server")
+    implicit val executionContext: ExecutionContext = system.dispatcher
 
     // CORS settings
     val corsHeaders = List(
@@ -62,6 +62,11 @@ object Server {
         else reject
       }
 
+    // Multishell service
+    implicit val materializer: org.apache.pekko.stream.Materializer = org.apache.pekko.stream.Materializer(system)
+    val multishellService = new MultishellService()(system, executionContext, materializer)
+    println("[Server] MultishellService created and route configured")
+
     // API routes (expand as needed)
     val apiRoutes =
       pathPrefix("api") {
@@ -70,7 +75,11 @@ object Server {
             complete("projectorAPI endpoint")
           }
         } ~
-        complete("API endpoint")
+        multishellService.route ~
+        path(Remaining) { remaining =>
+          println(s"[Server] Unmatched API path: $remaining")
+          complete(s"API endpoint - unmatched path: $remaining")
+        }
       } ~
       path("health") {
         get {

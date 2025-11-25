@@ -3,12 +3,13 @@ import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 import org.scalajs.linker.interface.ModuleSplitStyle
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 import scala.sys.process._
 
 name := "flow"
 
 ThisBuild / organization := "flow"
-ThisBuild / scalaVersion := "3.3.3"
+ThisBuild / scalaVersion := "3.3.5"
 ThisBuild / version      := "0.1.0-SNAPSHOT"
 
 lazy val pekkoV = "1.0.3"
@@ -30,6 +31,7 @@ lazy val server = project
       "com.typesafe" % "config" % "1.4.2"
     )
   )
+  .dependsOn(multishell)
 
 lazy val coreIO = project
   .in(file("backend/core"))
@@ -54,6 +56,18 @@ lazy val util = project
     )
   )
 
+// Multishell Protocol (crossProject for JVM and JS)
+lazy val multishellProtocol = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("protocol/multishell"))
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.lihaoyi" %%% "upickle" % "3.1.4"
+    )
+  )
+  .jvmSettings()
+  .jsSettings()
+
 // Backend Services
 lazy val projectorIO = project
   .in(file("backend/services/projectorIO"))
@@ -64,6 +78,18 @@ lazy val projectorIO = project
       // "com.lihaoyi" %%% "upickle" % "3.1.4",
     )
   ).dependsOn(coreIO)
+
+lazy val multishell = project
+  .in(file("backend/services/multishell"))
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.apache.pekko" %% "pekko-http" % pekkoHttpV,
+      "org.apache.pekko" %% "pekko-stream" % pekkoV,
+      "org.apache.pekko" %% "pekko-actor" % pekkoV,
+      "com.lihaoyi" %% "os-lib" % "0.9.3",
+    )
+  )
+  .dependsOn(multishellProtocol.jvm, util)
 
 
 
@@ -137,7 +163,7 @@ lazy val client = project
 lazy val coreUI = project
   .in(file("frontend/core"))
   .enablePlugins(ScalaJSPlugin)
-  // .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
+  .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
   .settings(
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "2.8.0",
@@ -145,12 +171,13 @@ lazy val coreUI = project
       "com.raquo" %%% "waypoint" % "9.0.0",
       "com.lihaoyi" %%% "upickle" % "3.1.4",
     ),
-    // externalNpm := {
-      // Process("npm", baseDirectory.value).!
-      // baseDirectory.value
-    // },
-    // stIgnore := List(),
+    externalNpm := {
+      Process("npm", baseDirectory.value / ".." / "client").!
+      baseDirectory.value / ".." / "client"
+    },
+    stIgnore := List(),
   )
+  .dependsOn(multishellProtocol.js)
 
 
 // Frontend apps

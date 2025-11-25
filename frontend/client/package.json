@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@xterm/xterm": "latest",
+    "@types/xterm": "latest"
   },
   "devDependencies": {
     "@scala-js/vite-plugin-scalajs": "^1.0.0",
@@ -17,4 +19,4 @@
     "typescript": "^5.0.0",
     "vite": "latest"
   }
-} 
+}

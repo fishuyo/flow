@@ -19,7 +19,7 @@ export default defineConfig({
         // include js/ts files
         //'src/**/*.{js,ts,scala}',
         //"src/main/scala/**/*.scala",  // Scan source Scala files
-        "target/scala-3.3.3/**/*.js"  // Scan compiled Scala.js output
+        "target/scala-3.3.5/**/*.js"  // Scan compiled Scala.js output
     
       ],
       // exclude files
