@@ -2,6 +2,7 @@ package multishell.service
 
 import multishell.protocol.Message
 import multishell.protocol.{ShellInput, ShellError}
+import multishell.protocol.ShellResize
 import org.apache.pekko.actor._
 import org.apache.pekko.http.scaladsl.model.ws._
 import scala.concurrent.ExecutionContext
@@ -28,9 +29,21 @@ class MultishellWSActor(out: ActorRef)(implicit ec: ExecutionContext) extends Ac
         val message = upickle.default.read[Message](msg)
         println(s"[MultishellWSActor] Parsed message: $message")
         message match {
-          case ShellInput(command) =>
-            println(s"[MultishellWSActor] ShellInput received, command: '$command'")
-            shellProcess.sendCommand(command)
+          case ShellInput(data) =>
+            println(s"[MultishellWSActor] ShellInput received (raw data): '${data.replaceAll("\r", "\\r").replaceAll("\n", "\\n")}'")
+            // Ensure process is started before sending input
+            if (!shellProcess.processExists) {
+              shellProcess.start(24, 80)  // Default size, will be updated by resize message
+            }
+            shellProcess.sendInput(data)
+          case ShellResize(rows: Int, cols: Int) =>
+            println(s"[MultishellWSActor] ShellResize received: ${rows}x${cols}")
+            // Start process if not started, or resize if already started
+            if (!shellProcess.processExists) {
+              shellProcess.start(rows, cols)
+            } else {
+              shellProcess.resizeTerminal(rows, cols)
+            }
           case other =>
             println(s"[MultishellWSActor] Unexpected message type: $other")
         }

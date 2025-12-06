@@ -74,34 +74,60 @@ object MultishellSocket {
     connectionStatus.set(false)
   }
 
-  def sendCommand(command: String): Unit = {
-    dom.console.log(s"[MultishellSocket] sendCommand called with: '$command'")
+  def sendInput(data: String): Unit = {
+    dom.console.log(s"[MultishellSocket] sendInput called with: '${data.replaceAll("\r", "\\r").replaceAll("\n", "\\n")}'")
     ws match {
       case Some(socket) =>
         val state = socket.readyState
-        dom.console.log(s"[MultishellSocket] WebSocket state: $state (OPEN=${WebSocket.OPEN})")
         if (state == WebSocket.OPEN) {
           try {
-            val message = write(ShellInput(command))
-            dom.console.log(s"[MultishellSocket] Sending command message: $message")
+            val message = write(ShellInput(data))
             socket.send(message)
-            dom.console.log(s"[MultishellSocket] Command sent successfully")
           } catch {
             case e: Exception =>
-              dom.console.error(s"[MultishellSocket] Error sending command: $e")
+              dom.console.error(s"[MultishellSocket] Error sending input: $e")
               e.printStackTrace()
           }
         } else {
           dom.console.log(s"[MultishellSocket] WebSocket not connected (state=$state), attempting to reconnect...")
           connect()
-          // Try again after a short delay
-          dom.window.setTimeout(() => sendCommand(command), 500)
+          dom.window.setTimeout(() => sendInput(data), 500)
         }
       case None =>
         dom.console.log("[MultishellSocket] No WebSocket, connecting first...")
         connect()
-        dom.window.setTimeout(() => sendCommand(command), 500)
+        dom.window.setTimeout(() => sendInput(data), 500)
     }
   }
+
+  def sendResize(rows: Int, cols: Int): Unit = {
+    dom.console.log(s"[MultishellSocket] sendResize called with: ${rows}x${cols}")
+    ws match {
+      case Some(socket) =>
+        val state = socket.readyState
+        if (state == WebSocket.OPEN) {
+          try {
+            val message = write(ShellResize(rows, cols))
+            socket.send(message)
+            dom.console.log(s"[MultishellSocket] Resize message sent successfully")
+          } catch {
+            case e: Exception =>
+              dom.console.error(s"[MultishellSocket] Error sending resize: $e")
+              e.printStackTrace()
+          }
+        } else {
+          dom.console.log(s"[MultishellSocket] WebSocket not connected (state=$state), attempting to reconnect...")
+          connect()
+          dom.window.setTimeout(() => sendResize(rows, cols), 500)
+        }
+      case None =>
+        dom.console.log("[MultishellSocket] No WebSocket, connecting first...")
+        connect()
+        dom.window.setTimeout(() => sendResize(rows, cols), 500)
+    }
+  }
+
+  // Keep sendCommand for backward compatibility, but it now sends raw input
+  def sendCommand(data: String): Unit = sendInput(data)
 }
 

@@ -10,11 +10,13 @@ name := "flow"
 
 ThisBuild / organization := "flow"
 ThisBuild / scalaVersion := "3.3.5"
-ThisBuild / version      := "0.1.0-SNAPSHOT"
+ThisBuild / version := "0.1.0-SNAPSHOT"
 
 lazy val pekkoV = "1.0.3"
 lazy val pekkoHttpV = "1.0.1"
 
+// Vite build task - defined at build level so it can be used across projects
+lazy val viteBuild = taskKey[Unit]("Build the frontend client with Vite")
 
 // Backend Core Module
 lazy val server = project
@@ -29,7 +31,20 @@ lazy val server = project
       "org.apache.pekko" %% "pekko-slf4j" % pekkoV,
       "ch.qos.logback" % "logback-classic" % "1.4.11",
       "com.typesafe" % "config" % "1.4.2"
-    )
+    ),
+    // Vite build integration
+    viteBuild := {
+      val clientDir = baseDirectory.value / ".." / ".." / "frontend" / "client"
+      val log = streams.value.log
+      log.info("Building client with Vite...")
+      val result = Process(Seq("npm", "run", "build"), clientDir).!
+      if (result != 0) {
+        throw new Exception(s"Vite build failed with exit code $result")
+      }
+      log.info("Vite build completed successfully")
+    },
+    // Build Scala.js client before Vite build
+    viteBuild := (viteBuild dependsOn (client / Compile / fastLinkJS)).value
   )
   .dependsOn(multishell)
 
@@ -40,7 +55,7 @@ lazy val coreIO = project
     libraryDependencies ++= Seq(
       "org.apache.pekko" %% "pekko-http" % pekkoHttpV,
       "org.apache.pekko" %% "pekko-stream" % pekkoV,
-      "com.lihaoyi" %%% "upickle" % "3.1.4",
+      "com.lihaoyi" %%% "upickle" % "3.1.4"
       // "io.github.fishuyo" %% "actor" % "0.2.0-SNAPSHOT"
     )
   )
@@ -63,7 +78,9 @@ lazy val multishellProtocol = crossProject(JSPlatform, JVMPlatform)
   .settings(
     libraryDependencies ++= Seq(
       "com.lihaoyi" %%% "upickle" % "3.1.4"
-    )
+    ),
+    // Explicitly add shared source directory (baseDirectory for crossProject points to .js/.jvm, need to go up)
+    Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala"
   )
   .jvmSettings()
   .jsSettings()
@@ -77,7 +94,8 @@ lazy val projectorIO = project
       // "org.apache.pekko" %% "pekko-stream" % pekkoV,
       // "com.lihaoyi" %%% "upickle" % "3.1.4",
     )
-  ).dependsOn(coreIO)
+  )
+  .dependsOn(coreIO)
 
 lazy val multishell = project
   .in(file("backend/services/multishell"))
@@ -86,12 +104,10 @@ lazy val multishell = project
       "org.apache.pekko" %% "pekko-http" % pekkoHttpV,
       "org.apache.pekko" %% "pekko-stream" % pekkoV,
       "org.apache.pekko" %% "pekko-actor" % pekkoV,
-      "com.lihaoyi" %% "os-lib" % "0.9.3",
+      "org.jetbrains.pty4j" % "pty4j" % "0.13.4"
     )
   )
   .dependsOn(multishellProtocol.jvm, util)
-
-
 
 // lazy val flowService = project
 //   .in(file("backend/services/flow"))
@@ -115,22 +131,20 @@ lazy val multishell = project
 //     )
 //   )
 
-
-
-
 // Frontend packages
 lazy val client = project
   .in(file("frontend/client"))
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
   .settings(
-   // Tell Scala.js that this is an application with a main method
+    // Tell Scala.js that this is an application with a main method
     scalaJSUseMainModuleInitializer := true,
     // mainClass := Some("client.Main"),
 
     /* Configure ScalablyTyped */
     externalNpm := {
-      Process("npm", baseDirectory.value).!
+      // Process(Seq("npm", "install"), baseDirectory.value).!
+      // Process(Seq("npm", "list"), baseDirectory.value).!
       baseDirectory.value
     },
     stIgnore := List(),
@@ -143,8 +157,7 @@ lazy val client = project
      */
     scalaJSLinkerConfig ~= {
       _.withModuleKind(ModuleKind.ESModule)
-        .withModuleSplitStyle(
-          ModuleSplitStyle.SmallModulesFor(List("client")))
+        .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("client")))
     },
 
     /* Dependencies */
@@ -154,10 +167,9 @@ lazy val client = project
       // "com.raquo" %%% "waypoint" % "9.0.0",
       // "com.lihaoyi" %%% "upickle" % "3.1.4",
       // "io.github.fishuyo" %%% "examplesjs" % "0.2.0-SNAPSHOT"
-    ),
+    )
   )
   .dependsOn(coreUI, projectorRemote)
-
 
 // Frontend core
 lazy val coreUI = project
@@ -169,16 +181,20 @@ lazy val coreUI = project
       "org.scala-js" %%% "scalajs-dom" % "2.8.0",
       "com.raquo" %%% "laminar" % "17.2.0",
       "com.raquo" %%% "waypoint" % "9.0.0",
-      "com.lihaoyi" %%% "upickle" % "3.1.4",
+      "com.lihaoyi" %%% "upickle" % "3.1.4"
     ),
     externalNpm := {
-      Process("npm", baseDirectory.value / ".." / "client").!
+      // Process("npm", baseDirectory.value / ".." / "client").!
+      // Process(Seq("npm", "install", "-s"), baseDirectory.value / ".." / "client").!
       baseDirectory.value / ".." / "client"
     },
     stIgnore := List(),
+    // Ensure protocol project compiles before coreUI
+    Compile / compile := (Compile / compile)
+      .dependsOn(multishellProtocol.js / Compile / compile)
+      .value
   )
   .dependsOn(multishellProtocol.js)
-
 
 // Frontend apps
 lazy val projectorRemote = project
@@ -189,32 +205,35 @@ lazy val projectorRemote = project
   .settings(
     name := "projectorRemote",
     libraryDependencies ++= Seq(
-
-    ),
+    )
     // externalNpm := {
-      // Process("npm", baseDirectory.value).!
-      // baseDirectory.value
+    // Process("npm", baseDirectory.value).!
+    // baseDirectory.value
     // },
     // stIgnore := List(),
   )
   .dependsOn(coreUI)
 
-
 // Root project
 // lazy val root = project
-  // .in(file("."))
-  // .aggregate(
-    // core,
-    // projectorIO,
-    // projectorRemote,
-    // flowFrontend,
-    // launcherFrontend
-    // protocolJVM,
-    // protocolJS,
-    // internalProtocol,
-    // util,
-    // flowService,
-    // launcherService,
-    // flowFrontend,
-    // launcherFrontend
-  // ) 
+// .in(file("."))
+// .aggregate(
+// core,
+// projectorIO,
+// projectorRemote,
+// flowFrontend,
+// launcherFrontend
+// protocolJVM,
+// protocolJS,
+// internalProtocol,
+// util,
+// flowService,
+// launcherService,
+// flowFrontend,
+// launcherFrontend
+// )
+
+// SBT aliases for common workflows
+addCommandAlias("serverDev", "project server; viteBuild; reStart")
+addCommandAlias("serverBuild", "project server; viteBuild")
+addCommandAlias("clientBuild", "project client; fastLinkJS")

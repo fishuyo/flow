@@ -19,56 +19,60 @@ object XTerm {
       inContext { thisNode =>
         onMountCallback { ctx =>
           dom.console.log("[XTerm] Component mounted, initializing xterm")
-          
+
           // Get container element directly from thisNode
           val container = thisNode.ref.asInstanceOf[dom.HTMLElement]
           // Create and configure xterm terminal
-          val options = js.Dynamic.literal(
-            theme = js.Dynamic.literal(
-              background = "#1a1a1a",
-              foreground = "#00ff00",
-              cursor = "#00ff00"
-            ),
-            fontSize = 14,
-            fontFamily = "'Courier New', monospace",
-            cursorBlink = true,
-            cursorStyle = "block"
-          ).asInstanceOf[ITerminalOptions & ITerminalInitOnlyOptions]
+          val options = js.Dynamic
+            .literal(
+              theme = js.Dynamic.literal(
+                // background = "#1a1a1a",
+                // foreground = "#00ff00",
+                // cursor = "#00ff00"
+              ),
+              fontSize = 14,
+              fontFamily = "'Courier New', monospace",
+              cursorBlink = true,
+              cursorStyle = "block"
+            )
+            .asInstanceOf[ITerminalOptions & ITerminalInitOnlyOptions]
           val terminal = new Terminal(options)
-          
+
           // Open terminal in container
           terminal.open(container)
-          
+
           terminalRef.set(Some(terminal))
           dom.console.log("[XTerm] Terminal initialized")
-          
+
           // Connect to WebSocket
           MultishellSocket.connect()
-          
-          // Handle terminal input (user typing)
+
+          // Get initial terminal size and send resize message
+          val initialCols = terminal.cols
+          val initialRows = terminal.rows
+          dom.console.log(
+            s"[XTerm] Initial terminal size: ${initialRows}x${initialCols}"
+          )
+
+          // Send initial resize to start PTY with correct size
+          MultishellSocket.sendResize(initialRows.toInt, initialCols.toInt)
+
+          // Handle terminal input (raw mode - send all characters)
           // xterm.js handles displaying user input automatically
-          // We only send complete lines (when Enter is pressed) to the shell
+          // We send ALL input directly to the PTY for full interactivity
           terminal.onData((data: String, _: Unit) => {
-            dom.console.log(s"[XTerm] User input received: '${data.replaceAll("\r", "\\r").replaceAll("\n", "\\n")}'")
-            
-            // Check if this is a complete line (Enter was pressed)
-            if (data.contains("\r") || data.contains("\n")) {
-              // Extract the command (remove newline characters)
-              val command = data.replaceAll("\r\n", "").replaceAll("\n", "").replaceAll("\r", "")
-              dom.console.log(s"[XTerm] Sending complete command to shell: '$command'")
-              
-              // Only send non-empty commands
-              if (command.nonEmpty) {
-                MultishellSocket.sendCommand(command)
-              } else {
-                // Empty line - just send newline to shell (for commands that read until empty line)
-                MultishellSocket.sendCommand("")
-              }
-            }
-            // For individual characters (not Enter), xterm.js already displays them
-            // We don't send them to the shell - the shell will receive the complete line when Enter is pressed
+            // Send all input data directly to backend (raw mode)
+            MultishellSocket.sendInput(data)
           })
-          
+
+          // Handle terminal resize events
+          terminal.onResize((size: typings.xterm.anon.Cols, _: Unit) => {
+            val rows = size.rows.toInt
+            val cols = size.cols.toInt
+            dom.console.log(s"[XTerm] Terminal resized to: ${rows}x${cols}")
+            MultishellSocket.sendResize(rows, cols)
+          })
+
           // Observe connection status changes
           MultishellSocket.isConnected.foreach { connected =>
             dom.console.log(s"[XTerm] Connection status changed: $connected")
@@ -78,36 +82,30 @@ object XTerm {
               terminal.writeln("[Disconnected from shell]")
             }
           }(ctx.owner)
-          
+
           // Observe WebSocket messages and write to terminal
           MultishellSocket.outputStream.foreach { message =>
-            dom.console.log(s"[XTerm] Received message from stream: $message")
             message match {
               case ShellOutput(text) =>
-                dom.console.log(s"[XTerm] ShellOutput: $text")
+                // Write raw output (preserves ANSI escape codes)
+                // PTY handles newlines, so we don't add them manually
                 terminal.write(text)
-                terminal.write("\r\n")
               case ShellError(text) =>
-                dom.console.log(s"[XTerm] ShellError: $text")
-                terminal.write(s"\u001b[31m$text\u001b[0m") // Red color
-                terminal.write("\r\n")
+                // Write error output (PTY may send errors as regular output, but we can color them)
+                terminal.write(text)
               case ShellExit(code) =>
                 dom.console.log(s"[XTerm] ShellExit: $code")
-                terminal.writeln(s"\u001b[33m[Process exited with code: $code]\u001b[0m")
+                terminal.writeln(
+                  s"\u001b[33m[Process exited with code: $code]\u001b[0m"
+                )
               case _ =>
                 dom.console.log(s"[XTerm] Unknown message type: $message")
             }
           }(ctx.owner)
-          
-          // Handle window resize (terminal will auto-fit on next render)
-          val resizeHandler: js.Function1[dom.Event, Unit] = { _ =>
-            // Terminal will handle resize automatically
-          }
-          dom.window.addEventListener("resize", resizeHandler)
-          
+
           // Store references for cleanup
           terminalRef.set(Some(terminal))
-          
+
           // Cleanup will be handled by onUnmountCallback below
         }
       },
