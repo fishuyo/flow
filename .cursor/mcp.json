@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "/Users/fishuyo/_work/ARG/flow-metals": {
+      "url": "http://localhost:52960/sse"
+    }
+  }
+}

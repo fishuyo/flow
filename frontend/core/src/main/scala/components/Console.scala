@@ -44,10 +44,10 @@ object Console {
         MultishellSocket.outputStream.foreach { message =>
           dom.console.log(s"[Console] Received message from stream: $message")
           message match {
-            case ShellOutput(text) =>
-              dom.console.log(s"[Console] ShellOutput: $text")
+            case m: ShellOutput =>
+              dom.console.log(s"[Console] ShellOutput: ${m.text}")
               outputLines.update(lines => {
-                val newLines = lines :+ text
+                val newLines = lines :+ m.text
                 dom.console.log(
                   s"[Console] Updated outputLines, new length: ${newLines.length}"
                 )
@@ -62,10 +62,10 @@ object Console {
                 },
                 10
               )
-            case ShellError(text) =>
-              dom.console.log(s"[Console] ShellError: $text")
+            case m: ShellError =>
+              dom.console.log(s"[Console] ShellError: ${m.text}")
               outputLines.update(lines => {
-                val newLines = lines :+ s"[ERROR] $text"
+                val newLines = lines :+ s"[ERROR] ${m.text}"
                 dom.console.log(
                   s"[Console] Updated outputLines with error, new length: ${newLines.length}"
                 )
@@ -79,10 +79,10 @@ object Console {
                 },
                 10
               )
-            case ShellExit(code) =>
-              dom.console.log(s"[Console] ShellExit: $code")
+            case m: ShellExit =>
+              dom.console.log(s"[Console] ShellExit: ${m.code}")
               outputLines.update(lines => {
-                val newLines = lines :+ s"[Process exited with code: $code]"
+                val newLines = lines :+ s"[Process exited with code: ${m.code}]"
                 dom.console.log(
                   s"[Console] Updated outputLines with exit, new length: ${newLines.length}"
                 )
